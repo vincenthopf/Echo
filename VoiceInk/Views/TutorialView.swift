@@ -6,20 +6,20 @@ struct TutorialView: View {
     @State private var searchText = ""
 
     var body: some View {
-        HSplitView {
-            // Sidebar with categories
-            categoryList
-                .frame(minWidth: 200, idealWidth: 220, maxWidth: 250)
+        VStack(spacing: 0) {
+            // Top navigation bar
+            topNavigationBar
+
+            Divider()
 
             // Main content area
             contentArea
-                .frame(minWidth: 450)
         }
         .background(Color(NSColor.controlBackgroundColor))
     }
 
-    private var categoryList: some View {
-        VStack(alignment: .leading, spacing: 0) {
+    private var topNavigationBar: some View {
+        VStack(spacing: 16) {
             // Search bar
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -39,22 +39,15 @@ struct TutorialView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(12)
+            .padding(10)
             .background(Color(NSColor.textBackgroundColor))
             .cornerRadius(8)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 16)
 
-            Divider()
-
-            // Category list
-            ScrollView {
-                VStack(spacing: 4) {
-                    ForEach(TutorialCategory.allCases.filter { category in
-                        searchText.isEmpty || category.rawValue.localizedCaseInsensitiveContains(searchText) ||
-                        category.topics.contains { $0.title.localizedCaseInsensitiveContains(searchText) }
-                    }, id: \.self) { category in
-                        CategoryButton(
+            // Category tabs
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(TutorialCategory.allCases, id: \.self) { category in
+                        CategoryTab(
                             category: category,
                             isSelected: selectedCategory == category
                         ) {
@@ -64,16 +57,16 @@ struct TutorialView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 12)
             }
         }
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
         .background(Color(NSColor.windowBackgroundColor))
     }
 
     private var contentArea: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 32) {
+            VStack(alignment: .leading, spacing: 40) {
                 // Category header
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {
@@ -95,14 +88,13 @@ struct TutorialView: View {
                         }
                     }
                 }
-                .padding(.bottom, 8)
 
-                // Topics
+                // Topics with static headings
                 ForEach(selectedCategory.topics.filter { topic in
                     searchText.isEmpty || topic.title.localizedCaseInsensitiveContains(searchText) ||
                     topic.content.localizedCaseInsensitiveContains(searchText)
                 }, id: \.title) { topic in
-                    TutorialTopicCard(topic: topic)
+                    TutorialTopicSection(topic: topic)
                 }
             }
             .padding(.horizontal, 40)
@@ -111,176 +103,152 @@ struct TutorialView: View {
     }
 }
 
-// MARK: - Tutorial Category Button
-struct CategoryButton: View {
+// MARK: - Tutorial Category Tab
+struct CategoryTab: View {
     let category: TutorialCategory
     let isSelected: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Image(systemName: category.icon)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundColor(isSelected ? .white : .secondary)
-                    .frame(width: 24)
 
                 Text(category.rawValue)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
                     .foregroundColor(isSelected ? .white : .primary)
-
-                Spacer()
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.accentColor : Color.clear)
+                    .fill(isSelected ? Color.accentColor : Color(NSColor.controlBackgroundColor))
             )
-            .contentShape(Rectangle())
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.clear : Color.secondary.opacity(0.2), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
     }
 }
 
-// MARK: - Tutorial Topic Card
-struct TutorialTopicCard: View {
+// MARK: - Tutorial Topic Section (Static, no dropdown)
+struct TutorialTopicSection: View {
     let topic: TutorialTopic
-    @State private var isExpanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    isExpanded.toggle()
-                }
-            }) {
-                HStack(spacing: 12) {
-                    if let icon = topic.icon {
-                        Image(systemName: icon)
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.accentColor)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.accentColor.opacity(0.1))
-                            )
-                    }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(topic.title)
-                            .font(.system(size: 16, weight: .semibold))
-                        if let subtitle = topic.subtitle {
-                            Text(subtitle)
-                                .font(.system(size: 13))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-
-                    Spacer()
-
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.secondary)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded {
-                Divider()
-
-                // Content
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(topic.content)
-                        .font(.system(size: 14))
-                        .foregroundColor(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    // Steps if available
-                    if let steps = topic.steps, !steps.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                                HStack(alignment: .top, spacing: 12) {
-                                    Text("\(index + 1)")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(width: 24, height: 24)
-                                        .background(
-                                            Circle()
-                                                .fill(Color.accentColor)
-                                        )
-
-                                    Text(step)
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.primary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                        }
-                        .padding(.top, 4)
-                    }
-
-                    // Tips if available
-                    if let tips = topic.tips, !tips.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(tips, id: \.self) { tip in
-                                HStack(alignment: .top, spacing: 10) {
-                                    Image(systemName: "lightbulb.fill")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.orange)
-
-                                    Text(tip)
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.secondary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                            }
-                        }
-                        .padding(12)
+        VStack(alignment: .leading, spacing: 20) {
+            // Header with icon
+            HStack(spacing: 12) {
+                if let icon = topic.icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.accentColor)
+                        .frame(width: 36, height: 36)
                         .background(
                             RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.orange.opacity(0.05))
+                                .fill(Color.accentColor.opacity(0.1))
                         )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-                        )
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(topic.title)
+                        .font(.system(size: 20, weight: .bold))
+                    if let subtitle = topic.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
                     }
+                }
+            }
 
-                    // Keyboard shortcut if available
-                    if let shortcut = topic.keyboardShortcut {
-                        HStack(spacing: 8) {
-                            Image(systemName: "keyboard")
-                                .font(.system(size: 13))
-                                .foregroundColor(.accentColor)
+            // Content
+            Text(topic.content)
+                .font(.system(size: 14))
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(4)
 
-                            Text("Keyboard Shortcut:")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-
-                            Text(shortcut)
-                                .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
+            // Steps if available
+            if let steps = topic.steps, !steps.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                        HStack(alignment: .top, spacing: 12) {
+                            Text("\(index + 1)")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 26, height: 26)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color(NSColor.textBackgroundColor))
+                                    Circle()
+                                        .fill(Color.accentColor)
                                 )
+
+                            Text(step)
+                                .font(.system(size: 14))
+                                .foregroundColor(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineSpacing(3)
                         }
                     }
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            // Tips if available
+            if let tips = topic.tips, !tips.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(tips, id: \.self) { tip in
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.orange)
+                                .frame(width: 20)
+
+                            Text(tip)
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .lineSpacing(3)
+                        }
+                    }
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.orange.opacity(0.06))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.orange.opacity(0.2), lineWidth: 1)
+                )
+            }
+
+            // Keyboard shortcut if available
+            if let shortcut = topic.keyboardShortcut {
+                HStack(spacing: 10) {
+                    Image(systemName: "keyboard")
+                        .font(.system(size: 14))
+                        .foregroundColor(.accentColor)
+
+                    Text("Keyboard Shortcut:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+
+                    Text(shortcut)
+                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color(NSColor.textBackgroundColor))
+                        )
+                }
             }
         }
-        .padding(16)
-        .background(CardBackground(isSelected: false))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
-        )
+        .padding(.vertical, 8)
     }
 }
 
