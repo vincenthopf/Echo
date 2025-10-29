@@ -11,6 +11,7 @@ struct MenuBarView: View {
     @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
     @State private var menuRefreshTrigger = false  // Added to force menu updates
     @State private var isHovered = false
+    @Environment(\.openSettings) private var openSettings
     
     var body: some View {
         VStack {
@@ -35,7 +36,7 @@ struct MenuBarView: View {
                 Button("Manage Models") {
                     // Set the selected tab to Models before opening Settings window
                     UserDefaults.standard.set("Models", forKey: "selectedSettingsTab")
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    openSettings()
                 }
             } label: {
                 HStack {

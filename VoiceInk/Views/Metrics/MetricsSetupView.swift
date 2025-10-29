@@ -6,6 +6,7 @@ struct MetricsSetupView: View {
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @State private var isAccessibilityEnabled = false
     @State private var isScreenRecordingEnabled = false
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         ScrollView {
@@ -158,7 +159,7 @@ struct MetricsSetupView: View {
         } else {
             // Handle different permission requests based on which one is missing
             if hotkeyManager.selectedHotkey1 == .none {
-                openSettings()
+                openSettingsWindow()
             } else if !AXIsProcessTrusted() {
                 if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
                     NSWorkspace.shared.open(url)
@@ -198,14 +199,14 @@ struct MetricsSetupView: View {
         CGPreflightScreenCaptureAccess()
     }
     
-    private func openSettings() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    private func openSettingsWindow() {
+        openSettings()
     }
 
     private func openModelManagement() {
         // Set the selected tab to Models before opening Settings window
         UserDefaults.standard.set("Models", forKey: "selectedSettingsTab")
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        openSettings()
     }
 
     // MARK: - Permission Monitoring
