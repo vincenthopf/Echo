@@ -7,7 +7,6 @@ enum ViewType: String, CaseIterable {
     case metrics = "Dashboard"
     case transcribeAudio = "Transcribe Audio"
     case history = "History"
-    case enhancement = "Enhancement"
     case powerMode = "Power Mode"
 
     var icon: String {
@@ -15,7 +14,6 @@ enum ViewType: String, CaseIterable {
         case .metrics: return "gauge.medium"
         case .transcribeAudio: return "waveform.circle.fill"
         case .history: return "doc.text.fill"
-        case .enhancement: return "wand.and.stars"
         case .powerMode: return "sparkles.square.fill.on.square"
         }
     }
@@ -190,8 +188,6 @@ struct ContentView: View {
                 switch destination {
                 case "History":
                     selectedView = .history
-                case "Enhancement":
-                    selectedView = .enhancement
                 case "Transcribe Audio":
                     selectedView = .transcribeAudio
                 case "Power Mode":
@@ -213,8 +209,6 @@ struct ContentView: View {
                 MetricsSetupView()
                     .environmentObject(hotkeyManager)
             }
-        case .enhancement:
-            EnhancementSettingsView()
         case .transcribeAudio:
             AudioTranscribeView()
         case .history:

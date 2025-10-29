@@ -46,6 +46,13 @@ struct SettingsWindowView: View {
                     Label("Dictionary", systemImage: "character.book.closed.fill")
                 }
                 .tag(SettingsTab.dictionary)
+
+            EnhancementSettingsView()
+                .environmentObject(enhancementService)
+                .tabItem {
+                    Label("Enhancement", systemImage: "wand.and.stars")
+                }
+                .tag(SettingsTab.enhancement)
         }
         .frame(minWidth: 700, minHeight: 500)
     }
@@ -58,6 +65,7 @@ enum SettingsTab: String, Codable, CaseIterable, Identifiable {
     case permissions = "Permissions"
     case audioInput = "Audio Input"
     case dictionary = "Dictionary"
+    case enhancement = "Enhancement"
 
     var id: String { rawValue }
 }

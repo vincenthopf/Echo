@@ -29,47 +29,20 @@ struct DictionarySettingsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 0) {
-                heroSection
-                mainContent
-            }
+            mainContent
         }
         .frame(minWidth: 600, minHeight: 500)
         .background(Color(NSColor.controlBackgroundColor))
     }
-    
-    private var heroSection: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "brain.filled.head.profile")
-                .font(.system(size: 40))
-                .foregroundStyle(Color.accentColor)
-                .padding(20)
-                .background(Circle()
-                    .fill(Color(.windowBackgroundColor).opacity(0.9))
-                    .shadow(color: .black.opacity(0.1), radius: 10, y: 5))
-            
-            VStack(spacing: 8) {
-                Text("Dictionary Settings")
-                    .font(.system(size: 28, weight: .bold))
-                Text("Enhance VoiceInk's transcription accuracy by teaching it your vocabulary")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 400)
-            }
-        }
-        .padding(.vertical, 40)
-        .frame(maxWidth: .infinity)
-    }
-    
+
     private var mainContent: some View {
         VStack(spacing: 40) {
             sectionSelector
-            
+
             selectedSectionContent
         }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 40)
+        .padding(.horizontal, 40)
+        .padding(.vertical, 20)
     }
     
     private var sectionSelector: some View {

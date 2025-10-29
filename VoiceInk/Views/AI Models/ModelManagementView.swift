@@ -32,10 +32,7 @@ struct ModelManagementView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 0) {
-                heroSection
-                mainContent
-            }
+            mainContent
         }
         .frame(minWidth: 600, minHeight: 500)
         .background(Color(NSColor.controlBackgroundColor))
@@ -49,29 +46,6 @@ struct ModelManagementView: View {
         }
     }
 
-    private var heroSection: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "brain.head.profile")
-                .font(.system(size: 40))
-                .foregroundStyle(Color.accentColor)
-                .padding(20)
-                .background(Circle()
-                    .fill(Color(.windowBackgroundColor).opacity(0.4))
-                    .shadow(color: .black.opacity(0.1), radius: 10, y: 5))
-
-            VStack(spacing: 8) {
-                Text("Models")
-                    .font(.system(size: 28, weight: .bold))
-                Text("Choose from local AI models for offline transcription or connect cloud services for advanced features")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(.vertical, 40)
-        .frame(maxWidth: .infinity)
-    }
-
     private var mainContent: some View {
         VStack(alignment: .leading, spacing: 24) {
             defaultModelSection
@@ -79,7 +53,7 @@ struct ModelManagementView: View {
             availableModelsSection
         }
         .padding(.horizontal, 40)
-        .padding(.bottom, 40)
+        .padding(.vertical, 20)
     }
     
     private var defaultModelSection: some View {
