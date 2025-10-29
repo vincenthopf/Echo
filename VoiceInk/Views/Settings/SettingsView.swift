@@ -247,23 +247,24 @@ struct SettingsView: View {
 
                 ExperimentalFeaturesSection()
 
-                SettingsSection(
-                    icon: "rectangle.on.rectangle",
-                    title: "Recorder Style",
-                    subtitle: "Choose your preferred recorder interface"
-                ) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Select how you want the recorder to appear on your screen.")
-                            .settingsDescription()
-                        
-                        Picker("Recorder Style", selection: $whisperState.recorderType) {
-                            Text("Notch Recorder").tag("notch")
-                            Text("Mini Recorder").tag("mini")
-                        }
-                        .pickerStyle(.radioGroup)
-                        .padding(.vertical, 4)
-                    }
-                }
+                // MARK: - Recorder Style (Hidden - May be enabled in future)
+                // SettingsSection(
+                //     icon: "rectangle.on.rectangle",
+                //     title: "Recorder Style",
+                //     subtitle: "Choose your preferred recorder interface"
+                // ) {
+                //     VStack(alignment: .leading, spacing: 8) {
+                //         Text("Select how you want the recorder to appear on your screen.")
+                //             .settingsDescription()
+                //
+                //         Picker("Recorder Style", selection: $whisperState.recorderType) {
+                //             Text("Notch Recorder").tag("notch")
+                //             Text("Mini Recorder").tag("mini")
+                //         }
+                //         .pickerStyle(.radioGroup)
+                //         .padding(.vertical, 4)
+                //     }
+                // }
 
                 SettingsSection(
                     icon: "doc.on.clipboard",
