@@ -8,6 +8,7 @@ enum ViewType: String, CaseIterable {
     case transcribeAudio = "Transcribe Audio"
     case history = "History"
     case powerMode = "Power Mode"
+    case tutorial = "Tutorial"
 
     var icon: String {
         switch self {
@@ -15,6 +16,7 @@ enum ViewType: String, CaseIterable {
         case .transcribeAudio: return "waveform.circle.fill"
         case .history: return "doc.text.fill"
         case .powerMode: return "sparkles.square.fill.on.square"
+        case .tutorial: return "book.fill"
         }
     }
 }
@@ -215,6 +217,8 @@ struct ContentView: View {
             TranscriptionHistoryView()
         case .powerMode:
             PowerModeView()
+        case .tutorial:
+            TutorialView()
         }
     }
 }
