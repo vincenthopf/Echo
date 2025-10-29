@@ -4,9 +4,9 @@ import KeyboardShortcuts
 struct MetricsSetupView: View {
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
-    @State private var isAccessibilityEnabled = AXIsProcessTrusted()
-    @State private var isScreenRecordingEnabled = CGPreflightScreenCaptureAccess()
-    
+    @State private var isAccessibilityEnabled = false
+    @State private var isScreenRecordingEnabled = false
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -15,12 +15,12 @@ struct MetricsSetupView: View {
                     AppIconView()
                         .frame(width: 80, height: 80)
                         .padding(.bottom, 20)
-                       
+
                     VStack(spacing: 4) {
                         Text("Welcome to Embr Echo")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.center)
-                        
+
                         Text("Complete the setup to get started")
                             .font(.system(size: 16))
                             .foregroundColor(.secondary)
@@ -29,7 +29,7 @@ struct MetricsSetupView: View {
                 }
                 .padding(.top, 20)
                 .padding(.bottom, 20)
-                
+
                 // Setup Steps
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(0..<4) { index in
@@ -46,13 +46,13 @@ struct MetricsSetupView: View {
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                 )
                 .padding(.horizontal)
-                
+
                 Spacer(minLength: 20)
-                
+
                 // Action Button
                 actionButton
                     .frame(maxWidth: 400)
-                
+
                 // Help Text
                 helpText
             }
@@ -60,6 +60,13 @@ struct MetricsSetupView: View {
         }
         .frame(minWidth: 500, minHeight: 600)
         .background(Color(NSColor.controlBackgroundColor))
+        .onAppear {
+            refreshPermissions()
+            setupNotificationObservers()
+        }
+        .onDisappear {
+            removeNotificationObservers()
+        }
     }
     
     private func setupStep(for index: Int) -> some View {
@@ -197,6 +204,41 @@ struct MetricsSetupView: View {
 
     private func openModelManagement() {
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+
+    // MARK: - Permission Monitoring
+
+    private func refreshPermissions() {
+        isAccessibilityEnabled = AXIsProcessTrusted()
+        isScreenRecordingEnabled = CGPreflightScreenCaptureAccess()
+    }
+
+    private func setupNotificationObservers() {
+        // Observe when app becomes active (user returns from System Settings)
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [self] _ in
+            refreshPermissions()
+        }
+
+        // Observe system-wide accessibility changes using DistributedNotificationCenter
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("com.apple.accessibility.api"),
+            object: nil,
+            queue: .main
+        ) { [self] _ in
+            // Add a small delay as permissions take time to reflect in the system
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                refreshPermissions()
+            }
+        }
+    }
+
+    private func removeNotificationObservers() {
+        NotificationCenter.default.removeObserver(self, name: NSApplication.didBecomeActiveNotification, object: nil)
+        DistributedNotificationCenter.default().removeObserver(self, name: NSNotification.Name("com.apple.accessibility.api"), object: nil)
     }
 }
 

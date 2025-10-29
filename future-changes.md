@@ -7,16 +7,20 @@ In this document you will find a list of potential future changes we will want t
 
 ***
 
+# Current task to complete
+
+None - all current tasks completed!&#x20;
+
 ### List of future upgrades
 
 * [ ] Update the design of our Pill when using voice dictation
 * [ ] Update the settings arrangement. We want things to be clean and easy to follow.&#x20;
-* [ ] Update Power Mode naming. We don't want things to seem so gross, instead we want it to be more fluid and aligning with our beautiful Ember voice design.
-* [ ] Add heading to the Transcribe Audio Tab.&#x20;
-* [ ] Fix Header on Models tab to align correctly, like the Audio Input and Dictionary Settings tabs.
-* [ ] Add heading to the Enhancement Tab and History Tab
-* [ ] Remove the second recorder style for notch recorder. We don't need it for now. We just want to hide the option to change it to notch recorder, but we want to keep the code there just in case we want to reinstate it in the future.
-  ### Completed Changes:
+
+### Completed Changes:
+
+* [x] Accessibility permissions and setup dialog on startup. Fixed the issue where the Accessibility option didn't show as enabled in the app when enabled in System Settings. The root cause was MetricsSetupView using static @State initialization that never refreshed. Implemented notification observers for NSApplication.didBecomeActiveNotification and DistributedNotificationCenter "com.apple.accessibility.api" to detect permission changes in real-time. Also added NSAppleEventsUsageDescription to Info.plist for best practices.
+* [x] Remove the second recorder style for notch recorder. We don't need it for now. We just want to hide the option to change it to notch recorder, but we want to keep the code there just in case we want to reinstate it in the future.
+* [x] Update Power Mode naming. We don't want things to seem so gross, instead we want it to be more fluid and aligning with our beautiful Ember voice design.
 * [x] We want to move the models tab pane (I think it's call view/pane), app permissions pane and the audio input pane. We want to move all of those to underneath the settings pane, but we want to have tabs at the top of the settings pane that categorise the settings correctly. Does this make sense? Could we run in to potential complicatios doing this?&#x20;
 
 - [x] Update sounds to new ones.&#x20;
