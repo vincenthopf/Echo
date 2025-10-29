@@ -26,8 +26,8 @@ struct GeneralSettingsView: View {
             VStack(spacing: 24) {
                 SettingsSection(
                     icon: "command.circle",
-                    title: "VoiceInk Shortcuts",
-                    subtitle: "Choose how you want to trigger VoiceInk"
+                    title: "Embr Voice Shortcuts",
+                    subtitle: "Choose how you want to trigger Embr Voice"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         hotkeyView(
@@ -72,7 +72,7 @@ struct GeneralSettingsView: View {
                 SettingsSection(
                     icon: "keyboard.badge.ellipsis",
                     title: "Other App Shortcuts",
-                    subtitle: "Additional shortcuts for VoiceInk"
+                    subtitle: "Additional shortcuts for Embr Voice"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         // Paste Last Transcript (Original)
@@ -173,7 +173,7 @@ struct GeneralSettingsView: View {
 
                                 InfoTip(
                                     title: "Middle-Click Toggle",
-                                    message: "Use middle mouse button to toggle VoiceInk recording."
+                                    message: "Use middle mouse button to toggle Embr Voice recording."
                                 )
                             }
 
