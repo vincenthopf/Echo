@@ -17,17 +17,44 @@ struct AudioTranscribeView: View {
         ZStack {
             Color(NSColor.controlBackgroundColor)
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
+                // Header Section
+                VStack(spacing: 12) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 8) {
+                                Text("Transcribe Files")
+                                    .font(.system(size: 28, weight: .bold, design: .default))
+                                    .foregroundColor(.primary)
+
+                                InfoTip(
+                                    title: "Transcribe Audio Files",
+                                    message: "Turn any audio or video file into text. Drop a file, choose your settings, and get accurate transcriptions in seconds."
+                                )
+                            }
+
+                            Text("Convert recordings and videos to text instantly.")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 8)
+                }
+
                 if transcriptionManager.isProcessing {
                     processingView
                 } else {
                     dropZoneView
                 }
-                
+
                 Divider()
                     .padding(.vertical)
-                
+
                 // Show current transcription result
                 if let transcription = transcriptionManager.currentTranscription {
                     TranscriptionResultView(transcription: transcription)

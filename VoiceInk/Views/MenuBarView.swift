@@ -216,7 +216,7 @@ struct MenuBarView: View {
             
             Divider()
             
-            Button("Quit Embr Echo") {
+            Button("Quit Echo") {
                 NSApplication.shared.terminate(nil)
             }
         }

@@ -67,7 +67,7 @@ struct DynamicSidebar: View {
                         .cornerRadius(8)
                 }
                 
-                Text("Embr Echo")
+                Text("Echo")
                     .font(.system(size: 14, weight: .semibold))
 
                 Spacer()
@@ -168,8 +168,8 @@ struct ContentView: View {
                 selectedView: $selectedView,
                 hoveredView: $hoveredView
             )
-            .frame(width: 200)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200, max: 300)
+            .frame(width: 240)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 240, max: 300)
         } detail: {
             detailView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

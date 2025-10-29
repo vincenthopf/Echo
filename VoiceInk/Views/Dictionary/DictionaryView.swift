@@ -96,7 +96,7 @@ struct DictionaryView: View {
             // Information Section
             GroupBox {
                 Label {
-                    Text("Add words to help Embr Echo recognize them properly. (Requires Intelligent Transformation)")
+                    Text("Add words to help Echo recognize them properly. (Requires Intelligent Transformation)")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

@@ -22,7 +22,7 @@ struct GeneralSettingsView: View {
                 SettingsSection(
                     icon: "gear",
                     title: "Appearance",
-                    subtitle: "Customize how Embr Echo appears"
+                    subtitle: "Customize how Echo appears"
                 ) {
                     VStack(alignment: .leading, spacing: 12) {
                         Toggle("Hide Dock Icon (Menu Bar Only)", isOn: $menuBarManager.isMenuBarOnly)

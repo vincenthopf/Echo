@@ -387,7 +387,7 @@ struct AddReplacementSheet: View {
                                 Text("Replacement:")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
-                                Text("Embr Echo")
+                                Text("Echo")
                                     .font(.callout)
                             }
                         }

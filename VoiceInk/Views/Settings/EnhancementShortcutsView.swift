@@ -67,7 +67,7 @@ struct EnhancementShortcutsSection: View {
                 VStack(alignment: .leading, spacing: 16) {
                     EnhancementShortcutsView()
                     
-                    Text("Transformation shortcuts are available only when the recorder is visible and Embr Echo is running.")
+                    Text("Transformation shortcuts are available only when the recorder is visible and Echo is running.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

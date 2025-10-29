@@ -27,7 +27,7 @@ struct OnboardingTutorialView: View {
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                             
-                            Text("Let's test your Embr Echo setup.")
+                            Text("Let's test your Echo setup.")
                                 .font(.system(size: 24, weight: .medium, design: .rounded))
                                 .foregroundColor(.white.opacity(0.7))
                                 .lineSpacing(4)

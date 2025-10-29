@@ -190,7 +190,7 @@ struct ModelManagementView: View {
 
                             InfoTip(
                                 title: "Import local Whisper models",
-                                message: "Add a custom fine-tuned whisper model to use with Embr Echo. Select the downloaded .bin file.",
+                                message: "Add a custom fine-tuned whisper model to use with Echo. Select the downloaded .bin file.",
                                 learnMoreURL: "https://vjh.io/embr-echo-docs"
                             )
                             .help("Read more about custom local models")

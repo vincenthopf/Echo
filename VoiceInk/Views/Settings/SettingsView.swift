@@ -26,8 +26,8 @@ struct SettingsView: View {
             VStack(spacing: 24) {
                 SettingsSection(
                     icon: "command.circle",
-                    title: "Embr Echo Shortcuts",
-                    subtitle: "Choose how you want to trigger Embr Echo"
+                    title: "Echo Shortcuts",
+                    subtitle: "Choose how you want to trigger Echo"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         hotkeyView(
@@ -72,7 +72,7 @@ struct SettingsView: View {
                 SettingsSection(
                     icon: "keyboard.badge.ellipsis",
                     title: "Other App Shortcuts",
-                    subtitle: "Additional shortcuts for Embr Echo"
+                    subtitle: "Additional shortcuts for Echo"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         // Paste Last Transcript (Original)
@@ -177,7 +177,7 @@ struct SettingsView: View {
 
                                 InfoTip(
                                     title: "Mouse Activation",
-                                    message: "Use middle mouse button to toggle Embr Echo recording."
+                                    message: "Use middle mouse button to toggle Echo recording."
                                 )
                             }
 

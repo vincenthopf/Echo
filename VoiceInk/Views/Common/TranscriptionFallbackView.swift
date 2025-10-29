@@ -18,7 +18,7 @@ struct TranscriptionFallbackView: View {
                 
                 Spacer()
                 
-                Text("Embr Echo")
+                Text("Echo")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
                 

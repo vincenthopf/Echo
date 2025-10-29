@@ -4,7 +4,7 @@ import AppKit
 
 struct EmailSupport {
     static func generateSupportEmailURL() -> URL? {
-        let subject = "Embr Echo Support Request"
+        let subject = "Echo Support Request"
         let systemInfo = SystemInfoService.shared.getSystemInfoString()
 
         let body = """

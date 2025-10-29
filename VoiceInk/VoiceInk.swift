@@ -158,7 +158,7 @@ struct VoiceInkApp: App {
                     .frame(minWidth: 880, minHeight: 780)
                     .background(WindowAccessor { window in
                         // Ensure this is called only once or is idempotent
-                        if window.title != "Embr Echo Onboarding" { // Prevent re-configuration
+                        if window.title != "Echo Onboarding" { // Prevent re-configuration
                             WindowManager.shared.configureOnboardingPanel(window)
                         }
                     })
@@ -180,7 +180,7 @@ struct VoiceInkApp: App {
             }
 
             CommandGroup(replacing: .help) {
-                Button("Embr Echo Help") {
+                Button("Echo Help") {
                     if let url = URL(string: "https://vjh.io/embr-echo-help") {
                         NSWorkspace.shared.open(url)
                     }

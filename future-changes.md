@@ -7,20 +7,22 @@ In this document you will find a list of potential future changes we will want t
 
 ***
 
-# Current task to complete
+# Current task
 
+- [ ] Update the copy on the about pane to reflect what @apple-best-practices agent believes to be better more apple like copy explaining what Echo is capable. Reference the app as "Echo".  Link the documentaiton tab to https\://vjh.io/embr-echo-docs. Same with the tutorial. Remove github repo link.
 
-
-* [x] I have two new icons for the app. one for the menubar icon and one for the app icon itself. Can you update them both accordingly in this codebase. they are located in the ./newicons directory which should be deleted after this task is complete.&#x20;
+* [ ] Add header to the transcribe pane to ensure that its easy to understand what it achieves as well as a little icon describing what is possible with it. (like an i info icon like we have elsewhere). get the apple best practices agent to write quality copy.&#x20;
 
 ### List of future upgrades
 
 * [ ] Update the design of our Pill when using voice dictation
-* [ ] Update the settings arrangement. We want things to be clean and easy to follow.&#x20;
-* [ ] All "Learn More" links in the repo need to direct to&#x20;
 
 ### Completed Changes:
 
+* [x] Update all references in app from "Embr Echo" to just "Echo" - Changed all user-facing text throughout the app including UI labels, descriptions, window titles, permission messages, and Info.plist entries.
+* [x] All "Learn More" links in the repo need to direct to&#x20;
+* [x] Update the settings arrangement. We want things to be clean and easy to follow.&#x20;
+* [x] I have two new icons for the app. one for the menubar icon and one for the app icon itself. Can you update them both accordingly in this codebase. they are located in the ./newicons directory which should be deleted after this task is complete.&#x20;
 * [x] Update the settings panes for Customisation/personal vocab, and Transformation to be added as panels in the app itself. We need to add nice headers with brief descriptions to the top of each of these as well as the Transcribe Audio pane and tab.&#x20;
 * [x] Accessibility permissions and setup dialog on startup. Fixed the issue where the Accessibility option didn't show as enabled in the app when enabled in System Settings. The root cause was MetricsSetupView using static @State initialization that never refreshed. Implemented notification observers for NSApplication.didBecomeActiveNotification and DistributedNotificationCenter "com.apple.accessibility.api" to detect permission changes in real-time. Also added NSAppleEventsUsageDescription to Info.plist for best practices.
 * [x] Remove the second recorder style for notch recorder. We don't need it for now. We just want to hide the option to change it to notch recorder, but we want to keep the code there just in case we want to reinstate it in the future.

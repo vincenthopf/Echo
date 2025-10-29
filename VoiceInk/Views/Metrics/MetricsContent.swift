@@ -45,7 +45,7 @@ struct MetricsContent: View {
                 color: .accentColor
             )
             MetricCard(
-                title: "Embr Echo Sessions",
+                title: "Echo Sessions",
                 value: "\(transcriptions.count)",
                 icon: "mic.circle.fill",
                 color: .accentColor
@@ -67,7 +67,7 @@ struct MetricsContent: View {
     
     private var voiceInkTrendChart: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("30-Day Embr Echo Trend")
+            Text("30-Day Echo Trend")
                 .font(.headline)
             
             Chart {

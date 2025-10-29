@@ -23,7 +23,7 @@ struct IntelligenceSettingsView: View {
         var description: String {
             switch self {
             case .spellings:
-                return "Add words to help Embr Echo recognize them properly"
+                return "Add words to help Echo recognize them properly"
             case .replacements:
                 return "Automatically replace specific words/phrases with custom formatted text"
             }

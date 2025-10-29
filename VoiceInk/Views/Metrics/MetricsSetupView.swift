@@ -18,7 +18,7 @@ struct MetricsSetupView: View {
                         .padding(.bottom, 20)
 
                     VStack(spacing: 4) {
-                        Text("Welcome to Embr Echo")
+                        Text("Welcome to Echo")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.center)
 
@@ -79,7 +79,7 @@ struct MetricsSetupView: View {
                 isCompleted: hotkeyManager.selectedHotkey1 != .none,
                 icon: "command",
                 title: "Set Keyboard Shortcut",
-                description: "Use Embr Echo anywhere with a shortcut."
+                description: "Use Echo anywhere with a shortcut."
             )
         case 1:
             stepInfo = (

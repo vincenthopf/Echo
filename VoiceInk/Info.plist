@@ -31,9 +31,9 @@
 		</dict>
 	</array>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Embr Echo needs accessibility access to paste transcribed text directly at your cursor position and to interact with other applications for seamless dictation.</string>
+	<string>Echo needs accessibility access to paste transcribed text directly at your cursor position and to interact with other applications for seamless dictation.</string>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>Embr Echo needs screen recording access to understand context from your screen for improved transcription accuracy.</string>
+	<string>Echo needs screen recording access to understand context from your screen for improved transcription accuracy.</string>
 	<key>SUEnableAutomaticChecks</key>
 	<false/>
 	<key>SUEnableInstallerLauncherService</key>

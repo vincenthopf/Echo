@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// About page showcasing Embr Echo's philosophy and capabilities
+/// About page showcasing Echo's philosophy and capabilities
 struct AboutView: View {
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 
@@ -30,7 +30,7 @@ struct AboutView: View {
             }
 
             VStack(spacing: 8) {
-                Text("Embr Echo")
+                Text("Echo")
                     .font(.system(size: 36, weight: .bold))
 
                 Text("Version \(appVersion)")
@@ -54,23 +54,23 @@ struct AboutView: View {
 
     private var mainContent: some View {
         VStack(alignment: .leading, spacing: 40) {
-            // The Manifesto
+            // What You Can Do
             VStack(alignment: .leading, spacing: 16) {
-                Text("Your Voice, Unfiltered")
+                Text("Speak naturally. Work faster.")
                     .font(.system(size: 24, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("In a world where every word you speak could be someone else's data, Embr Echo takes a different path.")
+                    Text("Turn your voice into text instantly. Echo transcribes everything you say with remarkable accuracy—right on your Mac.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("We believe your thoughts, your ideas, your voice—they're yours. Not training data. Not metadata. Not a product.")
+                    Text("Work in any app. Write emails, draft documents, or capture ideas without touching your keyboard. Just press your hotkey and start speaking.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("That's why everything happens on your Mac. Your voice never leaves your machine unless you explicitly choose otherwise. No cloud roundtrips. No mysterious servers. No corporate surveillance masquerading as 'improvement.'")
+                    Text("Your words stay private. Everything runs on your Mac—no servers, no cloud processing, no one listening. Unless you choose otherwise.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -79,43 +79,43 @@ struct AboutView: View {
 
             Divider()
 
-            // Why Embr Echo is Different
+            // What Makes Echo Different
             VStack(alignment: .leading, spacing: 20) {
-                Text("Beyond the Competition")
+                Text("What you can do with Echo")
                     .font(.system(size: 22, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 20) {
                     FeatureComparison(
-                        title: "Privacy First, Not Privacy Theater",
-                        description: "While Whisper Flow and others process your voice in the cloud 'for better accuracy,' we give you the choice. Local models run entirely offline. When you do choose cloud processing, it's transparent, explicit, and in your control.",
+                        title: "Keep your voice private",
+                        description: "Choose local transcription and your audio never leaves your Mac. No servers. No cloud processing. No compromise. Or select cloud services when you need them—it's always your choice.",
                         icon: "lock.shield.fill",
                         accentColor: .green
                     )
 
                     FeatureComparison(
-                        title: "Adaptive Awareness: Context-Aware Intelligence",
-                        description: "Unlike basic transcription tools, Embr Echo adapts to where you are and what you're doing. Writing code? It uses technical models and syntax-aware prompts. Composing email? It switches to natural language. Automatic, seamless, intelligent.",
+                        title: "Adapt to any task",
+                        description: "Echo knows what you're working on and adjusts automatically. Writing code? You'll get technical accuracy. Drafting an email? Natural language flows in. Context-aware transcription that thinks ahead.",
                         icon: "sparkles.square.fill.on.square",
                         accentColor: .purple
                     )
 
                     FeatureComparison(
-                        title: "True Native macOS",
-                        description: "Built with SwiftUI from the ground up. Not an Electron wrapper. Not a web app in disguise. Real menu bar integration. Real keyboard shortcuts. Real macOS design. It feels like it belongs because it does.",
+                        title: "Work anywhere on your Mac",
+                        description: "Native macOS design that feels right at home. Quick access from your menu bar, global hotkeys that work everywhere, and interface elements that follow your system's appearance. It's part of your Mac.",
                         icon: "apple.logo",
                         accentColor: .blue
                     )
 
                     FeatureComparison(
-                        title: "AI Enhancement on Your Terms",
-                        description: "Basic transcription is just the beginning. Transform your raw speech into polished prose, professional emails, or technical documentation—all with customizable AI prompts you control. Your voice, refined exactly how you want it.",
+                        title: "Refine with AI",
+                        description: "Go beyond basic transcription. Polish your words into professional emails, clean up technical documentation, or transform rough thoughts into clear writing—all with AI prompts you customize.",
                         icon: "wand.and.stars",
                         accentColor: .orange
                     )
 
                     FeatureComparison(
-                        title: "No Subscription Trap",
-                        description: "Local models? Completely free after download. Cloud services? You bring your own API keys and pay only for what you use. No artificial limits. No monthly ransom. No surprise price hikes.",
+                        title: "Pay only for what you use",
+                        description: "Download local models for free. Connect your own API keys for cloud services. No subscriptions. No monthly fees. No surprises.",
                         icon: "dollarsign.circle.fill",
                         accentColor: .red
                     )
@@ -124,22 +124,22 @@ struct AboutView: View {
 
             Divider()
 
-            // Philosophy
+            // How It Works
             VStack(alignment: .leading, spacing: 16) {
-                Text("The Philosophy")
+                Text("Built for how you work")
                     .font(.system(size: 22, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("Software should serve you, not surveil you.")
+                    Text("Press your hotkey. Start speaking. See your words appear.")
                         .font(.system(size: 15, weight: .medium))
                         .foregroundColor(.primary)
 
-                    Text("Tools should be powerful without being complex. Private without being paranoid. Beautiful without sacrificing function.")
+                    Text("Echo runs advanced AI models right on your Mac—no internet required. Choose from multiple transcription engines, each optimized for different needs. Switch between them anytime.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Embr Echo is for creators, thinkers, and builders who refuse to compromise. Who believe that convenience shouldn't cost privacy. Who want their tools to amplify their voice, not capture it.")
+                    Text("Set it up once and forget about it. Echo learns your workflow, remembers your preferences, and stays out of your way until you need it.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -154,21 +154,19 @@ struct AboutView: View {
                     .font(.system(size: 22, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 12) {
-                    LinkButton(title: "Documentation", url: "https://embr.sh/docs", icon: "book.fill")
-                    LinkButton(title: "Tutorial Guide", url: "https://embr.sh/tutorial", icon: "graduationcap.fill")
-                    LinkButton(title: "GitHub Repository", url: "https://github.com/vincenthopf/Voice", icon: "chevron.left.forwardslash.chevron.right")
-                    LinkButton(title: "Report an Issue", url: "https://github.com/vincenthopf/Voice/issues", icon: "exclamationmark.triangle.fill")
+                    LinkButton(title: "Documentation", url: "https://vjh.io/embr-echo-docs", icon: "book.fill")
+                    LinkButton(title: "Tutorial Guide", url: "https://vjh.io/embr-echo-docs", icon: "graduationcap.fill")
                 }
             }
 
             // Footer
             VStack(spacing: 12) {
-                Text("Made with care for those who care about their privacy.")
+                Text("Designed for privacy. Built for speed. Made for macOS.")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
 
-                Text("© 2025 Embr Echo. Built with 🔥 on macOS.")
+                Text("© 2025 Echo")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary.opacity(0.6))
             }

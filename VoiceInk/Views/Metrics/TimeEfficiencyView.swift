@@ -62,7 +62,7 @@ struct TimeEfficiencyView: View {
                     .font(.system(size: 32, weight: .bold))
                     .foregroundStyle(efficiencyGradient)
                 
-                Text("with Embr Echo")
+                Text("with Echo")
                     .font(.system(size: 32, weight: .bold))
             }
             .lineLimit(1)
