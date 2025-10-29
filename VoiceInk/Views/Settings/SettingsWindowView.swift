@@ -8,10 +8,38 @@ struct SettingsWindowView: View {
     @EnvironmentObject private var aiService: AIService
     @EnvironmentObject private var enhancementService: AIEnhancementService
 
-    @AppStorage("selectedSettingsTab") private var selectedTab = SettingsTab.general
+    @AppStorage("selectedSettingsTab") private var selectedTab = SettingsTab.recording
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            RecordingSettingsView()
+                .environmentObject(hotkeyManager)
+                .environmentObject(whisperState)
+                .tabItem {
+                    Label("Recording", systemImage: "mic.circle")
+                }
+                .tag(SettingsTab.recording)
+
+            TranscriptionSettingsView(whisperState: whisperState)
+                .environmentObject(enhancementService)
+                .tabItem {
+                    Label("Transcription", systemImage: "waveform")
+                }
+                .tag(SettingsTab.transcription)
+
+            OutputSettingsView()
+                .environmentObject(enhancementService)
+                .tabItem {
+                    Label("Output", systemImage: "arrow.up.doc")
+                }
+                .tag(SettingsTab.output)
+
+            IntelligenceSettingsView()
+                .tabItem {
+                    Label("Intelligence", systemImage: "sparkles")
+                }
+                .tag(SettingsTab.intelligence)
+
             GeneralSettingsView()
                 .environmentObject(updaterViewModel)
                 .environmentObject(hotkeyManager)
@@ -21,38 +49,6 @@ struct SettingsWindowView: View {
                     Label("General", systemImage: "gear")
                 }
                 .tag(SettingsTab.general)
-
-            ModelManagementView(whisperState: whisperState)
-                .environmentObject(enhancementService)
-                .tabItem {
-                    Label("Models", systemImage: "brain.head.profile")
-                }
-                .tag(SettingsTab.models)
-
-            PermissionsView()
-                .tabItem {
-                    Label("Permissions", systemImage: "shield.fill")
-                }
-                .tag(SettingsTab.permissions)
-
-            AudioInputSettingsView()
-                .tabItem {
-                    Label("Audio Input", systemImage: "mic.fill")
-                }
-                .tag(SettingsTab.audioInput)
-
-            DictionarySettingsView(whisperPrompt: whisperState.whisperPrompt)
-                .tabItem {
-                    Label("Customisation", systemImage: "character.book.closed.fill")
-                }
-                .tag(SettingsTab.dictionary)
-
-            EnhancementSettingsView()
-                .environmentObject(enhancementService)
-                .tabItem {
-                    Label("Transformation", systemImage: "wand.and.stars")
-                }
-                .tag(SettingsTab.enhancement)
         }
         .frame(minWidth: 700, minHeight: 500)
     }
@@ -60,12 +56,11 @@ struct SettingsWindowView: View {
 
 /// Enum representing available settings tabs
 enum SettingsTab: String, Codable, CaseIterable, Identifiable {
+    case recording = "Recording"
+    case transcription = "Transcription"
+    case output = "Output"
+    case intelligence = "Intelligence"
     case general = "General"
-    case models = "Models"
-    case permissions = "Permissions"
-    case audioInput = "Audio Input"
-    case dictionary = "Customisation"
-    case enhancement = "Transformation"
 
     var id: String { rawValue }
 }

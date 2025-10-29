@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings Reorganization - Apple HIG Analysis</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', 'Source Code Pro', monospace;
+      background: #0d0d0d;
+      color: #e8e8e8;
+      line-height: 1.8;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    .header p {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      border: 1px solid #2a2a2a;
+      margin-bottom: 30px;
+      background: #0d0d0d;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      padding: 30px 20px 20px 20px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .card-summary {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #2a2a2a;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }
+
+    .tab {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 16px 24px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+      border-bottom: 1px solid transparent;
+    }
+
+    .tab:hover {
+      color: #d0d0d0;
+    }
+
+    .tab.active {
+      color: #ffffff;
+      border-bottom: 1px solid #ffffff;
+      margin-bottom: -1px;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px 20px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .option-title {
+      font-size: 1rem;
+      color: #ffffff;
+      margin-bottom: 24px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #888;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-content {
+      color: #d0d0d0;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .section-content p {
+      margin-bottom: 12px;
+    }
+
+    .list {
+      list-style: none;
+      color: #c8c8c8;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .list li {
+      margin-bottom: 8px;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .list li:before {
+      content: "—";
+      position: absolute;
+      left: 0;
+      color: #444;
+    }
+
+    .divider {
+      height: 1px;
+      background: #1a1a1a;
+      margin: 24px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .grid-item {
+      border: 1px solid #1a1a1a;
+      padding: 16px;
+      transition: background 0.2s ease;
+    }
+
+    .grid-item:hover {
+      background: #121212;
+    }
+
+    .grid-item-title {
+      font-size: 0.85rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .note {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      padding: 16px;
+      color: #c0c0c0;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Settings Reorganization - Apple HIG Analysis</h1>
+      <p>Four approaches aligned with Human Interface Guidelines and macOS design patterns</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Settings Reorganization Strategy</div>
+        <div class="card-summary">Based on comprehensive analysis of Apple's Human Interface Guidelines, macOS System Settings patterns, and apps like Safari, Mail, and Photos. Each approach resolves the General tab bloat while following established Apple design principles.</div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(event, 'q1-opt1')">Task-Based</button>
+        <button class="tab" onclick="switchTab(event, 'q1-opt2')">Feature-Domain</button>
+        <button class="tab" onclick="switchTab(event, 'q1-opt3')">Progressive Complexity</button>
+        <button class="tab" onclick="switchTab(event, 'q1-opt4')">Minimal Change</button>
+      </div>
+
+      <div id="q1-opt1" class="tab-content active">
+        <div class="option-title">Task-Based Organization (Recommended by HIG Analysis)</div>
+
+        <div class="section">
+          <div class="section-label">Overview</div>
+          <div class="section-content">
+            <p>Organize settings by user workflow and what users are trying to accomplish. Five tabs follow recording-to-output progression: Recording (shortcuts, audio input, management), Transcription (models, quality), Output (AI enhancement, corrections, delivery), Automation (PowerMode), and General (app preferences). Matches patterns in Photos, Safari, and Mail.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Strengths</div>
+          <ul class="list">
+            <li>Strongest alignment with HIG clarity principle - each tab answers a specific user question</li>
+            <li>Matches Apple's task-based patterns in Photos (Library/For You/Albums) and Safari (General/Tabs/AutoFill)</li>
+            <li>Natural workflow progression from input to output matches user mental model</li>
+            <li>Groups all recording controls together - shortcuts, audio devices, and management in one location</li>
+            <li>Progressive disclosure works naturally - new users stay in Recording/Transcription, power users discover Output/Automation</li>
+            <li>Scales well for future features - new capabilities fit logically into existing workflow categories</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Considerations</div>
+          <ul class="list">
+            <li>PowerMode isolated in dedicated Automation tab may feel sparse initially</li>
+            <li>Requires creating four new view files and redistributing General tab sections</li>
+            <li>Existing users need to relearn tab locations though structure is more intuitive</li>
+            <li>Five total tabs slightly increases tab bar width compared to four-tab approaches</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Technical Details</div>
+          <div class="grid">
+            <div class="grid-item">
+              <div class="grid-item-title">Tab Structure</div>
+              <div class="section-content">Recording (shortcuts, audio input/management), Transcription (models, quality, API keys), Output (AI enhancement, corrections, paste method), Automation (PowerMode), General (appearance, permissions, privacy, backup)</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">Implementation Scope</div>
+              <div class="section-content">Create RecordingSettingsView, TranscriptionSettingsView, OutputSettingsView, AutomationSettingsView. Redistribute 9 General sections across new views. Update SettingsTab enum with 5 cases.</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">HIG Principles Applied</div>
+              <div class="section-content">Clarity through focused categorization, progressive disclosure, visual hierarchy, consistency with macOS patterns, benefit-focused naming that describes user actions</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">User Impact</div>
+              <div class="section-content">Most intuitive for new users. Reduces cognitive load by grouping related tasks. All settings preserved during migration. One-time notification about reorganization.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="note">
+          Best for creating Apple-like user experience with clear workflow progression. Ideal when prioritizing discoverability, reducing cognitive load, and establishing scalable structure for future features. Most aligned with HIG analysis.
+        </div>
+      </div>
+
+      <div id="q1-opt2" class="tab-content">
+        <div class="option-title">Feature-Domain Organization</div>
+
+        <div class="section">
+          <div class="section-label">Overview</div>
+          <div class="section-content">
+            <p>Group settings by technical feature domains aligned with system architecture. Four tabs organize by input/output stages: Input & Recording (shortcuts, audio, PowerMode), Transcription Models (model selection, quality, APIs), Output & Enhancement (AI transformation, corrections, paste method), and App Settings (preferences, permissions, privacy, backup). Follows macOS System Settings domain-based categorization.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Strengths</div>
+          <ul class="list">
+            <li>Fewest tabs (4 total) creates cleanest tab bar with clear visual hierarchy</li>
+            <li>PowerMode logically grouped with recording input rather than isolated</li>
+            <li>Matches System Settings pattern of domain categorization like Sound, Keyboard, Displays</li>
+            <li>Clear technical boundaries make it easier for developers to locate settings during debugging</li>
+            <li>Consolidates input concerns - recording triggers, audio devices, context awareness together</li>
+            <li>Power users who understand technical architecture can navigate efficiently</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Considerations</div>
+          <ul class="list">
+            <li>Less intuitive for non-technical users who may not understand input/output distinctions</li>
+            <li>Output & Enhancement tab combines transformation with corrections which serve different purposes</li>
+            <li>Input & Recording tab becomes large with shortcuts, audio devices, management, and PowerMode</li>
+            <li>Workflow fragmentation - users still jump between Input and Output tabs for complete setup</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Technical Details</div>
+          <div class="grid">
+            <div class="grid-item">
+              <div class="grid-item-title">Tab Structure</div>
+              <div class="section-content">Input & Recording (shortcuts, mouse, audio devices/management, PowerMode), Transcription Models (models, quality, APIs), Output & Enhancement (AI, corrections, paste), App Settings (preferences, permissions, privacy, backup)</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">Implementation Scope</div>
+              <div class="section-content">Create InputRecordingSettingsView (consolidate multiple sections), OutputEnhancementSettingsView (merge Transformation + corrections), AppSettingsView. Merge existing ModelManagementView. Update SettingsTab enum to 4 cases.</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">HIG Principles Applied</div>
+              <div class="section-content">Domain-based categorization similar to System Settings, visual grouping of related technical features, clear separation of concerns, reduced tab count improves scannability</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">User Impact</div>
+              <div class="section-content">Efficient for power users familiar with technical concepts. Larger tab sections require more scrolling. Best tab-to-content ratio balances organization with detail.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="note">
+          Best for maintaining architectural clarity and minimizing tab count. Ideal when targeting technically-savvy users who prefer domain-based organization and when keeping tab bar compact is priority.
+        </div>
+      </div>
+
+      <div id="q1-opt3" class="tab-content">
+        <div class="option-title">Progressive Complexity Organization</div>
+
+        <div class="section">
+          <div class="section-label">Overview</div>
+          <div class="section-content">
+            <p>Organize settings by complexity level and frequency of use. Five tabs progress from essential to advanced: Quick Start (recording shortcuts, basic audio, common preferences), Transcription (models, languages, quality), Enhancement (AI transformation, corrections, output), Automation (PowerMode, context rules), and Advanced (detailed audio controls, permissions, privacy, experimental features). Follows Xcode and Final Cut Pro progressive disclosure patterns.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Strengths</div>
+          <ul class="list">
+            <li>Optimized for new user onboarding - Quick Start contains only essential 20% of settings</li>
+            <li>Reduces overwhelm by hiding advanced features until users are ready to discover them</li>
+            <li>Clear complexity signals - users know Quick Start is safe, Advanced requires understanding</li>
+            <li>Follows progressive disclosure HIG principle - make essential information easy to find</li>
+            <li>Fastest path to basic functionality - new users never leave Quick Start initially</li>
+            <li>Matches professional app patterns like Xcode Behaviors or Final Cut Pro preferences</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Considerations</div>
+          <ul class="list">
+            <li>Subjective complexity categorization requires assumptions about what is essential vs advanced</li>
+            <li>Power users must navigate to Advanced tab frequently which may feel like features are buried</li>
+            <li>Artificial separation of related features - audio controls split between Quick Start and Advanced</li>
+            <li>Complexity levels may not match all user mental models of feature importance</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Technical Details</div>
+          <div class="grid">
+            <div class="grid-item">
+              <div class="grid-item-title">Tab Structure</div>
+              <div class="section-content">Quick Start (shortcuts, basic audio, preferences), Transcription (models, languages, quality), Enhancement (AI, corrections, output methods), Automation (PowerMode, context rules), Advanced (detailed audio, permissions, privacy, experimental, backup)</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">Implementation Scope</div>
+              <div class="section-content">Create QuickStartSettingsView (curated essentials), EnhancementSettingsView (expand current), AutomationSettingsView, AdvancedSettingsView (consolidate technical features). Significant redistribution of General sections.</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">HIG Principles Applied</div>
+              <div class="section-content">Progressive disclosure at structural level, essential information given prominence, negative space and hierarchy guide users from simple to complex, matches pro app complexity gradients</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">User Impact</div>
+              <div class="section-content">Dramatically improves new user experience. May frustrate power users who need frequent access to advanced features. Requires careful feature categorization to avoid confusion.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="note">
+          Best for optimizing new user onboarding and reducing interface complexity. Ideal when user research shows most users only need basic features and when following professional app patterns like Xcode or Final Cut Pro.
+        </div>
+      </div>
+
+      <div id="q1-opt4" class="tab-content">
+        <div class="option-title">Minimal Reorganization (Conservative Approach)</div>
+
+        <div class="section">
+          <div class="section-label">Overview</div>
+          <div class="section-content">
+            <p>Keep existing six-tab structure but redistribute General tab bloat. Split General into Recording (shortcuts, audio management, paste method) and Settings (appearance, permissions, privacy, backup). Merge Customisation into Enhancement. Rename tabs for clarity: Models to Transcription, Transformation to Enhancement. Minimal disruption while resolving primary bloat issue.</p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Strengths</div>
+          <ul class="list">
+            <li>Lowest implementation risk - smallest code change surface area reduces chance of bugs</li>
+            <li>Minimal user disruption - five existing tabs remain in same relative positions</li>
+            <li>Fastest to implement - only requires splitting GeneralSettingsView into two files and one merge</li>
+            <li>Easy rollback if users find new structure confusing - simple revert to previous state</li>
+            <li>Still addresses core bloat problem by dividing nine General sections into logical groups</li>
+            <li>Preserves all existing user settings and preferences without migration complexity</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Considerations</div>
+          <ul class="list">
+            <li>Doesn't fully solve organization issues - related settings still scattered across tabs</li>
+            <li>Users still jump between Recording and Audio Input tabs for complete recording setup</li>
+            <li>Missed opportunity to establish clear organizational principle for future scalability</li>
+            <li>Tab naming remains somewhat generic - Recording and Settings don't clearly communicate scope</li>
+            <li>Doesn't leverage HIG patterns as effectively as more comprehensive reorganizations</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+          <div class="section-label">Technical Details</div>
+          <div class="grid">
+            <div class="grid-item">
+              <div class="grid-item-title">Tab Structure</div>
+              <div class="section-content">Recording (shortcuts, audio management, paste method), Transcription (renamed Models), Enhancement (Transformation + Customisation merged), Automation (PowerMode, experimental), Audio (existing), Settings (appearance, permissions, privacy, backup)</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">Implementation Scope</div>
+              <div class="section-content">Split GeneralSettingsView into RecordingSettingsView and AppSettingsView. Merge DictionarySettingsView into EnhancementSettingsView. Update SettingsTab enum with renamed cases. Minimal structural changes.</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">HIG Principles Applied</div>
+              <div class="section-content">Reduces cognitive load through section splitting, improves scannability by reducing per-tab content, maintains consistency with existing structure users understand</div>
+            </div>
+            <div class="grid-item">
+              <div class="grid-item-title">User Impact</div>
+              <div class="section-content">Least disruptive to existing users. Incremental improvement rather than comprehensive solution. Zero settings migration needed. Can iterate further based on user feedback.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="note">
+          Best for addressing immediate bloat with minimal engineering effort and user disruption. Ideal when prioritizing low-risk incremental improvement over comprehensive reorganization, or when time constraints prevent larger refactoring.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(event, tabId) {
+      const card = event.target.closest('.card');
+      const tabContents = card.querySelectorAll('.tab-content');
+      tabContents.forEach(content => content.classList.remove('active'));
+      const tabButtons = card.querySelectorAll('.tab');
+      tabButtons.forEach(button => button.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>
