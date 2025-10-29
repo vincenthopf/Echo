@@ -33,6 +33,8 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage Models") {
+                    // Set the selected tab to Models before opening Settings window
+                    UserDefaults.standard.set("Models", forKey: "selectedSettingsTab")
                     NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                 }
             } label: {
