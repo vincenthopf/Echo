@@ -192,19 +192,11 @@ struct MetricsSetupView: View {
     }
     
     private func openSettings() {
-        NotificationCenter.default.post(
-            name: .navigateToDestination,
-            object: nil,
-            userInfo: ["destination": "Settings"]
-        )
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
-    
+
     private func openModelManagement() {
-        NotificationCenter.default.post(
-            name: .navigateToDestination,
-            object: nil,
-            userInfo: ["destination": "Models"]
-        )
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
 }
 

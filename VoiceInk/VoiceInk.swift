@@ -179,7 +179,18 @@ struct VoiceInkApp: App {
                 .keyboardShortcut("s", modifiers: [.command, .control])
             }
         }
-        
+
+        Settings {
+            SettingsWindowView()
+                .environmentObject(whisperState)
+                .environmentObject(hotkeyManager)
+                .environmentObject(updaterViewModel)
+                .environmentObject(menuBarManager)
+                .environmentObject(aiService)
+                .environmentObject(enhancementService)
+                .modelContainer(container)
+        }
+
         MenuBarExtra {
             MenuBarView()
                 .environmentObject(whisperState)

@@ -33,7 +33,7 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage Models") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Models")
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
                 }
             } label: {
                 HStack {
