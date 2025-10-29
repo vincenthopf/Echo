@@ -17,17 +17,17 @@ struct EnhancementSettingsView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text("Enable Enhancement")
+                                    Text("Enable Transformation")
                                         .font(.headline)
-                                    
+
                                     InfoTip(
-                                        title: "AI Enhancement",
-                                        message: "AI enhancement lets you pass the transcribed audio through LLMS to post-process using different prompts suitable for different use cases like e-mails, summary, writing, etc.",
+                                        title: "Intelligent Transformation",
+                                        message: "Intelligent transformation lets you pass the transcribed audio through LLMs to post-process using different prompts suitable for different use cases like e-mails, summary, writing, etc.",
                                         learnMoreURL: "https://www.youtube.com/@tryvoiceink/videos"
                                     )
                                 }
                                 
-                                Text("Turn on AI-powered enhancement features")
+                                Text("Turn on AI-powered transformation features")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -75,7 +75,7 @@ struct EnhancementSettingsView: View {
                     
                     // 3. Enhancement Modes & Assistant Section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Enhancement Prompt")
+                        Text("Transformation Prompts")
                             .font(.headline)
                         
                         // Reorderable prompts grid with drag-and-drop

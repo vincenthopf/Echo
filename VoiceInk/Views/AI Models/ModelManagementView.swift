@@ -190,7 +190,7 @@ struct ModelManagementView: View {
 
                             InfoTip(
                                 title: "Import local Whisper models",
-                                message: "Add a custom fine-tuned whisper model to use with VoiceInk. Select the downloaded .bin file.",
+                                message: "Add a custom fine-tuned whisper model to use with Embr Echo. Select the downloaded .bin file.",
                                 learnMoreURL: "https://embr.sh/docs/custom-local-whisper-models"
                             )
                             .help("Read more about custom local models")

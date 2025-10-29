@@ -44,8 +44,8 @@ struct MenuBarView: View {
             }
             
             Divider()
-            
-            Toggle("AI Enhancement", isOn: $enhancementService.isEnhancementEnabled)
+
+            Toggle("Intelligent Transformation", isOn: $enhancementService.isEnhancementEnabled)
             
             Menu {
                 ForEach(enhancementService.allPrompts) { prompt in
@@ -94,7 +94,7 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Providers") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Enhancement")
+                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
                 }
             } label: {
                 HStack {
@@ -127,7 +127,7 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Models") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Enhancement")
+                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
                 }
             } label: {
                 HStack {

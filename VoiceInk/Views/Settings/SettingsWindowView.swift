@@ -43,14 +43,14 @@ struct SettingsWindowView: View {
 
             DictionarySettingsView(whisperPrompt: whisperState.whisperPrompt)
                 .tabItem {
-                    Label("Dictionary", systemImage: "character.book.closed.fill")
+                    Label("Customisation", systemImage: "character.book.closed.fill")
                 }
                 .tag(SettingsTab.dictionary)
 
             EnhancementSettingsView()
                 .environmentObject(enhancementService)
                 .tabItem {
-                    Label("Enhancement", systemImage: "wand.and.stars")
+                    Label("Transformation", systemImage: "wand.and.stars")
                 }
                 .tag(SettingsTab.enhancement)
         }
@@ -64,8 +64,8 @@ enum SettingsTab: String, Codable, CaseIterable, Identifiable {
     case models = "Models"
     case permissions = "Permissions"
     case audioInput = "Audio Input"
-    case dictionary = "Dictionary"
-    case enhancement = "Enhancement"
+    case dictionary = "Customisation"
+    case enhancement = "Transformation"
 
     var id: String { rawValue }
 }

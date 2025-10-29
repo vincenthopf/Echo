@@ -101,7 +101,7 @@ struct WordReplacementView: View {
             GroupBox {
                 HStack {
                     Label {
-                        Text("Define word replacements to automatically replace specific words or phrases")
+                        Text("Define smart corrections to automatically replace specific words or phrases")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -222,7 +222,7 @@ struct EmptyStateView: View {
             Text("No Replacements")
                 .font(.headline)
             
-            Text("Add word replacements to automatically replace text.")
+            Text("Add smart corrections to automatically replace text.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

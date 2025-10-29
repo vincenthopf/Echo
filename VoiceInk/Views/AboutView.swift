@@ -93,7 +93,7 @@ struct AboutView: View {
                     )
 
                     FeatureComparison(
-                        title: "Power Mode: Context-Aware Intelligence",
+                        title: "Adaptive Awareness: Context-Aware Intelligence",
                         description: "Unlike basic transcription tools, Embr Echo adapts to where you are and what you're doing. Writing code? It uses technical models and syntax-aware prompts. Composing email? It switches to natural language. Automatic, seamless, intelligent.",
                         icon: "sparkles.square.fill.on.square",
                         accentColor: .purple

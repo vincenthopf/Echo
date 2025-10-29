@@ -9,7 +9,7 @@ struct ConfigurationView: View {
     @FocusState private var isNameFieldFocused: Bool
     
     // State for configuration
-    @State private var configName: String = "New Power Mode"
+    @State private var configName: String = "New Configuration"
     @State private var selectedEmoji: String = "💼"
     @State private var isShowingEmojiPicker = false
     @State private var isShowingAppPicker = false
@@ -131,8 +131,8 @@ struct ConfigurationView: View {
                 if case .edit(let config) = mode {
                     Button("Delete") {
                         let alert = NSAlert()
-                        alert.messageText = "Delete Power Mode?"
-                        alert.informativeText = "Are you sure you want to delete the '\(config.name)' power mode? This action cannot be undone."
+                        alert.messageText = "Delete Configuration?"
+                        alert.informativeText = "Are you sure you want to delete the '\(config.name)' configuration? This action cannot be undone."
                         alert.alertStyle = .warning
                         alert.addButton(withTitle: "Delete")
                         alert.addButton(withTitle: "Cancel")
@@ -186,7 +186,7 @@ struct ConfigurationView: View {
                                 )
                             }
                             
-                            TextField("Name your power mode", text: $configName)
+                            TextField("Name your configuration", text: $configName)
                                 .font(.system(size: 18, weight: .bold))
                                 .textFieldStyle(.plain)
                                 .foregroundColor(.primary)
@@ -196,12 +196,12 @@ struct ConfigurationView: View {
                         
                         // Default Power Mode Toggle
                         HStack {
-                            Toggle("Set as default power mode", isOn: $isDefault)
+                            Toggle("Set as default configuration", isOn: $isDefault)
                                 .font(.system(size: 14))
-                            
+
                             InfoTip(
-                                title: "Default Power Mode",
-                                message: "Default power mode is used when no specific app or website matches are found"
+                                title: "Default Configuration",
+                                message: "Default configuration is used when no specific app or website matches are found"
                             )
                             
                             Spacer()
@@ -454,9 +454,9 @@ struct ConfigurationView: View {
                     .padding(.horizontal)
                     
                     VStack(spacing: 16) {
-                        SectionHeader(title: "AI Enhancement")
+                        SectionHeader(title: "Intelligent Transformation")
 
-                        Toggle("Enable AI Enhancement", isOn: $isAIEnhancementEnabled)
+                        Toggle("Enable Intelligent Transformation", isOn: $isAIEnhancementEnabled)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .onChange(of: isAIEnhancementEnabled) { oldValue, newValue in
                                 if newValue {
@@ -573,7 +573,7 @@ struct ConfigurationView: View {
                         
                             
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Enhancement Prompt")
+                                Text("Transformation Prompt")
                                     .font(.headline)
                                     .foregroundColor(.primary)
                                 
@@ -598,7 +598,7 @@ struct ConfigurationView: View {
                             Divider()
                             
                            
-                            Toggle("Context Awareness", isOn: $useScreenCapture)
+                            Toggle("Visual Context", isOn: $useScreenCapture)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
                             
@@ -629,7 +629,7 @@ struct ConfigurationView: View {
                     HStack {
                         Spacer()
                         Button(action: saveConfiguration) {
-                            Text(mode.isAdding ? "Add New Power Mode" : "Save Changes")
+                            Text(mode.isAdding ? "Add Configuration" : "Save Changes")
                                 .font(.headline)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)

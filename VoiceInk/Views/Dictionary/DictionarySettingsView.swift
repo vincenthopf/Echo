@@ -5,8 +5,8 @@ struct DictionarySettingsView: View {
     let whisperPrompt: WhisperPrompt
     
     enum DictionarySection: String, CaseIterable {
-        case replacements = "Word Replacements"
-        case spellings = "Correct Spellings"
+        case replacements = "Smart Corrections"
+        case spellings = "Personal Vocabulary"
         
         var description: String {
             switch self {

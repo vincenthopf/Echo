@@ -24,23 +24,23 @@ struct VoiceInkButton: View {
 
 struct PowerModeEmptyStateView: View {
     let action: () -> Void
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "bolt.circle.fill")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            
-            Text("No Power Modes")
+
+            Text("No Configurations")
                 .font(.title2)
                 .fontWeight(.semibold)
-            
-            Text("Add customized power modes for different contexts")
+
+            Text("Add customized configurations for different contexts")
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
+
             VoiceInkButton(
-                title: "Add New Power Mode",
+                title: "Add Configuration",
                 action: action
             )
             .frame(maxWidth: 250)
@@ -268,7 +268,7 @@ struct ConfigurationRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "camera.viewfinder")
                                     .font(.system(size: 10))
-                                Text("Context Awareness")
+                                Text("Visual Context")
                                     .font(.caption)
                             }
                             .padding(.horizontal, 8)
@@ -319,8 +319,8 @@ struct ConfigurationRow: View {
         }
         Button(role: .destructive, action: {
             let alert = NSAlert()
-            alert.messageText = "Delete Power Mode?"
-            alert.informativeText = "Are you sure you want to delete the '\(config.name)' power mode? This action cannot be undone."
+            alert.messageText = "Delete Configuration?"
+            alert.informativeText = "Are you sure you want to delete the '\(config.name)' configuration? This action cannot be undone."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Delete")
             alert.addButton(withTitle: "Cancel")

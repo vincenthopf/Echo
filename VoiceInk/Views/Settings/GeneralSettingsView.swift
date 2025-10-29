@@ -92,9 +92,9 @@ struct GeneralSettingsView: View {
                             Spacer()
                         }
 
-                        // Paste Last Transcript (Enhanced)
+                        // Paste Last Transcript (Transformed)
                         HStack(spacing: 12) {
-                            Text("Paste Last Transcript(Enhanced)")
+                            Text("Paste Last Transcript(Transformed)")
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(.secondary)
 
@@ -102,8 +102,8 @@ struct GeneralSettingsView: View {
                                 .controlSize(.small)
 
                             InfoTip(
-                                title: "Paste Last Transcript(Enhanced)",
-                                message: "Pastes the enhanced transcript if available, otherwise falls back to the original."
+                                title: "Paste Last Transcript(Transformed)",
+                                message: "Pastes the transformed transcript if available, otherwise falls back to the original."
                             )
 
                             Spacer()
@@ -165,14 +165,14 @@ struct GeneralSettingsView: View {
 
                         Divider()
 
-                        // Middle-Click Toggle
+                        // Mouse Activation
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 8) {
-                                Toggle("Enable Middle-Click Toggle", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
+                                Toggle("Enable Mouse Activation", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
                                     .toggleStyle(.switch)
 
                                 InfoTip(
-                                    title: "Middle-Click Toggle",
+                                    title: "Mouse Activation",
                                     message: "Use middle mouse button to toggle Embr Echo recording."
                                 )
                             }
@@ -209,7 +209,7 @@ struct GeneralSettingsView: View {
 
                 SettingsSection(
                     icon: "speaker.wave.2.bubble.left.fill",
-                    title: "Recording Feedback",
+                    title: "Audio Management",
                     subtitle: "Customize app & system feedback"
                 ) {
                     VStack(alignment: .leading, spacing: 12) {
@@ -326,7 +326,7 @@ struct GeneralSettingsView: View {
 
                 SettingsSection(
                     icon: "lock.shield",
-                    title: "Data & Privacy",
+                    title: "Privacy Controls",
                     subtitle: "Control transcript history and storage"
                 ) {
                     AudioCleanupSettingsView()
@@ -334,11 +334,11 @@ struct GeneralSettingsView: View {
 
                 SettingsSection(
                     icon: "arrow.up.arrow.down.circle",
-                    title: "Data Management",
+                    title: "Backup & Restore",
                     subtitle: "Import or export your settings"
                 ) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Export your custom prompts, power modes, word replacements, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
+                        Text("Export your custom prompts, configurations, smart corrections, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
                             .settingsDescription()
 
                         HStack(spacing: 12) {

@@ -26,8 +26,8 @@ struct SettingsView: View {
             VStack(spacing: 24) {
                 SettingsSection(
                     icon: "command.circle",
-                    title: "VoiceInk Shortcuts",
-                    subtitle: "Choose how you want to trigger VoiceInk"
+                    title: "Embr Echo Shortcuts",
+                    subtitle: "Choose how you want to trigger Embr Echo"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         hotkeyView(
@@ -72,7 +72,7 @@ struct SettingsView: View {
                 SettingsSection(
                     icon: "keyboard.badge.ellipsis",
                     title: "Other App Shortcuts",
-                    subtitle: "Additional shortcuts for VoiceInk"
+                    subtitle: "Additional shortcuts for Embr Echo"
                 ) {
                     VStack(alignment: .leading, spacing: 18) {
                         // Paste Last Transcript (Original)
@@ -169,15 +169,15 @@ struct SettingsView: View {
 
                         Divider()
 
-                        // Middle-Click Toggle
+                        // Mouse Activation
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 8) {
-                                Toggle("Enable Middle-Click Toggle", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
+                                Toggle("Enable Mouse Activation", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
                                     .toggleStyle(.switch)
-                                
+
                                 InfoTip(
-                                    title: "Middle-Click Toggle",
-                                    message: "Use middle mouse button to toggle VoiceInk recording."
+                                    title: "Mouse Activation",
+                                    message: "Use middle mouse button to toggle Embr Echo recording."
                                 )
                             }
 
@@ -213,7 +213,7 @@ struct SettingsView: View {
 
                 SettingsSection(
                     icon: "speaker.wave.2.bubble.left.fill",
-                    title: "Recording Feedback",
+                    title: "Audio Management",
                     subtitle: "Customize app & system feedback"
                 ) {
                     VStack(alignment: .leading, spacing: 12) {
@@ -330,7 +330,7 @@ struct SettingsView: View {
                 
                 SettingsSection(
                     icon: "lock.shield",
-                    title: "Data & Privacy",
+                    title: "Privacy Controls",
                     subtitle: "Control transcript history and storage"
                 ) {
                     AudioCleanupSettingsView()
@@ -338,11 +338,11 @@ struct SettingsView: View {
                 
                 SettingsSection(
                     icon: "arrow.up.arrow.down.circle",
-                    title: "Data Management",
+                    title: "Backup & Restore",
                     subtitle: "Import or export your settings"
                 ) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Export your custom prompts, power modes, word replacements, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
+                        Text("Export your custom prompts, configurations, smart corrections, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
                             .settingsDescription()
 
                         HStack(spacing: 12) {

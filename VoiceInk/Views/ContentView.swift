@@ -7,7 +7,7 @@ enum ViewType: String, CaseIterable {
     case metrics = "Dashboard"
     case transcribeAudio = "Transcribe Audio"
     case history = "History"
-    case powerMode = "Power Mode"
+    case powerMode = "Adaptive Awareness"
     case about = "About"
 
     var icon: String {
@@ -192,7 +192,7 @@ struct ContentView: View {
                     selectedView = .history
                 case "Transcribe Audio":
                     selectedView = .transcribeAudio
-                case "Power Mode":
+                case "Power Mode", "Adaptive Awareness":
                     selectedView = .powerMode
                 default:
                     break

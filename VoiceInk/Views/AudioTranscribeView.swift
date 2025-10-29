@@ -65,12 +65,12 @@ struct AudioTranscribeView: View {
                     Text("Audio file selected: \(selectedAudioURL?.lastPathComponent ?? "")")
                         .font(.headline)
                     
-                    // AI Enhancement Settings
+                    // AI Transformation Settings
                     if let enhancementService = whisperState.getEnhancementService() {
                         VStack(spacing: 16) {
-                            // AI Enhancement and Prompt in the same row
+                            // Intelligent Transformation and Prompt in the same row
                             HStack(spacing: 16) {
-                                Toggle("AI Enhancement", isOn: $isEnhancementEnabled)
+                                Toggle("Intelligent Transformation", isOn: $isEnhancementEnabled)
                                     .toggleStyle(.switch)
                                     .onChange(of: isEnhancementEnabled) { oldValue, newValue in
                                         enhancementService.isEnhancementEnabled = newValue

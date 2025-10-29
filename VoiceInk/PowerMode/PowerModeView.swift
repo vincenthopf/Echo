@@ -24,8 +24,8 @@ enum ConfigurationMode: Hashable {
     
     var title: String {
         switch self {
-        case .add: return "Add Power Mode"
-        case .edit: return "Edit Power Mode"
+        case .add: return "Add Configuration"
+        case .edit: return "Edit Configuration"
         }
     }
     
@@ -73,12 +73,12 @@ struct PowerModeView: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 8) {
-                                Text("Power Modes")
+                                Text("Adaptive Awareness")
                                     .font(.system(size: 28, weight: .bold, design: .default))
                                     .foregroundColor(.primary)
                                 
                                                                  InfoTip(
-                                     title: "What is Power Mode?",
+                                     title: "What is Adaptive Awareness?",
                                      message: "Automatically apply custom configurations based on the app/website you are using",
                                      learnMoreURL: "https://www.youtube.com/@tryvoiceink/videos"
                                  )
@@ -100,7 +100,7 @@ struct PowerModeView: View {
                                     HStack(spacing: 6) {
                                         Image(systemName: "plus")
                                             .font(.system(size: 12, weight: .medium))
-                                        Text("Add Power Mode")
+                                        Text("Add Configuration")
                                             .font(.system(size: 13, weight: .medium))
                                     }
                                     .foregroundColor(.white)
@@ -213,11 +213,11 @@ struct PowerModeView: View {
                                                 .foregroundColor(.secondary.opacity(0.6))
                                             
                                             VStack(spacing: 8) {
-                                                Text("No Power Modes Yet")
+                                                Text("No Configurations Yet")
                                                     .font(.system(size: 20, weight: .medium))
                                                     .foregroundColor(.primary)
-                                                
-                                                Text("Create first power mode to automate your Embr Echo workflow based on apps/website you are using")
+
+                                                Text("Create your first configuration to automate your Embr Echo workflow based on apps/websites you are using")
                                                     .font(.system(size: 14))
                                                     .foregroundColor(.secondary)
                                                     .multilineTextAlignment(.center)

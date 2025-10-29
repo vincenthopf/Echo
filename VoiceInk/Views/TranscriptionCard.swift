@@ -205,7 +205,7 @@ struct TranscriptionCard: View {
                             ) {
                                 metadataRow(
                                     icon: "bolt.fill",
-                                    label: "Power Mode",
+                                    label: "Configuration",
                                     value: powerModeValue
                                 )
                             }

@@ -96,7 +96,7 @@ struct DictionaryView: View {
             // Information Section
             GroupBox {
                 Label {
-                    Text("Add words to help VoiceInk recognize them properly. (Requires AI enhancement)")
+                    Text("Add words to help Embr Echo recognize them properly. (Requires Intelligent Transformation)")
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -108,7 +108,7 @@ struct DictionaryView: View {
             
             // Input Section
             HStack(spacing: 8) {
-                TextField("Add word to dictionary", text: $newWord)
+                TextField("Add word to vocabulary", text: $newWord)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 13))
                     .onSubmit { addWords() }
@@ -127,7 +127,7 @@ struct DictionaryView: View {
             // Words List
             if !dictionaryManager.items.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Dictionary Items (\(dictionaryManager.items.count))")
+                    Text("Vocabulary Items (\(dictionaryManager.items.count))")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                     
@@ -151,7 +151,7 @@ struct DictionaryView: View {
             }
         }
         .padding()
-        .alert("Dictionary", isPresented: $showAlert) {
+        .alert("Personal Vocabulary", isPresented: $showAlert) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(alertMessage)
@@ -171,7 +171,7 @@ struct DictionaryView: View {
         
         if parts.count == 1, let word = parts.first {
             if dictionaryManager.items.contains(where: { $0.word.lowercased() == word.lowercased() }) {
-                alertMessage = "'\(word)' is already in the dictionary"
+                alertMessage = "'\(word)' is already in the vocabulary"
                 showAlert = true
                 return
             }

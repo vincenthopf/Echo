@@ -7,13 +7,13 @@ struct EnhancementShortcutsView: View {
     var body: some View {
         VStack(spacing: 12) {
             ShortcutRow(
-                title: "Toggle AI Enhancement",
-                description: "Quickly enable or disable enhancement while recording.",
+                title: "Toggle Intelligent Transformation",
+                description: "Quickly enable or disable transformation while recording.",
                 keyDisplay: ["⌘", "E"],
                 isOn: $shortcutSettings.isToggleEnhancementShortcutEnabled
             )
             ShortcutRow(
-                title: "Switch Enhancement Prompt",
+                title: "Switch Transformation Prompt",
                 description: "Switch between your saved prompts without touching the UI. Use ⌘1–⌘0 to activate the corresponding prompt in the order they are saved.",
                 keyDisplay: ["⌘", "1 – 0"]
             )
@@ -39,10 +39,10 @@ struct EnhancementShortcutsSection: View {
                         .frame(width: 24, height: 24)
                     
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Enhancement Shortcuts")
+                        Text("Transformation Shortcuts")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        Text("Keep enhancement prompts handy")
+                        Text("Keep transformation prompts handy")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -67,7 +67,7 @@ struct EnhancementShortcutsSection: View {
                 VStack(alignment: .leading, spacing: 16) {
                     EnhancementShortcutsView()
                     
-                    Text("Enhancement shortcuts are available only when the recorder is visible and Embr Echo is running.")
+                    Text("Transformation shortcuts are available only when the recorder is visible and Embr Echo is running.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -105,7 +105,7 @@ private struct ShortcutRow: View {
                 HStack(spacing: 8) {
                     Text(title)
                         .font(.system(size: 14, weight: .semibold))
-                    InfoTip(title: title, message: description, learnMoreURL: "https://embr.sh/docs/switching-enhancement-prompts")
+                    InfoTip(title: title, message: description, learnMoreURL: "https://embr.sh/docs/switching-transformation-prompts")
                 }
             }
             

@@ -9,7 +9,7 @@ Complete guide to mastering voice transcription with Embr Voice.
 - [Getting Started](#getting-started)
 - [Recording & Transcription](#recording--transcription)
 - [AI Enhancement](#ai-enhancement)
-- [Power Mode](#power-mode)
+- [Adaptive Awareness](#adaptive-awareness)
 - [Models & Languages](#models--languages)
 - [Customization](#customization)
 - [Advanced Features](#advanced-features)
@@ -53,7 +53,7 @@ Once setup is complete, transcribing is as simple as pressing your hotkey and sp
 
 ## Recording & Transcription
 
-### Recording Modes
+### Smart Recording
 
 Embr Voice supports two recording modes: Toggle mode (tap to start, tap to stop) and Push-to-Talk mode (hold to record, release to stop).
 
@@ -67,7 +67,7 @@ Embr Voice supports two recording modes: Toggle mode (tap to start, tap to stop)
 - Toggle mode is perfect for longer dictation sessions
 - You can see the recording timer in the recorder window
 
-### Recorder Styles
+### Recording Interface
 
 Choose between two beautiful recorder interfaces: the floating Mini Recorder or the elegant Notch Recorder (for Macs with a notch).
 
@@ -76,7 +76,7 @@ Choose between two beautiful recorder interfaces: the floating Mini Recorder or 
 2. Select your preferred style
 3. The recorder will appear in your chosen style on next recording
 
-### Audio Input Settings
+### Input Routing
 
 Select which microphone to use for recording. You can use the system default, choose a specific device, or set up prioritized devices.
 
@@ -162,35 +162,35 @@ To use AI Enhancement, you need to configure at least one AI provider with your 
 
 ---
 
-## Power Mode
+## Adaptive Awareness
 
-### What is Power Mode?
+### What is Adaptive Awareness?
 
-Power Mode automatically applies different transcription settings based on which app you're using or which website you're on. It's like having multiple transcription profiles that activate automatically.
+Adaptive Awareness automatically applies different transcription settings based on which app you're using or which website you're on. It's like having multiple transcription profiles that activate automatically.
 
 **Pro Tips:**
 - Create different configurations for work vs. personal apps
 - Use different models for different contexts
 - Apply specific AI prompts based on what you're doing
 
-### Creating Power Modes
+### Configuring Awareness
 
-Create a Power Mode configuration to automatically use specific settings when you're in certain apps.
+Create an Adaptive Awareness configuration to automatically use specific settings when you're in certain apps.
 
 **Steps:**
-1. Open Settings → Power Mode (if available in sidebar)
+1. Open Settings → Adaptive Awareness (if available in sidebar)
 2. Click 'Add New Configuration'
 3. Choose to match by App or by URL pattern
 4. Select the app or enter URL pattern
 5. Configure model, language, AI prompt, and other settings
 6. Enable the configuration
 
-### URL-Based Power Modes
+### Site Recognition
 
-Create Power Modes that activate when you're on specific websites, perfect for web-based tools like Gmail, Notion, or Google Docs.
+Create configurations that activate when you're on specific websites, perfect for web-based tools like Gmail, Notion, or Google Docs.
 
 **Steps:**
-1. Create a new Power Mode configuration
+1. Create a new Adaptive Awareness configuration
 2. Select 'URL Pattern' as the trigger
 3. Enter the URL pattern (e.g., 'mail.google.com')
 4. Configure your preferred settings
@@ -201,9 +201,9 @@ Create Power Modes that activate when you're on specific websites, perfect for w
 - You can have multiple configurations for different sites
 - Configurations are checked from top to bottom
 
-### Screen Context Integration
+### Visual Context
 
-Power Mode can capture on-screen text to give the AI context about what you're working on, dramatically improving transcription accuracy.
+Adaptive Awareness can capture on-screen text to give the AI context about what you're working on, dramatically improving transcription accuracy.
 
 **Pro Tips:**
 - Screen Recording permission is required for this feature

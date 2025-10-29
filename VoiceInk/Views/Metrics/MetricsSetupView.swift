@@ -71,7 +71,7 @@ struct MetricsSetupView: View {
                 isCompleted: hotkeyManager.selectedHotkey1 != .none,
                 icon: "command",
                 title: "Set Keyboard Shortcut",
-                description: "Use VoiceInk anywhere with a shortcut."
+                description: "Use Embr Echo anywhere with a shortcut."
             )
         case 1:
             stepInfo = (
