@@ -58,7 +58,6 @@ struct AudioTranscribeView: View {
                         .stroke(Color.gray.opacity(0.15), lineWidth: 1)
                 )
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
                 .padding(.bottom, 16)
 
                 if transcriptionManager.isProcessing {
@@ -66,9 +65,6 @@ struct AudioTranscribeView: View {
                 } else {
                     dropZoneView
                 }
-
-                Divider()
-                    .padding(.vertical)
 
                 // Show current transcription result
                 if let transcription = transcriptionManager.currentTranscription {
