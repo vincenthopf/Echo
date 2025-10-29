@@ -35,7 +35,7 @@
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>Embr Echo needs screen recording access to understand context from your screen for improved transcription accuracy.</string>
 	<key>SUEnableAutomaticChecks</key>
-	<true/>
+	<false/>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>

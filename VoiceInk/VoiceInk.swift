@@ -178,6 +178,14 @@ struct VoiceInkApp: App {
                 }
                 .keyboardShortcut("s", modifiers: [.command, .control])
             }
+
+            CommandGroup(replacing: .help) {
+                Button("Embr Echo Help") {
+                    if let url = URL(string: "https://vjh.io/embr-echo-help") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+            }
         }
 
         Settings {
