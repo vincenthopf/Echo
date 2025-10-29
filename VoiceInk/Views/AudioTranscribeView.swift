@@ -19,32 +19,47 @@ struct AudioTranscribeView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header Section
-                VStack(spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 8) {
-                                Text("Transcribe Files")
-                                    .font(.system(size: 28, weight: .bold, design: .default))
-                                    .foregroundColor(.primary)
+                // Header Card
+                HStack(alignment: .top, spacing: 16) {
+                    // Icon
+                    Image(systemName: "waveform.circle.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.white, .accent)
+                        .symbolRenderingMode(.palette)
 
-                                InfoTip(
-                                    title: "Transcribe Audio Files",
-                                    message: "Turn any audio or video file into text. Drop a file, choose your settings, and get accurate transcriptions in seconds."
-                                )
-                            }
+                    // Title and Description
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Text("Transcribe Files")
+                                .font(.system(size: 24, weight: .bold, design: .default))
+                                .foregroundColor(.primary)
 
-                            Text("Convert recordings and videos to text instantly.")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                            InfoTip(
+                                title: "Transcribe Audio Files",
+                                message: "Turn any audio or video file into text. Drop a file, choose your settings, and get accurate transcriptions in seconds."
+                            )
                         }
 
-                        Spacer()
+                        Text("Convert recordings and videos to text instantly.")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 8)
+
+                    Spacer()
                 }
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(NSColor.controlBackgroundColor))
+                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                )
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
 
                 if transcriptionManager.isProcessing {
                     processingView

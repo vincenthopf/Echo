@@ -5,7 +5,7 @@ import KeyboardShortcuts
 // ViewType enum with all cases (settings-related items moved to Settings window)
 enum ViewType: String, CaseIterable {
     case metrics = "Dashboard"
-    case transcribeAudio = "Transcribe Audio"
+    case transcribeAudio = "Transcribe Files"
     case history = "History"
     case powerMode = "Adaptive Awareness"
     case about = "About"
@@ -190,7 +190,7 @@ struct ContentView: View {
                 switch destination {
                 case "History":
                     selectedView = .history
-                case "Transcribe Audio":
+                case "Transcribe Files", "Transcribe Audio":
                     selectedView = .transcribeAudio
                 case "Power Mode", "Adaptive Awareness":
                     selectedView = .powerMode
