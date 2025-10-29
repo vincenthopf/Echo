@@ -31,7 +31,7 @@
 		</dict>
 	</array>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>Embr Voice needs screen recording access to understand context from your screen for improved transcription accuracy.</string>
+	<string>Embr Echo needs screen recording access to understand context from your screen for improved transcription accuracy.</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUEnableInstallerLauncherService</key>

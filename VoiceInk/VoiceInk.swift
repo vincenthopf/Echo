@@ -158,7 +158,7 @@ struct VoiceInkApp: App {
                     .frame(minWidth: 880, minHeight: 780)
                     .background(WindowAccessor { window in
                         // Ensure this is called only once or is idempotent
-                        if window.title != "Embr Voice Onboarding" { // Prevent re-configuration
+                        if window.title != "Embr Echo Onboarding" { // Prevent re-configuration
                             WindowManager.shared.configureOnboardingPanel(window)
                         }
                     })

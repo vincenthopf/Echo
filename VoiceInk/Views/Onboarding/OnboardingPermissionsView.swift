@@ -49,13 +49,13 @@ struct OnboardingPermissionsView: View {
         ),
         OnboardingPermission(
             title: "Microphone Selection",
-            description: "Select the audio input device you want to use with Embr Voice.",
+            description: "Select the audio input device you want to use with Embr Echo.",
             icon: "headphones",
             type: .audioDeviceSelection
         ),
         OnboardingPermission(
             title: "Accessibility Access",
-            description: "Allow Embr Voice to help you type anywhere in your Mac.",
+            description: "Allow Embr Echo to help you type anywhere in your Mac.",
             icon: "accessibility",
             type: .accessibility
         ),
@@ -67,7 +67,7 @@ struct OnboardingPermissionsView: View {
         ),
         OnboardingPermission(
             title: "Keyboard Shortcut",
-            description: "Set up a keyboard shortcut to quickly access Embr Voice from anywhere.",
+            description: "Set up a keyboard shortcut to quickly access Embr Echo from anywhere.",
             icon: "keyboard",
             type: .keyboardShortcut
         )
@@ -126,7 +126,7 @@ struct OnboardingPermissionsView: View {
                                     if permissions[currentPermissionIndex].type == .screenRecording {
                                         InfoTip(
                                             title: "Screen Recording Access",
-                                            message: "Embr Voice captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
+                                            message: "Embr Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
                                             learnMoreURL: "https://embr.sh/docs/contextual-awareness"
                                         )
                                     }

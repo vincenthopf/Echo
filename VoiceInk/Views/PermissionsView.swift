@@ -207,7 +207,7 @@ struct PermissionsView: View {
                     PermissionCard(
                         icon: "keyboard",
                         title: "Keyboard Shortcut",
-                        description: "Set up a keyboard shortcut to use Embr Voice anywhere",
+                        description: "Set up a keyboard shortcut to use Embr Echo anywhere",
                         isGranted: hotkeyManager.selectedHotkey1 != .none,
                         buttonTitle: "Configure Shortcut",
                         buttonAction: {
@@ -224,7 +224,7 @@ struct PermissionsView: View {
                     PermissionCard(
                         icon: "mic",
                         title: "Microphone Access",
-                        description: "Allow Embr Voice to record your voice for transcription",
+                        description: "Allow Embr Echo to record your voice for transcription",
                         isGranted: permissionManager.audioPermissionStatus == .authorized,
                         buttonTitle: permissionManager.audioPermissionStatus == .notDetermined ? "Request Permission" : "Open System Settings",
                         buttonAction: {
@@ -243,7 +243,7 @@ struct PermissionsView: View {
                     PermissionCard(
                         icon: "hand.raised",
                         title: "Accessibility Access",
-                        description: "Allow Embr Voice to paste transcribed text directly at your cursor position",
+                        description: "Allow Embr Echo to paste transcribed text directly at your cursor position",
                         isGranted: permissionManager.isAccessibilityEnabled,
                         buttonTitle: "Open System Settings",
                         buttonAction: {
@@ -253,14 +253,14 @@ struct PermissionsView: View {
                         },
                         checkPermission: { permissionManager.checkAccessibilityPermissions() },
                         infoTipTitle: "Accessibility Access",
-                        infoTipMessage: "Embr Voice uses Accessibility permissions to paste the transcribed text directly into other applications at your cursor's position. This allows for a seamless dictation experience across your Mac."
+                        infoTipMessage: "Embr Echo uses Accessibility permissions to paste the transcribed text directly into other applications at your cursor's position. This allows for a seamless dictation experience across your Mac."
                     )
                     
                     // Screen Recording Permission
                     PermissionCard(
                         icon: "rectangle.on.rectangle",
                         title: "Screen Recording Access",
-                        description: "Allow Embr Voice to understand context from your screen for transcript Enhancement",
+                        description: "Allow Embr Echo to understand context from your screen for transcript Enhancement",
                         isGranted: permissionManager.isScreenRecordingEnabled,
                         buttonTitle: "Request Permission",
                         buttonAction: {
@@ -272,7 +272,7 @@ struct PermissionsView: View {
                         },
                         checkPermission: { permissionManager.checkScreenRecordingPermission() },
                         infoTipTitle: "Screen Recording Access",
-                        infoTipMessage: "Embr Voice captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
+                        infoTipMessage: "Embr Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
                         infoTipLink: "https://embr.sh/docs/contextual-awareness"
                     )
                 }

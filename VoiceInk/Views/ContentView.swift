@@ -67,7 +67,7 @@ struct DynamicSidebar: View {
                         .cornerRadius(8)
                 }
                 
-                Text("Embr Voice")
+                Text("Embr Echo")
                     .font(.system(size: 14, weight: .semibold))
 
                 Spacer()

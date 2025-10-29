@@ -10,7 +10,7 @@ class VoiceInkCSVExportService {
         
         let savePanel = NSSavePanel()
         savePanel.allowedContentTypes = [.commaSeparatedText]
-        savePanel.nameFieldStringValue = "EmbrVoice-transcription.csv"
+        savePanel.nameFieldStringValue = "EmbrEcho-transcription.csv"
         
         savePanel.begin { result in
             if result == .OK, let url = savePanel.url {

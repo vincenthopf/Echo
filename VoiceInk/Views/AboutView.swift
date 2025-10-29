@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// About page showcasing Embr Voice's philosophy and capabilities
+/// About page showcasing Embr Echo's philosophy and capabilities
 struct AboutView: View {
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 
@@ -30,7 +30,7 @@ struct AboutView: View {
             }
 
             VStack(spacing: 8) {
-                Text("Embr Voice")
+                Text("Embr Echo")
                     .font(.system(size: 36, weight: .bold))
 
                 Text("Version \(appVersion)")
@@ -60,7 +60,7 @@ struct AboutView: View {
                     .font(.system(size: 24, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("In a world where every word you speak could be someone else's data, Embr Voice takes a different path.")
+                    Text("In a world where every word you speak could be someone else's data, Embr Echo takes a different path.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -79,7 +79,7 @@ struct AboutView: View {
 
             Divider()
 
-            // Why Embr Voice is Different
+            // Why Embr Echo is Different
             VStack(alignment: .leading, spacing: 20) {
                 Text("Beyond the Competition")
                     .font(.system(size: 22, weight: .bold))
@@ -94,7 +94,7 @@ struct AboutView: View {
 
                     FeatureComparison(
                         title: "Power Mode: Context-Aware Intelligence",
-                        description: "Unlike basic transcription tools, Embr Voice adapts to where you are and what you're doing. Writing code? It uses technical models and syntax-aware prompts. Composing email? It switches to natural language. Automatic, seamless, intelligent.",
+                        description: "Unlike basic transcription tools, Embr Echo adapts to where you are and what you're doing. Writing code? It uses technical models and syntax-aware prompts. Composing email? It switches to natural language. Automatic, seamless, intelligent.",
                         icon: "sparkles.square.fill.on.square",
                         accentColor: .purple
                     )
@@ -139,7 +139,7 @@ struct AboutView: View {
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Embr Voice is for creators, thinkers, and builders who refuse to compromise. Who believe that convenience shouldn't cost privacy. Who want their tools to amplify their voice, not capture it.")
+                    Text("Embr Echo is for creators, thinkers, and builders who refuse to compromise. Who believe that convenience shouldn't cost privacy. Who want their tools to amplify their voice, not capture it.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -168,7 +168,7 @@ struct AboutView: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
 
-                Text("© 2025 Embr Voice. Built with 🔥 on macOS.")
+                Text("© 2025 Embr Echo. Built with 🔥 on macOS.")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary.opacity(0.6))
             }
