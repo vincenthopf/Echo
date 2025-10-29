@@ -105,7 +105,7 @@ private struct ShortcutRow: View {
                 HStack(spacing: 8) {
                     Text(title)
                         .font(.system(size: 14, weight: .semibold))
-                    InfoTip(title: title, message: description, learnMoreURL: "https://embr.sh/docs/switching-transformation-prompts")
+                    InfoTip(title: title, message: description, learnMoreURL: "https://vjh.io/embr-echo-docs")
                 }
             }
             

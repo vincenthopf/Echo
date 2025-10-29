@@ -18,7 +18,7 @@ struct ModelSettingsView: View {
                 InfoTip(
                     title: "Output Format Guide",
                     message: "Unlike GPT, Voice Models(whisper) follows the style of your prompt rather than instructions. Use examples of your desired output format instead of commands.",
-                    learnMoreURL: "https://cookbook.openai.com/examples/whisper_prompting_guide#comparison-with-gpt-prompting"
+                    learnMoreURL: "https://vjh.io/embr-echo-docs"
                 )
                 
                 Spacer()

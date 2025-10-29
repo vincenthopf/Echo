@@ -54,13 +54,6 @@ struct GeneralSettingsView: View {
                                     AnnouncementsService.shared.stop()
                                 }
                             }
-
-                        Button("Check for Updates Now") {
-                            updaterViewModel.checkForUpdates()
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                        .disabled(!updaterViewModel.canCheckForUpdates)
                     }
                 }
 
@@ -142,6 +135,15 @@ struct GeneralSettingsView: View {
                         .buttonStyle(.bordered)
                         .controlSize(.large)
                     }
+                }
+
+                // MARK: - Experimental Features Section
+                SettingsSection(
+                    icon: "flask",
+                    title: "Experimental Features",
+                    subtitle: "Try new features that may be unstable"
+                ) {
+                    ExperimentalFeaturesSection()
                 }
             }
             .padding(.horizontal, 20)

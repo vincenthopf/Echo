@@ -23,7 +23,7 @@ struct EnhancementSettingsView: View {
                                     InfoTip(
                                         title: "Intelligent Transformation",
                                         message: "Intelligent transformation lets you pass the transcribed audio through LLMs to post-process using different prompts suitable for different use cases like e-mails, summary, writing, etc.",
-                                        learnMoreURL: "https://www.youtube.com/@tryvoiceink/videos"
+                                        learnMoreURL: "https://vjh.io/embr-echo-docs"
                                     )
                                 }
                                 

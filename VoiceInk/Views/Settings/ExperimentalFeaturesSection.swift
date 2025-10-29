@@ -6,17 +6,12 @@ struct ExperimentalFeaturesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Image(systemName: "flask")
-                    .font(.system(size: 20))
-                    .foregroundColor(.accentColor)
-                    .frame(width: 24, height: 24)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Experimental Features")
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Enable Experimental Features")
                         .font(.headline)
                     Text("Experimental features that might be unstable & bit buggy.")
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
@@ -36,7 +31,7 @@ struct ExperimentalFeaturesSection: View {
                 Divider()
                     .padding(.vertical, 4)
                     .transition(.opacity.combined(with: .move(edge: .top)))
-                
+
                 Toggle(isOn: $playbackController.isPauseMediaEnabled) {
                     Text("Pause Media during recording")
                 }
@@ -46,8 +41,5 @@ struct ExperimentalFeaturesSection: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: isExperimentalFeaturesEnabled)
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CardBackground(isSelected: false, useAccentGradientWhenSelected: true))
     }
 }

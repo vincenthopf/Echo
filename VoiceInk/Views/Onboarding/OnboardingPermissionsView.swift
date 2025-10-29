@@ -127,7 +127,7 @@ struct OnboardingPermissionsView: View {
                                         InfoTip(
                                             title: "Screen Recording Access",
                                             message: "Embr Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
-                                            learnMoreURL: "https://embr.sh/docs/contextual-awareness"
+                                            learnMoreURL: "https://vjh.io/embr-echo-docs"
                                         )
                                     }
                                 }
