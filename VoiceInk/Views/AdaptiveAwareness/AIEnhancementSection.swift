@@ -107,51 +107,26 @@ struct AIEnhancementSection: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
 
-                    Menu {
-                        Button("Use Global Setting") {
-                            config.selectedAIProvider = nil
-                            config.selectedAIModel = nil
+                    Picker("AI Provider", selection: Binding(
+                        get: { config.selectedAIProvider },
+                        set: { newValue in
+                            config.selectedAIProvider = newValue
+                            if newValue != nil {
+                                config.selectedAIModel = nil // Reset model when provider changes
+                            }
                             onSave()
                         }
+                    )) {
+                        Text("Use Global Setting").tag(nil as String?)
 
                         Divider()
 
                         ForEach(availableProviders, id: \.self) { provider in
-                            Button(action: {
-                                config.selectedAIProvider = provider.rawValue
-                                config.selectedAIModel = nil // Reset model when provider changes
-                                onSave()
-                            }) {
-                                HStack {
-                                    Text(provider.rawValue)
-                                    if config.selectedAIProvider == provider.rawValue {
-                                        Spacer()
-                                        Image(systemName: "checkmark")
-                                    }
-                                }
-                            }
+                            Text(provider.rawValue).tag(provider.rawValue as String?)
                         }
-                    } label: {
-                        HStack {
-                            Text(providerDisplayName)
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(NSColor.controlBackgroundColor))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                        )
                     }
-                    .menuStyle(.borderlessButton)
+                    .pickerStyle(.menu)
+                    .labelsHidden()
                 }
 
                 // AI Model Picker
@@ -161,49 +136,23 @@ struct AIEnhancementSection: View {
                             .font(.subheadline)
                             .fontWeight(.medium)
 
-                        Menu {
-                            Button("Use Global Setting") {
-                                config.selectedAIModel = nil
+                        Picker("AI Model", selection: Binding(
+                            get: { config.selectedAIModel },
+                            set: { newValue in
+                                config.selectedAIModel = newValue
                                 onSave()
                             }
+                        )) {
+                            Text("Use Global Setting").tag(nil as String?)
 
                             Divider()
 
                             ForEach(availableModels, id: \.self) { model in
-                                Button(action: {
-                                    config.selectedAIModel = model
-                                    onSave()
-                                }) {
-                                    HStack {
-                                        Text(model)
-                                        if config.selectedAIModel == model {
-                                            Spacer()
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
+                                Text(model).tag(model as String?)
                             }
-                        } label: {
-                            HStack {
-                                Text(modelDisplayName)
-                                    .foregroundColor(.primary)
-
-                                Spacer()
-
-                                Image(systemName: "chevron.up.chevron.down")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.secondary)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color(NSColor.controlBackgroundColor))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                                )
                         }
-                        .menuStyle(.borderlessButton)
+                        .pickerStyle(.menu)
+                        .labelsHidden()
                     }
                 }
 

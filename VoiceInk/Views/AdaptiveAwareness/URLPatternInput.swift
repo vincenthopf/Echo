@@ -29,7 +29,7 @@ struct URLPatternInput: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     TextField("example.com or *.example.com", text: $newURL)
-                        .textFieldStyle(.roundedBorder)
+                        .textFieldStyle(.plain)
                         .font(.system(size: 13))
                         .focused($isTextFieldFocused)
                         .onSubmit {
@@ -134,11 +134,11 @@ struct URLTagView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(NSColor.controlBackgroundColor))
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(NSColor.textBackgroundColor))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 6)
+            RoundedRectangle(cornerRadius: 4)
                 .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
         }
     }

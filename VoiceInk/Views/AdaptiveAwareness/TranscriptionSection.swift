@@ -49,49 +49,23 @@ struct TranscriptionSection: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
 
-                Menu {
-                    Button("Use Global Setting") {
-                        config.selectedTranscriptionModelName = nil
+                Picker("Model", selection: Binding(
+                    get: { config.selectedTranscriptionModelName },
+                    set: { newValue in
+                        config.selectedTranscriptionModelName = newValue
                         onSave()
                     }
+                )) {
+                    Text("Use Global Setting").tag(nil as String?)
 
                     Divider()
 
                     ForEach(availableModels, id: \.name) { model in
-                        Button(action: {
-                            config.selectedTranscriptionModelName = model.name
-                            onSave()
-                        }) {
-                            HStack {
-                                Text(model.displayName)
-                                if config.selectedTranscriptionModelName == model.name {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
+                        Text(model.displayName).tag(model.name as String?)
                     }
-                } label: {
-                    HStack {
-                        Text(selectedModel?.displayName ?? "Use Global Setting")
-                            .foregroundColor(.primary)
-
-                        Spacer()
-
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                    )
                 }
-                .menuStyle(.borderlessButton)
+                .pickerStyle(.menu)
+                .labelsHidden()
 
                 if let model = selectedModel {
                     Text(model.description)
@@ -107,59 +81,25 @@ struct TranscriptionSection: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
 
-                    Menu {
-                        Button("Use Global Setting") {
-                            config.selectedLanguage = nil
+                    Picker("Language", selection: Binding(
+                        get: { config.selectedLanguage },
+                        set: { newValue in
+                            config.selectedLanguage = newValue
                             onSave()
                         }
+                    )) {
+                        Text("Use Global Setting").tag(nil as String?)
 
                         Divider()
 
                         ForEach(Array(availableLanguages.keys.sorted()), id: \.self) { langCode in
                             if let langName = availableLanguages[langCode] {
-                                Button(action: {
-                                    config.selectedLanguage = langCode
-                                    onSave()
-                                }) {
-                                    HStack {
-                                        Text(langName)
-                                        if config.selectedLanguage == langCode {
-                                            Spacer()
-                                            Image(systemName: "checkmark")
-                                        }
-                                    }
-                                }
+                                Text(langName).tag(langCode as String?)
                             }
                         }
-                    } label: {
-                        HStack {
-                            let displayLanguage: String = {
-                                if let langCode = config.selectedLanguage,
-                                   let langName = availableLanguages[langCode] {
-                                    return langName
-                                }
-                                return "Use Global Setting"
-                            }()
-
-                            Text(displayLanguage)
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 10))
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Color(NSColor.controlBackgroundColor))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                        )
                     }
-                    .menuStyle(.borderlessButton)
+                    .pickerStyle(.menu)
+                    .labelsHidden()
                 }
             } else {
                 Text("Language selection not available for this model")

@@ -59,7 +59,7 @@ struct GeneralSection: View {
                         get: { config.name },
                         set: { config.name = $0 }
                     ))
-                    .textFieldStyle(.roundedBorder)
+                    .textFieldStyle(.plain)
                     .font(.system(size: 15))
                     .focused($isNameFieldFocused)
                     .onSubmit {
