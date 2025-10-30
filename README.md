@@ -152,4 +152,8 @@ Embr Voice is built on the work of incredible open-source contributors:
 
 <div align="center">
   Made with care by Vincent Hopf
+
+  <br><br>
+
+  <sub>This is a fork of the original <a href="https://github.com/Beingpax/VoiceInk">VoiceInk project</a></sub>
 </div>
