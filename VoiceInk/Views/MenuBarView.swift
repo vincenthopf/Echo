@@ -181,7 +181,7 @@ struct MenuBarView: View {
                 LastTranscriptionService.copyLastTranscription(from: whisperState.modelContext)
             }
 
-            Button("Echo...") {
+            Button("Open App") {
                 menuBarManager.openMainWindowAndNavigate(to: "Settings")
             }
             .keyboardShortcut(",", modifiers: .command)

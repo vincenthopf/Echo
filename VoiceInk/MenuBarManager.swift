@@ -18,6 +18,7 @@ class MenuBarManager: ObservableObject {
     private var aiService: AIService
     private var hotkeyManager: HotkeyManager
     private var mainWindow: NSWindow?  // Store window reference
+    private var windowDelegate: WindowDelegate?  // Store delegate to prevent deallocation
     
     init(updaterViewModel: UpdaterViewModel, 
          whisperState: WhisperState, 
@@ -47,6 +48,7 @@ class MenuBarManager: ObservableObject {
             if self.isMenuBarOnly && self.mainWindow != nil {
                 self.mainWindow?.close()
                 self.mainWindow = nil
+                self.windowDelegate = nil
             }
             
             // Update activation policy
@@ -79,15 +81,20 @@ class MenuBarManager: ObservableObject {
             }
             
             // Get or create main window
-            if self.mainWindow == nil {
+            let isNewWindow = self.mainWindow == nil
+            if isNewWindow {
                 self.mainWindow = self.createMainWindow()
             }
-            
+
             guard let window = self.mainWindow else { return }
-            
+
             // Make the window key and order front
             window.makeKeyAndOrderFront(nil)
-            window.center()  // Always center the window for consistent positioning
+
+            // Only center the window when first created, preserve user's position otherwise
+            if isNewWindow {
+                window.center()
+            }
             
             // Post a notification to navigate to the desired destination
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -117,15 +124,17 @@ class MenuBarManager: ObservableObject {
         // Create window using WindowManager
         let hostingView = NSHostingView(rootView: contentView)
         let window = WindowManager.shared.createMainWindow(contentView: hostingView)
-        
+
         // Set window delegate to handle window closing
         let delegate = WindowDelegate { [weak self] in
             self?.mainWindow = nil
+            self?.windowDelegate = nil
         }
         window.delegate = delegate
-        
+        self.windowDelegate = delegate  // Store strong reference to prevent deallocation
+
         print("MenuBarManager: Window setup complete")
-        
+
         return window
     }
 }
