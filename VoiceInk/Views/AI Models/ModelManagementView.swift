@@ -172,6 +172,9 @@ struct ModelManagementView: View {
                         )
                     }
                     
+                    // MARK: - DISABLED: Import Local Model Feature
+                    // Uncomment below to re-enable custom Whisper model import
+                    /*
                     // Import button as a card at the end of the Local list
                     if selectedFilter == .local {
                         HStack(spacing: 8) {
@@ -196,6 +199,7 @@ struct ModelManagementView: View {
                             .help("Read more about custom local models")
                         }
                     }
+                    */
                     
                     if selectedFilter == .custom {
                         // Add Custom Model Card at the bottom
@@ -236,7 +240,9 @@ struct ModelManagementView: View {
         }
     }
 
-    // MARK: - Import Panel
+    // MARK: - Import Panel (DISABLED)
+    // Uncomment below to re-enable custom Whisper model import
+    /*
     private func presentImportPanel() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.init(filenameExtension: "bin")!]
@@ -250,4 +256,5 @@ struct ModelManagementView: View {
             }
         }
     }
+    */
 }
