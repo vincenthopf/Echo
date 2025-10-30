@@ -16,9 +16,12 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var isAutoSendEnabled: Bool = false
     var isEnabled: Bool = true
     var isDefault: Bool = false
-        
+
+    // NEW: Voice trigger support for Adaptive Awareness integration
+    var triggerWords: [String] = []
+
     enum CodingKeys: String, CodingKey {
-        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault
+        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords
         case selectedWhisperModel
         case selectedTranscriptionModelName
     }
@@ -26,7 +29,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     init(id: UUID = UUID(), name: String, emoji: String, appConfigs: [AppConfig]? = nil,
          urlConfigs: [URLConfig]? = nil, isAIEnhancementEnabled: Bool, selectedPrompt: String? = nil,
          selectedTranscriptionModelName: String? = nil, selectedLanguage: String? = nil, useScreenCapture: Bool = false,
-         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false) {
+         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = []) {
         self.id = id
         self.name = name
         self.emoji = emoji
@@ -42,6 +45,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         self.selectedLanguage = selectedLanguage ?? UserDefaults.standard.string(forKey: "SelectedLanguage") ?? "en"
         self.isEnabled = isEnabled
         self.isDefault = isDefault
+        self.triggerWords = triggerWords
     }
 
     init(from decoder: Decoder) throws {
@@ -60,6 +64,9 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         isAutoSendEnabled = try container.decodeIfPresent(Bool.self, forKey: .isAutoSendEnabled) ?? false
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
         isDefault = try container.decodeIfPresent(Bool.self, forKey: .isDefault) ?? false
+
+        // Decode triggerWords with fallback to empty array for backward compatibility
+        triggerWords = try container.decodeIfPresent([String].self, forKey: .triggerWords) ?? []
 
         if let newModelName = try container.decodeIfPresent(String.self, forKey: .selectedTranscriptionModelName) {
             selectedTranscriptionModelName = newModelName
@@ -87,6 +94,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encodeIfPresent(selectedTranscriptionModelName, forKey: .selectedTranscriptionModelName)
         try container.encode(isEnabled, forKey: .isEnabled)
         try container.encode(isDefault, forKey: .isDefault)
+        try container.encode(triggerWords, forKey: .triggerWords)
     }
     
     
@@ -309,5 +317,38 @@ class PowerModeManager: ObservableObject {
 
     func isEmojiInUse(_ emoji: String) -> Bool {
         return configurations.contains { $0.emoji == emoji }
+    }
+
+    // MARK: - Voice Trigger Support (Adaptive Awareness)
+
+    /// Finds a PowerModeConfig that contains the specified trigger word
+    /// - Parameter word: The trigger word to search for (case-insensitive)
+    /// - Returns: The first enabled configuration containing the trigger word, or nil if not found
+    func findByTriggerWord(_ word: String) -> PowerModeConfig? {
+        let normalizedWord = word.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return configurations.first { config in
+            config.isEnabled && config.triggerWords.contains { triggerWord in
+                triggerWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == normalizedWord
+            }
+        }
+    }
+
+    /// Returns a dictionary mapping all trigger words to their corresponding configurations
+    /// - Returns: Dictionary with lowercase trigger words as keys and PowerModeConfig as values
+    func allTriggerWords() -> [String: PowerModeConfig] {
+        var result: [String: PowerModeConfig] = [:]
+
+        for config in configurations.filter({ $0.isEnabled }) {
+            for triggerWord in config.triggerWords {
+                let normalizedWord = triggerWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                // First matching config wins if multiple configs have the same trigger word
+                if result[normalizedWord] == nil {
+                    result[normalizedWord] = config
+                }
+            }
+        }
+
+        return result
     }
 } 

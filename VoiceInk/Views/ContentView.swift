@@ -225,7 +225,7 @@ struct ContentView: View {
         case .history:
             TranscriptionHistoryView()
         case .powerMode:
-            PowerModeView()
+            AdaptiveAwarenessView()
         case .about:
             AboutView()
         }

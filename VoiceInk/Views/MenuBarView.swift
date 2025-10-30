@@ -9,9 +9,44 @@ struct MenuBarView: View {
     @State private var menuRefreshTrigger = false  // Added to force menu updates
     @State private var isHovered = false
     @Environment(\.openSettings) private var openSettings
-    
+
+    @ObservedObject private var powerModeManager = PowerModeManager.shared
+    @ObservedObject private var sessionManager = PowerModeSessionManager.shared
+
     var body: some View {
         VStack {
+            // Active Profile Status Section
+            if let activeConfig = powerModeManager.activeConfiguration {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(activeConfig.emoji)
+                            .font(.system(size: 16))
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(activeConfig.name)
+                                .font(.system(size: 13, weight: .semibold))
+
+                            if let source = sessionManager.activationSource {
+                                Text(source.statusString())
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .background(Color.accentColor.opacity(0.1))
+                    .cornerRadius(6)
+                }
+                .padding(.horizontal, 4)
+                .padding(.top, 4)
+
+                Divider()
+            }
+
+
             Menu {
                 ForEach(whisperState.usableModels, id: \.id) { model in
                     Button {

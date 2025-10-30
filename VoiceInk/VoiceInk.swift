@@ -20,6 +20,7 @@ struct VoiceInkApp: App {
     @StateObject private var activeWindowService = ActiveWindowService.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("enableAnnouncements") private var enableAnnouncements = true
+    @State private var showMigrationNotice = false
     
     // Audio cleanup manager for automatic deletion of old audio files
     private let audioCleanupManager = AudioCleanupManager.shared
@@ -93,12 +94,15 @@ struct VoiceInkApp: App {
         activeWindowService.configure(with: enhancementService)
         activeWindowService.configureWhisperState(whisperState)
         _activeWindowService = StateObject(wrappedValue: activeWindowService)
-        
+
+        // Perform Adaptive Awareness migration (runs once)
+        AdaptiveAwarenessMigration.performMigration()
+
         // Ensure no lingering recording state from previous runs
         Task {
             await whisperState.resetOnLaunch()
         }
-        
+
         AppShortcuts.updateAppShortcutParameters()
     }
     
@@ -118,15 +122,15 @@ struct VoiceInkApp: App {
                         if enableAnnouncements {
                             AnnouncementsService.shared.start()
                         }
-                        
+
                         // Start the transcription auto-cleanup service (handles immediate and scheduled transcript deletion)
                         transcriptionAutoCleanupService.startMonitoring(modelContext: container.mainContext)
-                        
+
                         // Start the automatic audio cleanup process only if transcript cleanup is not enabled
                         if !UserDefaults.standard.bool(forKey: "IsTranscriptionCleanupEnabled") {
                             audioCleanupManager.startAutomaticCleanup(modelContext: container.mainContext)
                         }
-                        
+
                         // Process any pending open-file request now that the main ContentView is ready.
                         if let pendingURL = appDelegate.pendingOpenFileURL {
                             NotificationCenter.default.post(name: .navigateToDestination, object: nil, userInfo: ["destination": "Transcribe Audio"])
@@ -135,17 +139,23 @@ struct VoiceInkApp: App {
                             }
                             appDelegate.pendingOpenFileURL = nil
                         }
+
+                        // Show migration notice if migration occurred and user hasn't seen it yet
+                        checkAndShowMigrationNotice()
                     }
                     .background(WindowAccessor { window in
                         WindowManager.shared.configureWindow(window)
                     })
+                    .sheet(isPresented: $showMigrationNotice) {
+                        AdaptiveAwarenessMigrationSheet(isPresented: $showMigrationNotice)
+                    }
                     .onDisappear {
                         AnnouncementsService.shared.stop()
                         whisperState.unloadModel()
-                        
+
                         // Stop the transcription auto-cleanup service
                         transcriptionAutoCleanupService.stopMonitoring()
-                        
+
                         // Stop the automatic audio cleanup process
                         audioCleanupManager.stopAutomaticCleanup()
                     }
@@ -226,6 +236,27 @@ struct VoiceInkApp: App {
             }
         }
         #endif
+    }
+
+    // MARK: - Migration Notice
+
+    /// Checks if migration notice should be shown and displays it if appropriate
+    private func checkAndShowMigrationNotice() {
+        // Check if migration occurred
+        let didMigrate = UserDefaults.standard.bool(forKey: "didMigrateToAdaptiveAwareness")
+
+        // Check if user has already seen the notice
+        let hasSeenNotice = UserDefaults.standard.bool(forKey: "hasSeenAdaptiveAwarenessMigration")
+
+        // Show notice if migration occurred and user hasn't seen it yet
+        if didMigrate && !hasSeenNotice {
+            // Delay slightly to ensure window is fully loaded
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                    showMigrationNotice = true
+                }
+            }
+        }
     }
 }
 

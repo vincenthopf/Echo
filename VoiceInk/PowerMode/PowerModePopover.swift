@@ -64,7 +64,8 @@ struct PowerModePopover: View {
     private func applySelectedConfiguration() {
         Task {
             if let config = selectedConfig {
-                await PowerModeSessionManager.shared.beginSession(with: config)
+                // Manual selection from popover
+                await PowerModeSessionManager.shared.beginSession(with: config, activationSource: .manual)
             }
         }
     }

@@ -315,9 +315,35 @@ class WhisperState: NSObject, ObservableObject {
                 logger.notice("📝 WordReplacement: \(text)")
             }
 
+            // MARK: - Voice Trigger Detection (Stage 2: Adaptive Awareness)
+            // Check for voice triggers in the transcribed text BEFORE prompt detection
+            // Voice triggers have highest precedence and override automatic app/URL detection
+            let voiceTriggerResult = await ActiveWindowService.shared.detectVoiceTrigger(in: text)
+
+            if let voiceActivatedConfig = voiceTriggerResult.config,
+               let detectedKeyword = voiceTriggerResult.detectedKeyword {
+                // Voice trigger detected - apply the config with voice activation source
+                logger.notice("🎤 Activating PowerMode via voice trigger: '\(voiceActivatedConfig.name)' (keyword: '\(detectedKeyword)')")
+
+                await MainActor.run {
+                    PowerModeManager.shared.setActiveConfiguration(voiceActivatedConfig)
+                }
+
+                // Create activation source with the detected keyword
+                let activationSource = ActivationSource.voice(keyword: detectedKeyword)
+                await PowerModeSessionManager.shared.beginSession(
+                    with: voiceActivatedConfig,
+                    activationSource: activationSource
+                )
+
+                // Use the stripped text (with trigger word removed) for the rest of the pipeline
+                text = voiceTriggerResult.strippedText
+                logger.notice("📝 Text after voice trigger removal: \(text)")
+            }
+
             let audioAsset = AVURLAsset(url: url)
             let actualDuration = (try? CMTimeGetSeconds(await audioAsset.load(.duration))) ?? 0.0
-            
+
             transcription.text = text
             transcription.duration = actualDuration
             transcription.transcriptionModelName = model.displayName
@@ -325,7 +351,7 @@ class WhisperState: NSObject, ObservableObject {
             transcription.powerModeName = powerModeName
             transcription.powerModeEmoji = powerModeEmoji
             finalPastedText = text
-            
+
             if let enhancementService = enhancementService, enhancementService.isConfigured {
                 let detectionResult = await promptDetectionService.analyzeText(text, with: enhancementService)
                 promptDetectionResult = detectionResult

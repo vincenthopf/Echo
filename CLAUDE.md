@@ -76,21 +76,33 @@ If encountering build issues:
 - `CloudTranscriptionService` - Proxies to Deepgram, Groq, ElevenLabs, Gemini, Mistral
 - `NativeAppleTranscriptionService` - Uses Apple's on-device Speech framework
 
-### Power Mode System
+### Adaptive Awareness System
 
-Power Mode provides context-aware transcription settings that activate based on:
-- Active application (via bundle identifier matching)
-- Browser URL patterns (via AppleScript querying Chrome/Safari/Firefox/Edge/Arc)
+Adaptive Awareness provides unified context-aware transcription settings that activate based on:
+- Voice keywords spoken during recording (highest priority - manual override)
+- Browser URL patterns (via AppleScript querying Chrome/Safari/Firefox/Edge/Arc) (medium priority)
+- Active application (via bundle identifier matching) (lower priority)
 
-**PowerModeConfig** defines per-context settings:
+**PowerModeConfig** defines per-context awareness profiles (internally named PowerModeConfig, displayed to users as "Adaptive Awareness" profiles):
 - Transcription model and language
 - AI enhancement prompts
 - Screen capture integration
 - Auto-send behavior
+- Trigger words for voice activation (new in Adaptive Awareness unification)
 
-**ActiveWindowService** monitors frontmost app changes and applies matching PowerModeConfig.
+**Activation Precedence:**
+1. Voice Triggers - User spoke a trigger word during transcription (locks profile until next change)
+2. URL Patterns - Current browser URL matches pattern (auto-switches when URL changes)
+3. App Bundles - Frontmost app bundle ID matches (auto-switches when app changes)
+4. Default Profile - Fallback profile marked as default
 
-**PowerModeManager** stores and retrieves configurations from UserDefaults.
+**ActiveWindowService** monitors frontmost app changes, URL changes, and voice trigger detection, applying matching PowerModeConfig based on precedence rules.
+
+**PowerModeManager** stores and retrieves configurations from UserDefaults (key: `powerModeConfigurationsV2`).
+
+**PowerModeSessionManager** manages state transitions and tracks activation source (voice, URL, app, or manual).
+
+**Migration Note:** The Adaptive Awareness system unified the previously separate "Power Mode" and "Prompts with Trigger Words" features into a single system. Voice trigger detection was integrated into the existing PowerModeConfig structure by adding a `triggerWords` property. Legacy prompt trigger words are automatically migrated to new PowerModeConfig instances on first launch.
 
 ### Service Layer
 
@@ -117,16 +129,26 @@ Key services in `VoiceInk/Services/`:
 Views are organized in `VoiceInk/Views/`:
 - **Recorder/** - Mini recorder and notch UI windows
 - **Settings/** - Preferences panels
+- **AdaptiveAwareness/** - Unified profile management interface (replaces separate PowerModeView)
+  - `AdaptiveAwarenessView` - Master-detail container with help button
+  - `ProfileListView` - Master list of awareness profiles
+  - `ProfileDetailView` - Detail editor with all configuration options
+  - Includes inline help sheet explaining trigger types
 - **AI Models/** - Model management and API key configuration
 - **Dictionary/** - Custom word dictionary interface
 - **Metrics/** - Usage statistics
 - **Onboarding/** - First-run setup flow
+  - `AdaptiveAwarenessMigrationSheet` - One-time migration notice shown after Adaptive Awareness update
 
 Window management:
 - **MenuBarManager** - Menu bar extra icon and menu
 - **WindowManager** - Main app window configuration
 - **MiniWindowManager** - Floating mini recorder window
 - **NotchWindowManager** - Notch-style recorder UI (for notched Macs)
+
+**Deprecated UI Files (kept for reference, not actively used):**
+- `PowerModeView.swift` - Old Power Mode list view (replaced by AdaptiveAwarenessView)
+- `PowerModeConfigView.swift` - Old Power Mode editor (replaced by ProfileDetailView)
 
 ## Dependencies
 
@@ -185,3 +207,5 @@ External frameworks:
 - `VoiceInk/Models/PredefinedPrompts.swift` - Default AI enhancement prompts
 - `VoiceInk/HotkeyManager.swift` - Global keyboard shortcut handling
 - `VoiceInk/AppIntents/` - Siri Shortcuts integration
+- `VoiceInk/Services/AdaptiveAwarenessMigration.swift` - One-time migration utility for Adaptive Awareness unification
+- `VoiceInk/Views/Onboarding/AdaptiveAwarenessMigrationSheet.swift` - User-facing migration notice UI

@@ -1,6 +1,38 @@
 import Foundation
 import AppKit
 
+// MARK: - Activation Source Tracking
+
+/// Tracks how a PowerMode configuration was activated
+enum ActivationSource: Codable, Equatable {
+    case voice(keyword: String)
+    case url(pattern: String)
+    case app(bundleID: String)
+    case manual
+    case defaultProfile
+
+    /// Returns a user-friendly status string for display
+    func statusString() -> String {
+        switch self {
+        case .voice(let keyword):
+            return "Voice: '\(keyword)'"
+        case .url(let pattern):
+            return "Auto: \(pattern)"
+        case .app(let bundleID):
+            // Try to get a friendly app name
+            if let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == bundleID }),
+               let name = app.localizedName {
+                return "Auto: \(name)"
+            }
+            return "Auto: \(bundleID)"
+        case .manual:
+            return "Manual"
+        case .defaultProfile:
+            return "Default"
+        }
+    }
+}
+
 struct ApplicationState: Codable {
     var isEnhancementEnabled: Bool
     var useScreenCaptureContext: Bool
@@ -18,13 +50,16 @@ struct PowerModeSession: Codable {
 }
 
 @MainActor
-class PowerModeSessionManager {
+class PowerModeSessionManager: ObservableObject {
     static let shared = PowerModeSessionManager()
     private let sessionKey = "powerModeActiveSession.v1"
     private var isApplyingPowerModeConfig = false
 
     private var whisperState: WhisperState?
     private var enhancementService: AIEnhancementService?
+
+    /// Tracks how the current configuration was activated
+    @Published var activationSource: ActivationSource?
 
     private init() {
         recoverSession()
@@ -35,11 +70,14 @@ class PowerModeSessionManager {
         self.enhancementService = enhancementService
     }
 
-    func beginSession(with config: PowerModeConfig) async {
+    func beginSession(with config: PowerModeConfig, activationSource: ActivationSource? = nil) async {
         guard let whisperState = whisperState, let enhancementService = enhancementService else {
             print("SessionManager not configured.")
             return
         }
+
+        // Store the activation source
+        self.activationSource = activationSource
 
         let originalState = ApplicationState(
             isEnhancementEnabled: enhancementService.isEnhancementEnabled,
@@ -57,7 +95,7 @@ class PowerModeSessionManager {
             originalState: originalState
         )
         saveSession(newSession)
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(updateSessionSnapshot), name: .AppSettingsDidChange, object: nil)
 
         isApplyingPowerModeConfig = true
@@ -71,8 +109,11 @@ class PowerModeSessionManager {
         isApplyingPowerModeConfig = true
         await restoreState(session.originalState)
         isApplyingPowerModeConfig = false
-        
+
         NotificationCenter.default.removeObserver(self, name: .AppSettingsDidChange, object: nil)
+
+        // Clear activation source when session ends
+        activationSource = nil
 
         clearSession()
     }

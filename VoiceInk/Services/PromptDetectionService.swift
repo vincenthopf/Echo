@@ -150,13 +150,21 @@ class PromptDetectionService {
         return remainingText
     }
     
-	private func detectAndStripTriggerWord(from text: String, triggerWords: [String]) -> (String, String)? {
+	// MARK: - Trigger Word Detection (Shared Logic)
+
+    /// Internal method to detect and strip trigger words from text
+    /// Used by both CustomPrompt detection and PowerModeConfig voice triggers
+    /// - Parameters:
+    ///   - text: The text to analyze
+    ///   - triggerWords: Array of trigger words to search for
+    /// - Returns: A tuple containing the detected trigger word and the processed text, or nil if no match
+    internal func detectAndStripTriggerWord(from text: String, triggerWords: [String]) -> (String, String)? {
         let trimmedWords = triggerWords.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-        
+
         // Sort by length (longest first) to match the most specific trigger word
         let sortedTriggerWords = trimmedWords.sorted { $0.count > $1.count }
-        
+
 		for triggerWord in sortedTriggerWords {
 			if let afterTrailing = stripTrailingTriggerWord(from: text, triggerWord: triggerWord) {
 				if let afterBoth = stripLeadingTriggerWord(from: afterTrailing, triggerWord: triggerWord) {
@@ -165,7 +173,7 @@ class PromptDetectionService {
 				return (triggerWord, afterTrailing)
 			}
 		}
-		
+
 		for triggerWord in sortedTriggerWords {
 			if let afterLeading = stripLeadingTriggerWord(from: text, triggerWord: triggerWord) {
 				if let afterBoth = stripTrailingTriggerWord(from: afterLeading, triggerWord: triggerWord) {

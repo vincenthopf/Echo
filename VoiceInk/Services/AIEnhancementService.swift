@@ -430,6 +430,14 @@ class AIEnhancementService: ObservableObject {
     }
 
     func deletePrompt(_ prompt: CustomPrompt) {
+        // Check if prompt can be deleted (not in use by any profile)
+        let deleteCheck = canDeletePrompt(promptId: prompt.id)
+        if !deleteCheck.canDelete {
+            logger.warning("Attempted to delete in-use prompt: \(prompt.title). Reason: \(deleteCheck.reason ?? "unknown")")
+            // Note: UI should prevent this via deletion protection, but log for debugging
+            return
+        }
+
         customPrompts.removeAll { $0.id == prompt.id }
         if selectedPromptId == prompt.id {
             selectedPromptId = allPrompts.first?.id
@@ -438,6 +446,30 @@ class AIEnhancementService: ObservableObject {
 
     func setActivePrompt(_ prompt: CustomPrompt) {
         selectedPromptId = prompt.id
+    }
+
+    // MARK: - Adaptive Awareness Relationship Methods (Stage 4)
+
+    /// Returns usage information for a prompt: count and list of configs using it
+    func getPromptUsageInfo(promptId: UUID) -> (count: Int, configs: [PowerModeConfig]) {
+        let idString = promptId.uuidString
+        let configs = PowerModeManager.shared.configurations.filter { config in
+            config.selectedPrompt == idString
+        }
+        return (configs.count, configs)
+    }
+
+    /// Determines if a prompt can be deleted and returns a reason if not
+    func canDeletePrompt(promptId: UUID) -> (canDelete: Bool, reason: String?) {
+        let usageInfo = getPromptUsageInfo(promptId: promptId)
+
+        if usageInfo.count > 0 {
+            let configNames = usageInfo.configs.map { $0.name }.joined(separator: ", ")
+            let reason = "Cannot delete - used by \(usageInfo.count) profile\(usageInfo.count == 1 ? "" : "s"): \(configNames). Remove from profiles first."
+            return (false, reason)
+        }
+
+        return (true, nil)
     }
 
     private func initializePredefinedPrompts() {

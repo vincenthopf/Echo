@@ -31,7 +31,7 @@ struct NotchRecorderView: View {
     }
     
     private var leftSection: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             RecorderPromptButton(
                 activePopover: $activePopover,
                 buttonSize: 22,
@@ -43,6 +43,9 @@ struct NotchRecorderView: View {
                 buttonSize: 22,
                 padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
             )
+
+            // Compact profile badge for notch (tiny size)
+            RecorderProfileBadge(size: .tiny)
 
             Spacer()
         }

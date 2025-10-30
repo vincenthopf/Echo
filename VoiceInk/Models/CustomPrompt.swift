@@ -132,6 +132,24 @@ struct CustomPrompt: Identifiable, Codable, Equatable {
             return self.promptText
         }
     }
+
+    // MARK: - Adaptive Awareness Relationship Tracking
+
+    /// Returns the number of PowerModeConfigs that reference this prompt
+    var usageCount: Int {
+        let idString = self.id.uuidString
+        return PowerModeManager.shared.configurations.filter { config in
+            config.selectedPrompt == idString
+        }.count
+    }
+
+    /// Returns all PowerModeConfigs that use this prompt
+    func usedByConfigs() -> [PowerModeConfig] {
+        let idString = self.id.uuidString
+        return PowerModeManager.shared.configurations.filter { config in
+            config.selectedPrompt == idString
+        }
+    }
 }
 
 // MARK: - UI Extensions
@@ -281,19 +299,33 @@ extension CustomPrompt {
                         Label("Edit", systemImage: "pencil")
                     }
                 }
-                
+
                 if let onDelete = onDelete, !isPredefined {
                     Button(role: .destructive) {
-                        let alert = NSAlert()
-                        alert.messageText = "Delete Prompt?"
-                        alert.informativeText = "Are you sure you want to delete '\(self.title)' prompt? This action cannot be undone."
-                        alert.alertStyle = .warning
-                        alert.addButton(withTitle: "Delete")
-                        alert.addButton(withTitle: "Cancel")
-                        
-                        let response = alert.runModal()
-                        if response == .alertFirstButtonReturn {
-                            onDelete(self)
+                        // Stage 4: Check if prompt is in use before deletion
+                        let configs = self.usedByConfigs()
+
+                        if !configs.isEmpty {
+                            // Show warning alert - cannot delete in-use prompt
+                            let alert = NSAlert()
+                            alert.messageText = "Cannot Delete Prompt"
+                            alert.informativeText = "This prompt is used by \(configs.count) profile\(configs.count == 1 ? "" : "s"): \(configs.map { $0.name }.joined(separator: ", ")). Remove it from these profiles first."
+                            alert.alertStyle = .warning
+                            alert.addButton(withTitle: "OK")
+                            alert.runModal()
+                        } else {
+                            // Not in use - show standard deletion confirmation
+                            let alert = NSAlert()
+                            alert.messageText = "Delete Prompt?"
+                            alert.informativeText = "Are you sure you want to delete '\(self.title)' prompt? This action cannot be undone."
+                            alert.alertStyle = .warning
+                            alert.addButton(withTitle: "Delete")
+                            alert.addButton(withTitle: "Cancel")
+
+                            let response = alert.runModal()
+                            if response == .alertFirstButtonReturn {
+                                onDelete(self)
+                            }
                         }
                     } label: {
                         Label("Delete", systemImage: "trash")

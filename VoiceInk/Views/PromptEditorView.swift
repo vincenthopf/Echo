@@ -27,14 +27,34 @@ struct PromptEditorView: View {
     @State private var triggerWords: [String]
     @State private var showingPredefinedPrompts = false
     @State private var useSystemInstructions: Bool
-    
+    @State private var showingUsageWarning = false
+
     private var isEditingPredefinedPrompt: Bool {
         if case .edit(let prompt) = mode {
             return prompt.isPredefined
         }
         return false
     }
-    
+
+    // MARK: - Adaptive Awareness Usage Tracking (Stage 4)
+
+    private var editingPromptId: UUID? {
+        if case .edit(let prompt) = mode {
+            return prompt.id
+        }
+        return nil
+    }
+
+    private var usageInfo: (count: Int, configs: [PowerModeConfig])? {
+        guard let promptId = editingPromptId else { return nil }
+        return enhancementService.getPromptUsageInfo(promptId: promptId)
+    }
+
+    private var canDelete: (canDelete: Bool, reason: String?) {
+        guard let promptId = editingPromptId else { return (true, nil) }
+        return enhancementService.canDeletePrompt(promptId: promptId)
+    }
+
     init(mode: Mode) {
         self.mode = mode
         switch mode {
@@ -90,6 +110,80 @@ struct PromptEditorView: View {
             
             ScrollView {
                 VStack(spacing: 24) {
+                    // MARK: - Usage Indicator (Stage 4)
+                    // Show usage information when editing existing prompt
+                    if case .edit(_) = mode, let usage = usageInfo {
+                        if usage.count > 0 {
+                            // In-use indicator
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "info.circle.fill")
+                                        .foregroundColor(.blue)
+                                        .font(.system(size: 16))
+
+                                    Text("Used by \(usage.count) profile\(usage.count == 1 ? "" : "s")")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.primary)
+                                }
+
+                                // List profile names
+                                let profileNames = usage.configs.map { $0.emoji + " " + $0.name }
+                                Text(profileNames.joined(separator: ", "))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(3)
+
+                                Text("Changes to this prompt will apply to all profiles using it.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .italic()
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.blue.opacity(0.08))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                            )
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+                        } else {
+                            // Orphan indicator - not in use
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .foregroundColor(.orange)
+                                        .font(.system(size: 16))
+
+                                    Text("Not in use")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.primary)
+                                }
+
+                                Text("This prompt is not currently assigned to any Adaptive Awareness profile.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.orange.opacity(0.08))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                            )
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+                        }
+                    }
+
                     if isEditingPredefinedPrompt {
                         // Simplified view for predefined prompts - only trigger word editing
                         VStack(alignment: .leading, spacing: 16) {
