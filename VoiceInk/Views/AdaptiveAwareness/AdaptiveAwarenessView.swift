@@ -8,13 +8,12 @@ struct AdaptiveAwarenessView: View {
     @EnvironmentObject private var aiService: AIService
 
     @State private var selectedProfileId: UUID?
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var showingDeleteConfirmation = false
     @State private var profileToDelete: PowerModeConfig?
     @State private var showingHelpSheet = false
 
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
+        HSplitView {
             // Left Panel: Master List
             ProfileListView(
                 selectedProfileId: $selectedProfileId,
@@ -24,12 +23,13 @@ struct AdaptiveAwarenessView: View {
                     showingDeleteConfirmation = true
                 }
             )
-            .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 320)
-        } detail: {
+            .frame(minWidth: 240, idealWidth: 280, maxWidth: 320)
+
             // Right Panel: Detail Editor
             if let selectedId = selectedProfileId,
                let config = powerModeManager.getConfiguration(with: selectedId) {
                 ProfileDetailView(config: config)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 // Empty state
                 ContentUnavailableView(
@@ -37,9 +37,9 @@ struct AdaptiveAwarenessView: View {
                     systemImage: "sparkles.square.fill.on.square",
                     description: Text("Choose a profile from the list to view and edit its settings")
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationSplitViewStyle(.balanced)
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button(action: {

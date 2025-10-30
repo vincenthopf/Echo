@@ -47,12 +47,8 @@ struct DynamicSidebar: View {
     @Namespace private var buttonAnimation
     
     private var visibleViewTypes: [ViewType] {
-        ViewType.allCases.filter { viewType in
-            if viewType == .powerMode {
-                return powerModeUIFlag
-            }
-            return true
-        }
+        // Always show all view types (Adaptive Awareness is now primary UI)
+        return ViewType.allCases
     }
 
     var body: some View {
