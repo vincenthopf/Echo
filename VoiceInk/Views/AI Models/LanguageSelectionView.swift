@@ -70,9 +70,10 @@ struct LanguageSelectionView: View {
     }
     
     private var languageSelectionSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Transcription Language")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Language")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
 
             if let currentModel = whisperState.currentTranscriptionModel
             {
@@ -81,10 +82,6 @@ struct LanguageSelectionView: View {
                         Text("Language: Autodetected")
                             .font(.subheadline)
                             .foregroundColor(.primary)
-
-                        Text("Current model: \(currentModel.displayName)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
 
                         Text("The transcription language is automatically detected by the model.")
                             .font(.caption)
@@ -109,12 +106,8 @@ struct LanguageSelectionView: View {
                             updateLanguage(newValue)
                         }
 
-                        Text("Current model: \(currentModel.displayName)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
                         Text(
-                            "This model supports multiple languages. Select a specific language or auto-detect(if available)"
+                            "This model supports multiple languages. Select a specific language or auto-detect (if available)."
                         )
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -125,10 +118,6 @@ struct LanguageSelectionView: View {
                         Text("Language: English")
                             .font(.subheadline)
                             .foregroundColor(.primary)
-
-                        Text("Current model: \(currentModel.displayName)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
 
                         Text(
                             "This is an English-optimized model and only supports English transcription."
@@ -147,10 +136,7 @@ struct LanguageSelectionView: View {
                     .foregroundColor(.secondary)
             }
         }
-        .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(10)
     }
 
     // New compact view for menu bar

@@ -40,32 +40,33 @@ struct TranscriptionSettingsView: View {
     }
 
     private var mainContent: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            defaultModelSection
-            languageSelectionSection
+        VStack(alignment: .leading, spacing: 16) {
+            currentModelAndLanguageSection
             availableModelsSection
         }
         .padding(.horizontal, 40)
         .padding(.vertical, 20)
     }
 
-    private var defaultModelSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Default Model")
-                .font(.headline)
-                .foregroundColor(.secondary)
-            Text(whisperState.currentTranscriptionModel?.displayName ?? "No model selected")
-                .font(.title2)
-                .fontWeight(.bold)
+    private var currentModelAndLanguageSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Current Model heading and name
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Current Model")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                Text(whisperState.currentTranscriptionModel?.displayName ?? "No model selected")
+                    .font(.title2)
+                    .fontWeight(.bold)
+            }
+
+            // Language selection section
+            LanguageSelectionView(whisperState: whisperState, displayMode: .full, whisperPrompt: whisperPrompt)
         }
-        .padding()
+        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(CardBackground(isSelected: false))
         .cornerRadius(10)
-    }
-
-    private var languageSelectionSection: some View {
-        LanguageSelectionView(whisperState: whisperState, displayMode: .full, whisperPrompt: whisperPrompt)
     }
 
     private var availableModelsSection: some View {

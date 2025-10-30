@@ -1,14 +1,11 @@
 import SwiftUI
-import LaunchAtLogin
 
 struct MenuBarView: View {
     @EnvironmentObject var whisperState: WhisperState
     @EnvironmentObject var hotkeyManager: HotkeyManager
     @EnvironmentObject var menuBarManager: MenuBarManager
-    @EnvironmentObject var updaterViewModel: UpdaterViewModel
     @EnvironmentObject var enhancementService: AIEnhancementService
     @EnvironmentObject var aiService: AIService
-    @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
     @State private var menuRefreshTrigger = false  // Added to force menu updates
     @State private var isHovered = false
     @Environment(\.openSettings) private var openSettings
@@ -183,33 +180,12 @@ struct MenuBarView: View {
             Button("Copy Last Transcription") {
                 LastTranscriptionService.copyLastTranscription(from: whisperState.modelContext)
             }
-            
-            Button("History") {
-                menuBarManager.openMainWindowAndNavigate(to: "History")
-            }
-            .keyboardShortcut("h", modifiers: [.command, .shift])
-            
-            Button("Settings") {
+
+            Button("Echo...") {
                 menuBarManager.openMainWindowAndNavigate(to: "Settings")
             }
             .keyboardShortcut(",", modifiers: .command)
-            
-            Button(menuBarManager.isMenuBarOnly ? "Show Dock Icon" : "Hide Dock Icon") {
-                menuBarManager.toggleMenuBarOnly()
-            }
-            
-            Toggle("Launch at Login", isOn: $launchAtLoginEnabled)
-                .onChange(of: launchAtLoginEnabled) { oldValue, newValue in
-                    LaunchAtLogin.isEnabled = newValue
-                }
-            
-            Divider()
-            
-            Button("Check for Updates") {
-                updaterViewModel.checkForUpdates()
-            }
-            .disabled(!updaterViewModel.canCheckForUpdates)
-            
+
             Button("Help and Support") {
                 EmailSupport.openSupportEmail()
             }
