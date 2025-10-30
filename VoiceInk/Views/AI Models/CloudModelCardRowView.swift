@@ -38,6 +38,8 @@ struct CloudModelCardView: View {
             return "Mistral"
         case .gemini:
             return "Gemini"
+        case .soniox:
+            return "Soniox"
         default:
             return model.provider.rawValue
         }
