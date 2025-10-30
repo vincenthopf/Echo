@@ -150,24 +150,25 @@ struct OnboardingPermissionsView: View {
                                                 .font(.system(size: 36))
                                                 .symbolRenderingMode(.hierarchical)
                                                 .foregroundStyle(.secondary)
-                                            
+
                                             Text("No microphones found")
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
                                         }
                                         .padding()
                                     } else {
-                                        styledPicker(
+                                        styledPickerWithSystemDefault(
                                             label: "Microphone:",
-                                            selectedValue: audioDeviceManager.selectedDeviceID ?? 0,
-                                            displayValue: audioDeviceManager.availableDevices.first { $0.id == audioDeviceManager.selectedDeviceID }?.name ?? "Select Device",
-                                            options: audioDeviceManager.availableDevices.map { $0.id },
-                                            optionDisplayName: { deviceId in
-                                                audioDeviceManager.availableDevices.first { $0.id == deviceId }?.name ?? "Unknown Device"
-                                            },
-                                            onSelection: { deviceId in
-                                                audioDeviceManager.selectDevice(id: deviceId)
-                                                audioDeviceManager.selectInputMode(.custom)
+                                            selectedMode: audioDeviceManager.inputMode,
+                                            selectedDeviceID: audioDeviceManager.selectedDeviceID,
+                                            availableDevices: audioDeviceManager.availableDevices,
+                                            onSelection: { mode, deviceId in
+                                                if mode == .systemDefault {
+                                                    audioDeviceManager.selectInputMode(.systemDefault)
+                                                } else if let deviceId = deviceId {
+                                                    audioDeviceManager.selectDevice(id: deviceId)
+                                                    audioDeviceManager.selectInputMode(.custom)
+                                                }
                                                 withAnimation {
                                                     permissionStates[currentPermissionIndex] = true
                                                     showAnimation = true
@@ -175,26 +176,18 @@ struct OnboardingPermissionsView: View {
                                             }
                                         )
                                         .onAppear {
-                                            // Auto-select built-in microphone if no device is selected
-                                            if audioDeviceManager.selectedDeviceID == nil && !audioDeviceManager.availableDevices.isEmpty {
-                                                let builtInDevice = audioDeviceManager.availableDevices.first { device in
-                                                    device.name.lowercased().contains("built-in") || 
-                                                    device.name.lowercased().contains("internal")
-                                                }
-                                                let deviceToSelect = builtInDevice ?? audioDeviceManager.availableDevices.first
-                                                if let device = deviceToSelect {
-                                                    audioDeviceManager.selectDevice(id: device.id)
-                                                    audioDeviceManager.selectInputMode(.custom)
-                                                    withAnimation {
-                                                        permissionStates[currentPermissionIndex] = true
-                                                        showAnimation = true
-                                                    }
+                                            // Auto-select system default if nothing is configured
+                                            if audioDeviceManager.inputMode != .systemDefault && audioDeviceManager.selectedDeviceID == nil {
+                                                audioDeviceManager.selectInputMode(.systemDefault)
+                                                withAnimation {
+                                                    permissionStates[currentPermissionIndex] = true
+                                                    showAnimation = true
                                                 }
                                             }
                                         }
                                     }
-                                    
-                                    Text("For best results, using your Mac's built-in microphone is recommended.")
+
+                                    Text("System Default automatically uses your Mac's active microphone.")
                                         .font(.caption)
                                         .foregroundColor(.white.opacity(0.7))
                                         .multilineTextAlignment(.center)
@@ -313,7 +306,7 @@ struct OnboardingPermissionsView: View {
             
         case .audioDeviceSelection:
             audioDeviceManager.loadAvailableDevices()
-            
+
             if audioDeviceManager.availableDevices.isEmpty {
                 audioDeviceManager.selectInputMode(.systemDefault)
                 withAnimation {
@@ -323,23 +316,13 @@ struct OnboardingPermissionsView: View {
                 moveToNext()
                 return
             }
-            
-            // If no device is selected yet, auto-select the built-in microphone or first available device
-            if audioDeviceManager.selectedDeviceID == nil {
-                let builtInDevice = audioDeviceManager.availableDevices.first { device in
-                    device.name.lowercased().contains("built-in") || 
-                    device.name.lowercased().contains("internal")
-                }
-                
-                let deviceToSelect = builtInDevice ?? audioDeviceManager.availableDevices.first
-                
-                if let device = deviceToSelect {
-                    audioDeviceManager.selectDevice(id: device.id)
-                    audioDeviceManager.selectInputMode(.custom)
-                    withAnimation {
-                        permissionStates[currentPermissionIndex] = true
-                        showAnimation = true
-                    }
+
+            // If no mode is configured yet, auto-select system default
+            if audioDeviceManager.inputMode != .systemDefault && audioDeviceManager.selectedDeviceID == nil {
+                audioDeviceManager.selectInputMode(.systemDefault)
+                withAnimation {
+                    permissionStates[currentPermissionIndex] = true
+                    showAnimation = true
                 }
             }
             moveToNext()
@@ -460,6 +443,95 @@ struct OnboardingPermissionsView: View {
                 }
                 .menuStyle(.borderlessButton)
                 
+                Spacer()
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.05))
+        .cornerRadius(12)
+    }
+
+    @ViewBuilder
+    private func styledPickerWithSystemDefault(
+        label: String,
+        selectedMode: AudioInputMode,
+        selectedDeviceID: AudioDeviceID?,
+        availableDevices: [(id: AudioDeviceID, uid: String, name: String)],
+        onSelection: @escaping (AudioInputMode, AudioDeviceID?) -> Void
+    ) -> some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 12) {
+                Spacer()
+
+                Text(label)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white.opacity(0.8))
+
+                Menu {
+                    // System Default option (first and recommended)
+                    Button(action: {
+                        onSelection(.systemDefault, nil)
+                    }) {
+                        HStack {
+                            Image(systemName: "waveform.circle")
+                            Text("System Default")
+                            if selectedMode == .systemDefault {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+
+                    Divider()
+
+                    // Individual device options
+                    ForEach(availableDevices, id: \.id) { device in
+                        Button(action: {
+                            onSelection(.custom, device.id)
+                        }) {
+                            HStack {
+                                Text(device.name)
+                                if selectedMode == .custom && selectedDeviceID == device.id {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if selectedMode == .systemDefault {
+                            Image(systemName: "waveform.circle")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.9))
+                            Text("System Default")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .medium))
+                        } else if let deviceId = selectedDeviceID,
+                                  let device = availableDevices.first(where: { $0.id == deviceId }) {
+                            Text(device.name)
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .medium))
+                        } else {
+                            Text("Select Device")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 12))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                }
+                .menuStyle(.borderlessButton)
+
                 Spacer()
             }
         }
