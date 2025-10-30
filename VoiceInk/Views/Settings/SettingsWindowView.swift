@@ -37,10 +37,17 @@ struct SettingsWindowView: View {
                 }
                 .tag(SettingsTab.transcription)
 
+            AdaptiveIntelligenceSettingsView()
+                .environmentObject(enhancementService)
+                .tabItem {
+                    Label("Adaptive Intelligence", systemImage: "sparkles.square.fill.on.square")
+                }
+                .tag(SettingsTab.adaptiveIntelligence)
+
             IntelligenceSettingsView()
                 .environmentObject(enhancementService)
                 .tabItem {
-                    Label("Intelligence", systemImage: "sparkles")
+                    Label("Intelligence", systemImage: "wand.and.stars")
                 }
                 .tag(SettingsTab.intelligence)
         }
@@ -53,6 +60,7 @@ enum SettingsTab: String, Codable, CaseIterable, Identifiable {
     case general = "General"
     case recording = "Recording"
     case transcription = "Transcription"
+    case adaptiveIntelligence = "Adaptive Intelligence"
     case intelligence = "Intelligence"
 
     var id: String { rawValue }
