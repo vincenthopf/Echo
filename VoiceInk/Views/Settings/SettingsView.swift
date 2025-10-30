@@ -240,6 +240,22 @@ struct SettingsView: View {
                         .toggleStyle(.switch)
                         .help("Keep the transcribed text in clipboard instead of restoring the original clipboard content")
 
+                        Divider()
+                            .padding(.vertical, 4)
+
+                        // Universal Paste Compatibility
+                        HStack(spacing: 8) {
+                            Toggle("Universal Paste Compatibility", isOn: Binding(
+                                get: { UserDefaults.standard.bool(forKey: "UseAppleScriptPaste") },
+                                set: { UserDefaults.standard.set($0, forKey: "UseAppleScriptPaste") }
+                            ))
+                            .toggleStyle(.switch)
+
+                            InfoTip(
+                                title: "Universal Paste Compatibility",
+                                message: "Turn this on if you're using non-standard keyboard layouts (like AZERTY, Dvorak, or Colemak) or notice pasted text appearing incorrectly in certain apps.\n\nWhen to use:\n• You have a non-standard keyboard layout\n• Pasted text shows as \"pasted text\" instead of your actual transcription in tools like Claude AI\n• Text doesn't paste correctly in specific applications\n\nThis uses a different pasting method that works across more keyboard layouts and apps, though it may be slightly slower."
+                            )
+                        }
                     }
                 }
 
@@ -265,23 +281,6 @@ struct SettingsView: View {
                 //         .padding(.vertical, 4)
                 //     }
                 // }
-
-                SettingsSection(
-                    icon: "doc.on.clipboard",
-                    title: "Paste Method",
-                    subtitle: "Choose how text is pasted"
-                ) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Select the method used to paste text. Use AppleScript if you have a non-standard keyboard layout.")
-                            .settingsDescription()
-                        
-                        Toggle("Use AppleScript Paste Method", isOn: Binding(
-                            get: { UserDefaults.standard.bool(forKey: "UseAppleScriptPaste") },
-                            set: { UserDefaults.standard.set($0, forKey: "UseAppleScriptPaste") }
-                        ))
-                        .toggleStyle(.switch)
-                    }
-                }
 
                 SettingsSection(
                     icon: "gear",
