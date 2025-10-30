@@ -1,8 +1,4 @@
 <div align="center">
-  <img src="Readme.png" alt="Embr Voice Dashboard showing 3.1x productivity improvement" width="100%" />
-
-<br><br>
-
   <img src="VoiceInk/Assets.xcassets/AppIcon.appiconset/256-mac.png" width="120" height="120" />
 
   <h1>Embr Voice</h1>
@@ -28,6 +24,10 @@
     <a href="#what-you-can-do">Features</a> •
     <a href="BUILDING.md">Build from Source</a>
   </p>
+
+  <br>
+
+  <img src="Readme.png" alt="Embr Voice Dashboard showing 3.1x productivity improvement" width="100%" />
 </div>
 
 ***
