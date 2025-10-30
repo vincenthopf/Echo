@@ -7,6 +7,7 @@ struct ProfileListView: View {
 
     let onAdd: () -> Void
     let onDelete: (PowerModeConfig) -> Void
+    let onHelp: () -> Void
 
     @State private var searchText = ""
 
@@ -26,6 +27,17 @@ struct ProfileListView: View {
                 Text("Profiles")
                     .font(.headline)
                 Spacer()
+
+                // Help button
+                Button(action: onHelp) {
+                    Image(systemName: "questionmark.circle")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+                .help("Learn about Adaptive Awareness")
+
+                // Add button
                 Button(action: onAdd) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)

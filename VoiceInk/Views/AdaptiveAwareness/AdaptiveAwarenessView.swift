@@ -21,6 +21,9 @@ struct AdaptiveAwarenessView: View {
                 onDelete: { profile in
                     profileToDelete = profile
                     showingDeleteConfirmation = true
+                },
+                onHelp: {
+                    showingHelpSheet = true
                 }
             )
             .frame(minWidth: 240, idealWidth: 280, maxWidth: 320)
@@ -38,18 +41,6 @@ struct AdaptiveAwarenessView: View {
                     description: Text("Choose a profile from the list to view and edit its settings")
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button(action: {
-                    showingHelpSheet = true
-                }) {
-                    Image(systemName: "questionmark.circle")
-                        .font(.system(size: 16))
-                }
-                .buttonStyle(PlainButtonStyle())
-                .help("Learn about Adaptive Awareness")
             }
         }
         .sheet(isPresented: $showingHelpSheet) {
