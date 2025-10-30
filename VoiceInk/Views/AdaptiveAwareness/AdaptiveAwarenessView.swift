@@ -11,6 +11,8 @@ struct AdaptiveAwarenessView: View {
     @State private var showingDeleteConfirmation = false
     @State private var profileToDelete: PowerModeConfig?
     @State private var showingHelpSheet = false
+    @State private var showMigrationNotice = false
+    @AppStorage("hasSeenAdaptiveAwarenessMigration") private var hasSeenMigrationNotice = false
 
     var body: some View {
         HSplitView {
@@ -46,6 +48,9 @@ struct AdaptiveAwarenessView: View {
         .sheet(isPresented: $showingHelpSheet) {
             AdaptiveAwarenessHelpSheet(isPresented: $showingHelpSheet)
         }
+        .sheet(isPresented: $showMigrationNotice) {
+            AdaptiveAwarenessMigrationSheet(isPresented: $showMigrationNotice)
+        }
         .alert("Delete Profile", isPresented: $showingDeleteConfirmation, presenting: profileToDelete) { profile in
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
@@ -58,6 +63,16 @@ struct AdaptiveAwarenessView: View {
             // Select first profile by default if none selected
             if selectedProfileId == nil, let firstConfig = powerModeManager.configurations.first {
                 selectedProfileId = firstConfig.id
+            }
+
+            // Show migration notice on first visit if migration occurred
+            let didMigrate = UserDefaults.standard.bool(forKey: "didMigrateToAdaptiveAwareness")
+            if didMigrate && !hasSeenMigrationNotice {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        showMigrationNotice = true
+                    }
+                }
             }
         }
     }

@@ -241,40 +241,13 @@ extension CustomPrompt {
             }
             .frame(width: 48, height: 48)
             
-            // Enhanced title styling
-            VStack(spacing: 2) {
-                Text(title)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(isSelected ?
-                        .primary : .secondary)
-                    .lineLimit(1)
-                    .frame(maxWidth: 70)
-                
-                // Trigger word section with consistent height
-                ZStack(alignment: .center) {
-                    if !triggerWords.isEmpty {
-                        HStack(spacing: 2) {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: 7))
-                                .foregroundColor(isSelected ? .accentColor.opacity(0.9) : .secondary.opacity(0.7))
-                            
-                            if triggerWords.count == 1 {
-                                Text("\"\(triggerWords[0])...\"")
-                                    .font(.system(size: 8, weight: .regular))
-                                    .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.7))
-                                    .lineLimit(1)
-                            } else {
-                                Text("\"\(triggerWords[0])...\" +\(triggerWords.count - 1)")
-                                    .font(.system(size: 8, weight: .regular))
-                                    .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.7))
-                                    .lineLimit(1)
-                            }
-                        }
-                        .frame(maxWidth: 70)
-                    }
-                }
-                .frame(height: 16)
-            }
+            // Title
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(isSelected ?
+                    .primary : .secondary)
+                .lineLimit(1)
+                .frame(maxWidth: 70)
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)

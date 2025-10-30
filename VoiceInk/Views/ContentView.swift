@@ -6,16 +6,16 @@ import KeyboardShortcuts
 enum ViewType: String, CaseIterable {
     case metrics = "Dashboard"
     case transcribeAudio = "Transcribe Files"
-    case history = "History"
     case powerMode = "Adaptive Awareness"
+    case history = "History"
     case about = "About"
 
     var icon: String {
         switch self {
         case .metrics: return "gauge.medium"
         case .transcribeAudio: return "waveform.circle.fill"
-        case .history: return "doc.text.fill"
         case .powerMode: return "sparkles.square.fill.on.square"
+        case .history: return "doc.text.fill"
         case .about: return "info.circle.fill"
         }
     }

@@ -186,6 +186,10 @@ struct FeatureCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(NSColor.controlBackgroundColor))
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+        )
     }
 }
 

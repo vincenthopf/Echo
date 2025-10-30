@@ -51,6 +51,8 @@ class WhisperState: NSObject, ObservableObject {
     let whisperPrompt = WhisperPrompt()
     
     // Prompt detection service for trigger word handling
+    // Note: PromptDetectionService is deprecated for CustomPrompt trigger words
+    // Still used internally by ActiveWindowService for PowerModeConfig voice triggers
     private let promptDetectionService = PromptDetectionService()
     
     let modelContext: ModelContext
@@ -268,9 +270,8 @@ class WhisperState: NSObject, ObservableObject {
         }
 
         logger.notice("🔄 Starting transcription...")
-        
+
         var finalPastedText: String?
-        var promptDetectionResult: PromptDetectionService.PromptDetectionResult?
 
         do {
             guard let model = currentTranscriptionModel else {
@@ -352,11 +353,9 @@ class WhisperState: NSObject, ObservableObject {
             transcription.powerModeEmoji = powerModeEmoji
             finalPastedText = text
 
-            if let enhancementService = enhancementService, enhancementService.isConfigured {
-                let detectionResult = await promptDetectionService.analyzeText(text, with: enhancementService)
-                promptDetectionResult = detectionResult
-                await promptDetectionService.applyDetectionResult(detectionResult, to: enhancementService)
-            }
+            // Note: Prompt trigger word detection has been deprecated
+            // Voice triggers are now handled by Adaptive Awareness (PowerModeConfig)
+            // via ActiveWindowService earlier in the pipeline
 
             if let enhancementService = enhancementService,
                enhancementService.isEnhancementEnabled,
@@ -364,7 +363,7 @@ class WhisperState: NSObject, ObservableObject {
                 if await checkCancellationAndCleanup() { return }
 
                 await MainActor.run { self.recordingState = .enhancing }
-                let textForAI = promptDetectionResult?.processedText ?? text
+                let textForAI = text
                 
                 do {
                     let (enhancedText, enhancementDuration, promptName) = try await enhancementService.enhance(textForAI)
@@ -422,11 +421,8 @@ class WhisperState: NSObject, ObservableObject {
             }
         }
 
-        if let result = promptDetectionResult,
-           let enhancementService = enhancementService,
-           result.shouldEnableAI {
-            await promptDetectionService.restoreOriginalSettings(result, to: enhancementService)
-        }
+        // Note: Prompt detection result restoration removed - no longer needed
+        // Voice triggers for PowerModeConfig are handled by ActiveWindowService
 
         await self.dismissMiniRecorder()
 
