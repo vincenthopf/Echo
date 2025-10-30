@@ -1,10 +1,10 @@
-# Contributing to Embr Voice
+# Contributing to Embr Echo
 
-First off, thank you for considering contributing to Embr Voice! It's people like you that make Embr Voice such a great tool.
+First off, thank you for considering contributing to Embr Echo! It's people like you that make Embr Echo such a great tool.
 
 ## Important Notice About Pull Requests
 
-We welcome forks and improvements to Embr Voice! However, please note:
+We welcome forks and improvements to Embr Echo! However, please note:
 
 1. **The acceptance of Pull Requests is solely at the discretion of the project maintainers**
 2. **Before making significant changes or starting work on major features:**
@@ -100,4 +100,4 @@ If you have any questions or need clarification, feel free to:
 2. Start a discussion
 3. Reach out to the maintainers
 
-Thank you for contributing to Embr Voice! 🎉 
+Thank you for contributing to Embr Echo! 🎉 

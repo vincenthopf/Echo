@@ -14,7 +14,7 @@ struct AudioTranscribeView: View {
     @State private var selectedPromptId: UUID?
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Color(NSColor.controlBackgroundColor)
                 .ignoresSafeArea()
 
@@ -57,8 +57,7 @@ struct AudioTranscribeView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color.gray.opacity(0.15), lineWidth: 1)
                 )
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                .padding(20)
 
                 if transcriptionManager.isProcessing {
                     processingView
@@ -70,6 +69,8 @@ struct AudioTranscribeView: View {
                 if let transcription = transcriptionManager.currentTranscription {
                     TranscriptionResultView(transcription: transcription)
                 }
+
+                Spacer()
             }
         }
         .onDrop(of: [.fileURL, .data, .audio, .movie], isTargeted: $isDropTargeted) { providers in

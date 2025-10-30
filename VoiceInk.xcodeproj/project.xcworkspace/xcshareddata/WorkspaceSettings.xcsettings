@@ -6,9 +6,9 @@
 	<string>Original</string>
 	<key>DisableBuildSystemDeprecationWarning</key>
 	<true/>
-	<key>IDEPackageSupportUseBuiltinSCM</key>
-	<true/>
 	<key>IDEPackageSupportUnsafeFlagsAllowed</key>
+	<true/>
+	<key>IDEPackageSupportUseBuiltinSCM</key>
 	<true/>
 </dict>
 </plist>

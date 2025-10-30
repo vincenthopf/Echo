@@ -258,3 +258,14 @@ struct LinkButton: View {
     AboutView()
         .frame(width: 800, height: 700)
 }
+
+#Preview("Compact Size") {
+    AboutView()
+        .frame(width: 600, height: 500)
+}
+
+#Preview("Dark Mode") {
+    AboutView()
+        .frame(width: 800, height: 700)
+        .preferredColorScheme(.dark)
+}
