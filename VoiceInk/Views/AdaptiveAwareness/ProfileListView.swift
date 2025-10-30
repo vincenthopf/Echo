@@ -35,7 +35,7 @@ struct ProfileListView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("Learn about Adaptive Awareness")
+                .help("What's New")
 
                 // Add button
                 Button(action: onAdd) {
@@ -155,13 +155,20 @@ struct ProfileListItem: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // Emoji icon
+            // Icon (emoji or SF Symbol)
             ZStack {
                 Circle()
                     .fill(isSelected ? Color.accentColor.opacity(0.2) : Color.clear)
                     .frame(width: 36, height: 36)
-                Text(config.emoji)
-                    .font(.title3)
+
+                if config.emoji.shouldRenderAsSFSymbol {
+                    Image(systemName: config.emoji)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(isSelected ? .accentColor : .primary)
+                } else {
+                    Text(config.emoji)
+                        .font(.title3)
+                }
             }
 
             // Name and badges

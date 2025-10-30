@@ -12,13 +12,13 @@ struct ActivationTriggersSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Activation Triggers")
                     .font(.headline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.primary)
 
-                Text("This profile activates when:")
-                    .font(.subheadline)
+                Text("When this profile activates")
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
 

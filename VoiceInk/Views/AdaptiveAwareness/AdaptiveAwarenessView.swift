@@ -10,7 +10,6 @@ struct AdaptiveAwarenessView: View {
     @State private var selectedProfileId: UUID?
     @State private var showingDeleteConfirmation = false
     @State private var profileToDelete: PowerModeConfig?
-    @State private var showingHelpSheet = false
     @State private var showMigrationNotice = false
     @AppStorage("hasSeenAdaptiveAwarenessMigration") private var hasSeenMigrationNotice = false
 
@@ -25,7 +24,7 @@ struct AdaptiveAwarenessView: View {
                     showingDeleteConfirmation = true
                 },
                 onHelp: {
-                    showingHelpSheet = true
+                    showMigrationNotice = true
                 }
             )
             .frame(minWidth: 240, idealWidth: 280, maxWidth: 320)
@@ -44,9 +43,6 @@ struct AdaptiveAwarenessView: View {
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }
-        .sheet(isPresented: $showingHelpSheet) {
-            AdaptiveAwarenessHelpSheet(isPresented: $showingHelpSheet)
         }
         .sheet(isPresented: $showMigrationNotice) {
             AdaptiveAwarenessMigrationSheet(isPresented: $showMigrationNotice)

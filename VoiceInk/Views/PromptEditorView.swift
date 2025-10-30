@@ -275,11 +275,11 @@ struct PromptEditorView: View {
                             
                             if !isEditingPredefinedPrompt {
                                 HStack(spacing: 8) {
-                                    Toggle("Use System Instructions", isOn: $useSystemInstructions)
-                                    
+                                    Toggle("Use enhanced template", isOn: $useSystemInstructions)
+
                                     InfoTip(
-                                        title: "System Instructions",
-                                        message: "If enabled, your instructions are combined with a general-purpose template to improve transcription quality.\n\nDisable for full control over the AI's system prompt (for advanced users)."
+                                        title: "Enhanced Template",
+                                        message: "Your instructions are wrapped in a template that provides context about transcription enhancement, your dictionary terms, and clipboard content. This helps the AI understand what it's working with.\n\nTurn this off to send only your instructions, without any additions. This gives you complete control but requires more detailed prompts."
                                     )
                                 }
                                 .padding(.bottom, 4)

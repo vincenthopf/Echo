@@ -54,8 +54,14 @@ struct ProfileBadge: View {
                     .fill(Color.accentColor.opacity(0.15))
                     .frame(width: size.containerSize, height: size.containerSize)
 
-                Text(emoji)
-                    .font(.system(size: size.emojiSize))
+                if emoji.shouldRenderAsSFSymbol {
+                    Image(systemName: emoji)
+                        .font(.system(size: size.emojiSize, weight: .medium))
+                        .foregroundColor(.accentColor)
+                } else {
+                    Text(emoji)
+                        .font(.system(size: size.emojiSize))
+                }
             }
 
             if showName {
@@ -86,8 +92,14 @@ struct MenuBarProfileBadge: View {
     var body: some View {
         if let config = config {
             HStack(spacing: 6) {
-                Text(config.emoji)
-                    .font(.system(size: 12))
+                if config.emoji.shouldRenderAsSFSymbol {
+                    Image(systemName: config.emoji)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.accentColor)
+                } else {
+                    Text(config.emoji)
+                        .font(.system(size: 12))
+                }
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(config.name)

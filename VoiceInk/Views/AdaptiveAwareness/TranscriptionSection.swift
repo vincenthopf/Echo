@@ -33,9 +33,15 @@ struct TranscriptionSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Transcription")
-                .font(.headline)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Transcription")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                Text("Language and model settings")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
             // Model Picker
             VStack(alignment: .leading, spacing: 8) {

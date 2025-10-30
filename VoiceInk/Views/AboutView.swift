@@ -60,17 +60,12 @@ struct AboutView: View {
                     .font(.system(size: 24, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 14) {
-                    Text("Turn your voice into text instantly. Echo transcribes everything you say with remarkable accuracy—right on your Mac.")
+                    Text("Turn your voice into text instantly. Echo transcribes everything you say with remarkable accuracy. Right on your Mac.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Text("Work in any app. Write emails, draft documents, or capture ideas without touching your keyboard. Just press your hotkey and start speaking.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Text("Your words stay private. Everything runs on your Mac—no servers, no cloud processing, no one listening. Unless you choose otherwise.")
+                    Text("Your words stay private. No servers, cloud processing, or sneaky companies listening. Unless you choose otherwise.")
                         .font(.system(size: 15))
                         .foregroundColor(.primary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -87,16 +82,16 @@ struct AboutView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     FeatureComparison(
                         title: "Keep your voice private",
-                        description: "Choose local transcription and your audio never leaves your Mac. No servers. No cloud processing. No compromise. Or select cloud services when you need them—it's always your choice.",
+                        description: "Choose local transcription and your audio never leaves your Mac. No servers or cloud processing. Or select cloud services when you need them. It's always your choice.",
                         icon: "lock.shield.fill",
-                        accentColor: .green
+                        accentColor: .blue
                     )
 
                     FeatureComparison(
                         title: "Adapt to any task",
-                        description: "Echo knows what you're working on and adjusts automatically. Writing code? You'll get technical accuracy. Drafting an email? Natural language flows in. Context-aware transcription that thinks ahead.",
+                        description: "Echo knows what you're working on and adapts accordingly. Writing code? Get technical accuracy. Drafting an email? Natural language flows in. Context aware transcription that thinks ahead.",
                         icon: "sparkles.square.fill.on.square",
-                        accentColor: .purple
+                        accentColor: .orange
                     )
 
                     FeatureComparison(
@@ -108,45 +103,19 @@ struct AboutView: View {
 
                     FeatureComparison(
                         title: "Refine with AI",
-                        description: "Go beyond basic transcription. Polish your words into professional emails, clean up technical documentation, or transform rough thoughts into clear writing—all with AI prompts you customize.",
+                        description: "Go beyond basic transcription. Polish your words into professional emails, clean up technical documentation, or transform rough thoughts into clear writing. Configured by you!",
                         icon: "wand.and.stars",
                         accentColor: .orange
                     )
 
                     FeatureComparison(
                         title: "Pay only for what you use",
-                        description: "Download local models for free. Connect your own API keys for cloud services. No subscriptions. No monthly fees. No surprises.",
+                        description: "Download local models for free or connect your own API keys for cloud services. No extra subscriptions, monthly fees or nastry surprises.",
                         icon: "dollarsign.circle.fill",
-                        accentColor: .red
+                        accentColor: .blue
                     )
                 }
             }
-
-            Divider()
-
-            // How It Works
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Built for how you work")
-                    .font(.system(size: 22, weight: .bold))
-
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Press your hotkey. Start speaking. See your words appear.")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.primary)
-
-                    Text("Echo runs advanced AI models right on your Mac—no internet required. Choose from multiple transcription engines, each optimized for different needs. Switch between them anytime.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Text("Set it up once and forget about it. Echo learns your workflow, remembers your preferences, and stays out of your way until you need it.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
-            Divider()
 
             // Links and info
             VStack(alignment: .leading, spacing: 16) {
@@ -154,14 +123,14 @@ struct AboutView: View {
                     .font(.system(size: 22, weight: .bold))
 
                 VStack(alignment: .leading, spacing: 12) {
-                    LinkButton(title: "Documentation", url: "https://vjh.io/embr-echo-docs", icon: "book.fill")
+                    LinkButton(title: "support", url: "https://vjh.io/embr-echo-support", icon: "book.fill")
                     LinkButton(title: "Tutorial Guide", url: "https://vjh.io/embr-echo-docs", icon: "graduationcap.fill")
                 }
             }
 
             // Footer
             VStack(spacing: 12) {
-                Text("Designed for privacy. Built for speed. Made for macOS.")
+                Text("Made with ❤️ by Vince.")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

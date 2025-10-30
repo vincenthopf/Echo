@@ -7,9 +7,15 @@ struct AdvancedSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Advanced")
-                .font(.headline)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Advanced")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                Text("Additional options")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
             HStack(spacing: 8) {
                 Toggle("Auto-send after transcription", isOn: Binding(

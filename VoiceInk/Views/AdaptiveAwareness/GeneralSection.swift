@@ -10,9 +10,15 @@ struct GeneralSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("General")
-                .font(.headline)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("General")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                Text("Profile name, icon, and status")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
             // Name and Emoji Row
             HStack(spacing: 16) {
@@ -69,7 +75,7 @@ struct GeneralSection: View {
 
             // Toggles
             VStack(alignment: .leading, spacing: 12) {
-                Toggle("Enable this profile", isOn: Binding(
+                Toggle("Enable profile", isOn: Binding(
                     get: { config.isEnabled },
                     set: { newValue in
                         config.isEnabled = newValue
@@ -79,7 +85,7 @@ struct GeneralSection: View {
                 .toggleStyle(.switch)
 
                 HStack(spacing: 8) {
-                    Toggle("Set as default profile", isOn: Binding(
+                    Toggle("Make default", isOn: Binding(
                         get: { config.isDefault },
                         set: { newValue in
                             config.isDefault = newValue

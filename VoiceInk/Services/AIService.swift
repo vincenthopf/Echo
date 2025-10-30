@@ -197,6 +197,24 @@ class AIService: ObservableObject {
             return false
         }
     }
+
+    /// Check if a specific provider has a valid API key configured
+    func hasValidAPIKey(for provider: AIProvider) -> Bool {
+        if provider == .ollama {
+            return ollamaService.isConnected
+        } else if provider.requiresAPIKey {
+            return userDefaults.string(forKey: "\(provider.rawValue)APIKey") != nil
+        }
+        return true
+    }
+
+    /// Get provider name for a given identifier string
+    func providerName(for identifier: String) -> String {
+        guard let provider = AIProvider(rawValue: identifier) else {
+            return identifier.capitalized
+        }
+        return provider.rawValue
+    }
     
     var currentModel: String {
         if let selectedModel = selectedModels[selectedProvider],

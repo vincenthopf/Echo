@@ -23,85 +23,72 @@ struct EnhancedPromptSelector: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Prompt Dropdown
-            Menu {
-                Button("None") {
-                    selectedPromptId = nil
-                    onSave()
-                }
+            // Prompt Dropdown using native Picker
+            HStack(spacing: 12) {
+                Picker("Enhancement Prompt", selection: Binding(
+                    get: { selectedPromptId },
+                    set: { newValue in
+                        selectedPromptId = newValue
+                        onSave()
+                    }
+                )) {
+                    Text("None").tag(nil as String?)
 
-                Divider()
+                    Divider()
 
-                // Predefined prompts
-                let predefinedPrompts = sortedPrompts.filter { $0.isPredefined }
-                if !predefinedPrompts.isEmpty {
-                    Section(header: Text("Predefined")) {
-                        ForEach(predefinedPrompts) { prompt in
-                            promptMenuItem(for: prompt)
+                    // Predefined prompts
+                    let predefinedPrompts = sortedPrompts.filter { $0.isPredefined }
+                    if !predefinedPrompts.isEmpty {
+                        Section(header: Text("Predefined")) {
+                            ForEach(predefinedPrompts) { prompt in
+                                HStack {
+                                    Image(systemName: prompt.icon.rawValue)
+                                    Text(prompt.title)
+
+                                    // Usage count display
+                                    let count = usageCount(for: prompt)
+                                    if count > 0 {
+                                        Text("(Used in \(count))")
+                                            .font(.caption)
+                                    }
+                                }.tag(prompt.id.uuidString as String?)
+                            }
+                        }
+                    }
+
+                    // Custom prompts
+                    let customPrompts = sortedPrompts.filter { !$0.isPredefined }
+                    if !customPrompts.isEmpty {
+                        Section(header: Text("Custom")) {
+                            ForEach(customPrompts) { prompt in
+                                HStack {
+                                    Image(systemName: prompt.icon.rawValue)
+                                    Text(prompt.title)
+
+                                    // Usage count display
+                                    let count = usageCount(for: prompt)
+                                    if count > 0 {
+                                        Text("(Used in \(count))")
+                                            .font(.caption)
+                                    }
+                                }.tag(prompt.id.uuidString as String?)
+                            }
                         }
                     }
                 }
+                .pickerStyle(.menu)
+                .labelsHidden()
 
-                // Custom prompts
-                let customPrompts = sortedPrompts.filter { !$0.isPredefined }
-                if !customPrompts.isEmpty {
-                    Section(header: Text("Custom")) {
-                        ForEach(customPrompts) { prompt in
-                            promptMenuItem(for: prompt)
-                        }
-                    }
-                }
-
-                Divider()
-
+                // Create new prompt button
                 Button(action: {
                     editingPrompt = nil
                     showingPromptEditor = true
                 }) {
                     Label("Create New Prompt", systemImage: "plus.circle")
                 }
-            } label: {
-                HStack {
-                    if let prompt = selectedPrompt {
-                        Image(systemName: prompt.icon.rawValue)
-                            .font(.system(size: 14))
-                            .foregroundColor(.accentColor)
-
-                        Text(prompt.title)
-                            .foregroundColor(.primary)
-
-                        // Stage 4: Better usage count display in selector
-                        let count = usageCount(for: prompt)
-                        if count > 0 {
-                            Text("(Used in \(count))")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        } else {
-                            Text("(Not in use)")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                    } else {
-                        Text("Select a prompt")
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                )
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
-            .menuStyle(.borderlessButton)
 
             // Preview and Edit Button
             if let prompt = selectedPrompt {
@@ -137,36 +124,6 @@ struct EnhancedPromptSelector: View {
                 PromptEditorView(mode: .edit(prompt))
             } else {
                 PromptEditorView(mode: .add)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func promptMenuItem(for prompt: CustomPrompt) -> some View {
-        Button(action: {
-            selectedPromptId = prompt.id.uuidString
-            onSave()
-        }) {
-            HStack {
-                Image(systemName: prompt.icon.rawValue)
-                Text(prompt.title)
-
-                // Stage 4: Display usage count or "Not in use" label
-                let count = usageCount(for: prompt)
-                if count > 0 {
-                    Text("(Used in \(count))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                } else {
-                    Text("(Not in use)")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-
-                if selectedPromptId == prompt.id.uuidString {
-                    Spacer()
-                    Image(systemName: "checkmark")
-                }
             }
         }
     }

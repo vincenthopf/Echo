@@ -169,16 +169,6 @@ struct ContentView: View {
         } detail: {
             detailView
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .toolbar {
-                    ToolbarItem(placement: .navigation) {
-                        Button(action: {
-                            NotificationCenter.default.post(name: .toggleSidebar, object: nil)
-                        }) {
-                            Image(systemName: "sidebar.left")
-                        }
-                        .help("Toggle Sidebar")
-                    }
-                }
                 .navigationTitle("")
         }
         .navigationSplitViewStyle(.balanced)

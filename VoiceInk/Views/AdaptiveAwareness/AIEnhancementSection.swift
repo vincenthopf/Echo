@@ -7,30 +7,30 @@ struct AIEnhancementSection: View {
 
     @EnvironmentObject private var aiService: AIService
     @EnvironmentObject private var enhancementService: AIEnhancementService
+    @Environment(\.openSettings) private var openSettings
 
-    private var availableProviders: [String] {
-        ["openai", "anthropic"]
+    private var availableProviders: [AIProvider] {
+        aiService.connectedProviders
+    }
+
+    private var hasConfiguredProviders: Bool {
+        !availableProviders.isEmpty
     }
 
     private var providerDisplayName: String {
-        guard let provider = config.selectedAIProvider else { return "Use Global Setting" }
-        switch provider.lowercased() {
-        case "openai": return "OpenAI"
-        case "anthropic": return "Anthropic"
-        default: return provider.capitalized
+        guard let providerString = config.selectedAIProvider,
+              let provider = AIProvider.allCases.first(where: { $0.rawValue == providerString }) else {
+            return "Use Global Setting"
         }
+        return provider.rawValue
     }
 
     private var availableModels: [String] {
-        guard let provider = config.selectedAIProvider else { return [] }
-        switch provider.lowercased() {
-        case "openai":
-            return ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"]
-        case "anthropic":
-            return ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"]
-        default:
+        guard let providerString = config.selectedAIProvider,
+              let provider = AIProvider.allCases.first(where: { $0.rawValue == providerString }) else {
             return []
         }
+        return provider.availableModels
     }
 
     private var modelDisplayName: String {
@@ -40,9 +40,15 @@ struct AIEnhancementSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("AI Enhancement")
-                .font(.headline)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("AI Enhancement")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+
+                Text("Improve accuracy with AI")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
 
             // Enable Toggle
             Toggle("Enable AI enhancement", isOn: Binding(
@@ -55,7 +61,47 @@ struct AIEnhancementSection: View {
             .toggleStyle(.switch)
 
             if config.isAIEnhancementEnabled {
+                // Empty state warning when no providers configured
+                if !hasConfiguredProviders {
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 18))
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("No AI Provider Configured")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+
+                            Text("Add an OpenAI or Anthropic API key to enable enhancement.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Spacer()
+
+                        Button("Add Key") {
+                            // Set the Intelligence tab before opening Settings
+                            UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                            openSettings()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                    .padding(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.orange.opacity(0.1))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                    )
+                }
+
                 // AI Provider Picker
+                if hasConfiguredProviders {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("AI Provider")
                         .font(.subheadline)
@@ -72,13 +118,13 @@ struct AIEnhancementSection: View {
 
                         ForEach(availableProviders, id: \.self) { provider in
                             Button(action: {
-                                config.selectedAIProvider = provider
+                                config.selectedAIProvider = provider.rawValue
                                 config.selectedAIModel = nil // Reset model when provider changes
                                 onSave()
                             }) {
                                 HStack {
-                                    Text(provider == "openai" ? "OpenAI" : "Anthropic")
-                                    if config.selectedAIProvider == provider {
+                                    Text(provider.rawValue)
+                                    if config.selectedAIProvider == provider.rawValue {
                                         Spacer()
                                         Image(systemName: "checkmark")
                                     }
@@ -161,46 +207,47 @@ struct AIEnhancementSection: View {
                     }
                 }
 
-                Divider()
-                    .padding(.vertical, 4)
+                    Divider()
+                        .padding(.vertical, 4)
 
-                // Prompt Selector
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Enhancement Prompt")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                    // Prompt Selector
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Enhancement Prompt")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
 
-                    EnhancedPromptSelector(
-                        selectedPromptId: Binding(
-                            get: { config.selectedPrompt },
+                        EnhancedPromptSelector(
+                            selectedPromptId: Binding(
+                                get: { config.selectedPrompt },
+                                set: { newValue in
+                                    config.selectedPrompt = newValue
+                                    onSave()
+                                }
+                            ),
+                            onSave: onSave
+                        )
+                    }
+
+                    Divider()
+                        .padding(.vertical, 4)
+
+                    // Screen Capture Toggle
+                    HStack(spacing: 8) {
+                        Toggle("Capture screen for AI context", isOn: Binding(
+                            get: { config.useScreenCapture },
                             set: { newValue in
-                                config.selectedPrompt = newValue
+                                config.useScreenCapture = newValue
                                 onSave()
                             }
-                        ),
-                        onSave: onSave
-                    )
-                }
+                        ))
+                        .toggleStyle(.switch)
 
-                Divider()
-                    .padding(.vertical, 4)
-
-                // Screen Capture Toggle
-                HStack(spacing: 8) {
-                    Toggle("Use screen capture for visual context", isOn: Binding(
-                        get: { config.useScreenCapture },
-                        set: { newValue in
-                            config.useScreenCapture = newValue
-                            onSave()
-                        }
-                    ))
-                    .toggleStyle(.switch)
-
-                    InfoTip(
-                        title: "Visual Context",
-                        message: "Captures the screen to provide visual context to the AI for better enhancement results. Requires screen recording permission."
-                    )
-                }
+                        InfoTip(
+                            title: "Visual Context",
+                            message: "Captures the screen to provide visual context to the AI for better enhancement results. Requires screen recording permission."
+                        )
+                    }
+                } // End of hasConfiguredProviders check
             }
         }
     }

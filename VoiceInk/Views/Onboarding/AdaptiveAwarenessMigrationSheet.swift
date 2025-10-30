@@ -1,18 +1,14 @@
 import SwiftUI
 
-/// One-time migration notice shown after updating to the unified Adaptive Awareness system
-/// Explains the consolidation of Power Modes and Prompts into a single feature
+/// Onboarding sheet introducing new users to the Adaptive Awareness feature
+/// Explains how to create context-aware transcription profiles
 struct AdaptiveAwarenessMigrationSheet: View {
     @Binding var isPresented: Bool
     @State private var contentOpacity: CGFloat = 0
     @State private var iconScale: CGFloat = 0.5
 
     var body: some View {
-        ZStack {
-            // Background
-            Color(NSColor.windowBackgroundColor)
-                .ignoresSafeArea()
-
+        ScrollView {
             VStack(spacing: 0) {
                 // Header with icon
                 VStack(spacing: 24) {
@@ -45,18 +41,20 @@ struct AdaptiveAwarenessMigrationSheet: View {
                             )
                     }
                     .scaleEffect(iconScale)
-                    .padding(.top, 48)
+                    .padding(.top, 32)
 
                     // Title
-                    Text("Introducing Unified Adaptive Awareness")
+                    Text("Adaptive Awareness")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.primary)
 
                     // Subtitle
-                    Text("Smarter. Simpler. More Powerful.")
+                    Text("Your transcriptions adapt to what you're doing, automatically.")
                         .font(.system(size: 16, weight: .medium))
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 20)
                 }
                 .opacity(contentOpacity)
 
@@ -67,26 +65,27 @@ struct AdaptiveAwarenessMigrationSheet: View {
                 VStack(spacing: 16) {
                     FeatureCard(
                         icon: "square.stack.3d.up",
-                        title: "Everything in One Place",
-                        description: "Power Modes and Prompts with Trigger Words are now unified under Adaptive Awareness"
+                        title: "Create Your First Profile",
+                        description: "Set up profiles for different situations like writing emails, coding, or taking notes. Each one can use a different transcription model, language, or AI enhancement."
                     )
 
                     FeatureCard(
                         icon: "slider.horizontal.3",
-                        title: "Flexible Triggers",
-                        description: "Configure apps, websites, AND voice keywords in a single profile"
+                        title: "Profiles Switch Automatically",
+                        description: "Your profiles adapt based on what you're doing. Open your email app, and your Email profile kicks in. Switch to your browser, and a different profile takes over. You can also speak a keyword to instantly switch profiles with your voice."
                     )
 
                     FeatureCard(
-                        icon: "checkmark.shield",
-                        title: "Nothing Lost",
-                        description: "All your existing settings have been preserved and migrated automatically"
+                        icon: "lightbulb",
+                        title: "Customize Every Detail",
+                        description: "Choose which transcription model to use, set the language, add AI enhancement prompts, and control whether transcriptions auto-send. Each profile remembers your preferences so you don't have to adjust settings every time."
                     )
                 }
-                .padding(.horizontal, 48)
+                .padding(.horizontal, 16)
                 .opacity(contentOpacity)
 
                 Spacer()
+                    .frame(height: 32)
 
                 // Actions
                 VStack(spacing: 12) {
@@ -94,7 +93,7 @@ struct AdaptiveAwarenessMigrationSheet: View {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             isPresented = false
                         }
-                        // Mark as seen
+                        // Mark as seen (used for both migration and onboarding)
                         UserDefaults.standard.set(true, forKey: "hasSeenAdaptiveAwarenessMigration")
                     }) {
                         Text("Got It")
@@ -125,10 +124,13 @@ struct AdaptiveAwarenessMigrationSheet: View {
                     .buttonStyle(PlainButtonStyle())
                 }
                 .opacity(contentOpacity)
-                .padding(.bottom, 32)
+                .padding(.bottom, 48)
             }
-            .frame(width: 540, height: 640)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 32)
         }
+        .frame(width: 540, height: 640)
+        .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             startAnimations()
         }
