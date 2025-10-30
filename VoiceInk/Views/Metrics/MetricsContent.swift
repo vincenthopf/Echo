@@ -11,10 +11,13 @@ struct MetricsContent: View {
             ScrollView {
                 VStack(spacing: 20) {
                     TimeEfficiencyView(totalRecordedTime: totalRecordedTime, estimatedTypingTime: estimatedTypingTime)
-                    
+
                     metricsGrid
-                    
+
                     voiceInkTrendChart
+
+                    HelpAndResourcesSection()
+                        .padding(.top, 10)
                 }
                 .padding()
             }
