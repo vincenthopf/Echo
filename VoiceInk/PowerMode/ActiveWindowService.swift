@@ -38,23 +38,31 @@ class ActiveWindowService: ObservableObject {
         var configToApply: PowerModeConfig?
         var activationSource: ActivationSource?
 
-        // Check URL patterns first (higher precedence than app bundles)
+        // Get current URL if in a browser
+        var currentURL: String?
         if let browserType = BrowserType.allCases.first(where: { $0.bundleIdentifier == bundleIdentifier }) {
             do {
-                let currentURL = try await browserURLService.getCurrentURL(from: browserType)
-                if let config = PowerModeManager.shared.getConfigurationForURL(currentURL) {
-                    configToApply = config
-                    activationSource = .url(pattern: currentURL)
-                }
+                currentURL = try await browserURLService.getCurrentURL(from: browserType)
             } catch {
                 logger.error("❌ Failed to get URL from \(browserType.displayName): \(error.localizedDescription)")
             }
         }
 
-        // Check app bundle if no URL match
-        if configToApply == nil {
-            if let config = PowerModeManager.shared.getConfigurationForApp(bundleIdentifier) {
-                configToApply = config
+        // Find matching configuration based on logic mode
+        if let config = PowerModeManager.shared.findMatchingConfiguration(
+            bundleId: bundleIdentifier,
+            url: currentURL,
+            voiceTrigger: nil  // Voice triggers are handled separately during transcription
+        ) {
+            configToApply = config
+
+            // Determine activation source based on what matched
+            if let url = currentURL, config.urlConfigs?.contains(where: {
+                let cleanURL = PowerModeManager.shared.cleanURL($0.url)
+                return PowerModeManager.shared.cleanURL(url).contains(cleanURL)
+            }) == true {
+                activationSource = .url(pattern: url)
+            } else {
                 activationSource = .app(bundleID: bundleIdentifier)
             }
         }

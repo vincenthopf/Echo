@@ -1,5 +1,11 @@
 import Foundation
 
+/// Defines how multiple trigger types should be evaluated for profile activation
+enum TriggerLogicMode: String, Codable {
+    case any  // OR logic: ANY trigger from ANY category activates profile (default)
+    case all  // AND logic: At least ONE trigger from at least TWO categories must match
+}
+
 struct PowerModeConfig: Codable, Identifiable, Equatable {
     var id: UUID
     var name: String
@@ -17,11 +23,14 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var isEnabled: Bool = true
     var isDefault: Bool = false
 
-    // NEW: Voice trigger support for Adaptive Awareness integration
+    // Voice trigger support for Adaptive Awareness integration
     var triggerWords: [String] = []
 
+    // Trigger logic mode: determines how multiple triggers are evaluated
+    var triggerLogicMode: TriggerLogicMode = .any
+
     enum CodingKeys: String, CodingKey {
-        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords
+        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords, triggerLogicMode
         case selectedWhisperModel
         case selectedTranscriptionModelName
     }
@@ -29,7 +38,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     init(id: UUID = UUID(), name: String, emoji: String, appConfigs: [AppConfig]? = nil,
          urlConfigs: [URLConfig]? = nil, isAIEnhancementEnabled: Bool, selectedPrompt: String? = nil,
          selectedTranscriptionModelName: String? = nil, selectedLanguage: String? = nil, useScreenCapture: Bool = false,
-         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = []) {
+         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = [], triggerLogicMode: TriggerLogicMode = .any) {
         self.id = id
         self.name = name
         self.emoji = emoji
@@ -46,6 +55,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         self.isEnabled = isEnabled
         self.isDefault = isDefault
         self.triggerWords = triggerWords
+        self.triggerLogicMode = triggerLogicMode
     }
 
     init(from decoder: Decoder) throws {
@@ -67,6 +77,9 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
 
         // Decode triggerWords with fallback to empty array for backward compatibility
         triggerWords = try container.decodeIfPresent([String].self, forKey: .triggerWords) ?? []
+
+        // Decode triggerLogicMode with fallback to .any for backward compatibility
+        triggerLogicMode = try container.decodeIfPresent(TriggerLogicMode.self, forKey: .triggerLogicMode) ?? .any
 
         if let newModelName = try container.decodeIfPresent(String.self, forKey: .selectedTranscriptionModelName) {
             selectedTranscriptionModelName = newModelName
@@ -95,11 +108,33 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encode(isEnabled, forKey: .isEnabled)
         try container.encode(isDefault, forKey: .isDefault)
         try container.encode(triggerWords, forKey: .triggerWords)
+        try container.encode(triggerLogicMode, forKey: .triggerLogicMode)
     }
     
     
     static func == (lhs: PowerModeConfig, rhs: PowerModeConfig) -> Bool {
         lhs.id == rhs.id
+    }
+
+    // MARK: - Trigger Logic Helpers
+
+    /// Returns the number of trigger categories that have at least one configured trigger
+    func configuredTriggerCategories() -> Int {
+        var count = 0
+        if let apps = appConfigs, !apps.isEmpty { count += 1 }
+        if let urls = urlConfigs, !urls.isEmpty { count += 1 }
+        if !triggerWords.isEmpty { count += 1 }
+        return count
+    }
+
+    /// Returns whether the profile has triggers configured across multiple categories
+    func hasMultipleTriggerCategories() -> Bool {
+        return configuredTriggerCategories() >= 2
+    }
+
+    /// Returns whether the profile can use "All" logic mode
+    func canUseAllLogicMode() -> Bool {
+        return hasMultipleTriggerCategories()
     }
 }
 
@@ -317,6 +352,112 @@ class PowerModeManager: ObservableObject {
 
     func isEmojiInUse(_ emoji: String) -> Bool {
         return configurations.contains { $0.emoji == emoji }
+    }
+
+    // MARK: - Unified Matching Logic
+
+    /// Finds a matching configuration based on current context and trigger logic mode
+    /// - Parameters:
+    ///   - bundleId: Current application bundle identifier
+    ///   - url: Current URL (if in a browser), optional
+    ///   - voiceTrigger: Detected voice keyword, optional
+    /// - Returns: The first matching enabled configuration, or nil
+    func findMatchingConfiguration(bundleId: String, url: String?, voiceTrigger: String?) -> PowerModeConfig? {
+        for config in configurations.filter({ $0.isEnabled }) {
+            if matchesConfiguration(config, bundleId: bundleId, url: url, voiceTrigger: voiceTrigger) {
+                return config
+            }
+        }
+        return nil
+    }
+
+    /// Determines if a configuration matches the current context based on its trigger logic mode
+    private func matchesConfiguration(_ config: PowerModeConfig, bundleId: String, url: String?, voiceTrigger: String?) -> Bool {
+        switch config.triggerLogicMode {
+        case .any:
+            // OR logic: ANY trigger matches
+            return matchesAnyTrigger(config, bundleId: bundleId, url: url, voiceTrigger: voiceTrigger)
+
+        case .all:
+            // AND logic: At least TWO categories must match
+            return matchesAllLogic(config, bundleId: bundleId, url: url, voiceTrigger: voiceTrigger)
+        }
+    }
+
+    /// Checks if ANY trigger from ANY category matches (OR logic)
+    private func matchesAnyTrigger(_ config: PowerModeConfig, bundleId: String, url: String?, voiceTrigger: String?) -> Bool {
+        // Check voice trigger first (highest precedence)
+        if let trigger = voiceTrigger, !config.triggerWords.isEmpty {
+            let normalizedTrigger = trigger.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            if config.triggerWords.contains(where: {
+                $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == normalizedTrigger
+            }) {
+                return true
+            }
+        }
+
+        // Check URL patterns
+        if let currentURL = url, let urlConfigs = config.urlConfigs, !urlConfigs.isEmpty {
+            let cleanedCurrentURL = cleanURL(currentURL)
+            for urlConfig in urlConfigs {
+                let configURL = cleanURL(urlConfig.url)
+                if cleanedCurrentURL.contains(configURL) {
+                    return true
+                }
+            }
+        }
+
+        // Check app bundles
+        if let appConfigs = config.appConfigs, !appConfigs.isEmpty {
+            if appConfigs.contains(where: { $0.bundleIdentifier == bundleId }) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /// Checks if at least TWO trigger categories match (AND logic)
+    private func matchesAllLogic(_ config: PowerModeConfig, bundleId: String, url: String?, voiceTrigger: String?) -> Bool {
+        var matchedCategories = 0
+
+        // Check voice triggers
+        if !config.triggerWords.isEmpty {
+            if let trigger = voiceTrigger {
+                let normalizedTrigger = trigger.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                if config.triggerWords.contains(where: {
+                    $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) == normalizedTrigger
+                }) {
+                    matchedCategories += 1
+                }
+            }
+            // If voice keywords are configured but none matched, this category requirement is NOT met
+            // However, we continue checking other categories since we need at least 2 total matches
+        }
+
+        // Check URL patterns
+        if let urlConfigs = config.urlConfigs, !urlConfigs.isEmpty {
+            if let currentURL = url {
+                let cleanedCurrentURL = cleanURL(currentURL)
+                let urlMatches = urlConfigs.contains { urlConfig in
+                    let configURL = cleanURL(urlConfig.url)
+                    return cleanedCurrentURL.contains(configURL)
+                }
+                if urlMatches {
+                    matchedCategories += 1
+                }
+            }
+        }
+
+        // Check app bundles
+        if let appConfigs = config.appConfigs, !appConfigs.isEmpty {
+            if appConfigs.contains(where: { $0.bundleIdentifier == bundleId }) {
+                matchedCategories += 1
+            }
+        }
+
+        // Require at least 2 categories to match
+        return matchedCategories >= 2
     }
 
     // MARK: - Voice Trigger Support (Adaptive Awareness)

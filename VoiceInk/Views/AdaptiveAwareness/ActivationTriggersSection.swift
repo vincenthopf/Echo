@@ -17,16 +17,53 @@ struct ActivationTriggersSection: View {
                     .font(.headline)
                     .foregroundColor(.primary)
 
-                Text("When this profile activates")
+                Text(subtitleText)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
+            // Trigger Logic Mode Selector
+            if shouldShowTriggerLogicControl {
+                HStack(spacing: 8) {
+                    Picker("Trigger Logic", selection: Binding(
+                        get: { config.triggerLogicMode },
+                        set: { newValue in
+                            config.triggerLogicMode = newValue
+                            onSave()
+                        }
+                    )) {
+                        Text("Any").tag(TriggerLogicMode.any)
+                        if config.hasMultipleTriggerCategories() {
+                            Text("All").tag(TriggerLogicMode.all)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 160)
+                    .disabled(!hasTriggers)
+
+                    InfoTip(
+                        title: "Trigger Matching",
+                        message: infoTipMessage
+                    )
+
+                    Spacer()
+                }
+            }
+
             // Applications Subsection
             VStack(alignment: .leading, spacing: 12) {
-                Text("Applications")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                HStack(spacing: 4) {
+                    Text("Applications")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    if shouldShowRequiredBadge(hasItems: config.appConfigs?.isEmpty == false) {
+                        Text("(1 required)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 if let appConfigs = config.appConfigs, !appConfigs.isEmpty {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120))], spacing: 12) {
@@ -73,9 +110,17 @@ struct ActivationTriggersSection: View {
 
             // Websites Subsection
             VStack(alignment: .leading, spacing: 12) {
-                Text("Websites")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                HStack(spacing: 4) {
+                    Text("Websites")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    if shouldShowRequiredBadge(hasItems: config.urlConfigs?.isEmpty == false) {
+                        Text("(1 required)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 URLPatternInput(
                     urlConfigs: Binding(
@@ -93,9 +138,17 @@ struct ActivationTriggersSection: View {
 
             // Voice Keywords Subsection
             VStack(alignment: .leading, spacing: 12) {
-                Text("Voice Keywords")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                HStack(spacing: 4) {
+                    Text("Voice Keywords")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+
+                    if shouldShowRequiredBadge(hasItems: !config.triggerWords.isEmpty) {
+                        Text("(1 required)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 VoiceKeywordInput(
                     triggerWords: Binding(
@@ -109,6 +162,48 @@ struct ActivationTriggersSection: View {
             }
         }
     }
+
+    // MARK: - Computed Properties
+
+    /// Whether the control should be shown (disabled control when no triggers)
+    private var shouldShowTriggerLogicControl: Bool {
+        return true  // Always show, disabled when empty per user choice
+    }
+
+    /// Whether any triggers are configured
+    private var hasTriggers: Bool {
+        return config.configuredTriggerCategories() > 0
+    }
+
+    /// Dynamic subtitle text based on configuration state and logic mode
+    private var subtitleText: String {
+        if !hasTriggers {
+            return "Add triggers to enable automatic activation"
+        }
+
+        switch config.triggerLogicMode {
+        case .any:
+            return "Activates when any trigger matches"
+        case .all:
+            return "Requires at least two trigger types to match"
+        }
+    }
+
+    /// Info tip message explaining trigger logic
+    private var infoTipMessage: String {
+        """
+        Any: Profile activates when at least one trigger matches.
+
+        All: Profile only activates when triggers from at least two categories match simultaneously. For example, if you've set both an application and a website trigger, both must be active at the same time.
+        """
+    }
+
+    /// Whether to show "(1 required)" badge on category headers
+    private func shouldShowRequiredBadge(hasItems: Bool) -> Bool {
+        return config.triggerLogicMode == .all && hasItems && config.hasMultipleTriggerCategories()
+    }
+
+    // MARK: - Helper Methods
 
     private func loadInstalledApps() {
         let workspace = NSWorkspace.shared
