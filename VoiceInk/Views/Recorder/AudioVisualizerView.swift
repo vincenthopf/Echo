@@ -10,20 +10,20 @@ struct AudioVisualizer: View {
     private let maxHeight: CGFloat = 32
     private let barWidth: CGFloat = 3.5
     private let barSpacing: CGFloat = 2.3
-    private let hardThreshold: Double = 0.3
-    
+    private let hardThreshold: Double = 0.15
+
     private let sensitivityMultipliers: [Double]
-    
+
     @State private var barHeights: [CGFloat]
     @State private var targetHeights: [CGFloat]
-    
+
     init(audioMeter: AudioMeter, color: Color, isActive: Bool) {
         self.audioMeter = audioMeter
         self.color = color
         self.isActive = isActive
-        
+
         self.sensitivityMultipliers = (0..<barCount).map { _ in
-            Double.random(in: 0.2...1.9)
+            Double.random(in: 0.3...2.2)
         }
         
         _barHeights = State(initialValue: Array(repeating: minHeight, count: barCount))

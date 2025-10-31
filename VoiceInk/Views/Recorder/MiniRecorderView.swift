@@ -36,15 +36,15 @@ struct MiniRecorderView: View {
         HStack(spacing: 0) {
             // Profile badge (compact indicator)
             RecorderProfileBadge(size: .small)
-                .padding(.leading, 10)
+                .padding(.leading, 8)
 
-            Spacer()
+            Spacer(minLength: 8)
 
             // Fixed visualizer zone
             statusView
                 .frame(maxWidth: .infinity)
 
-            Spacer()
+            Spacer(minLength: 8)
         }
         .padding(.vertical, 9)
     }

@@ -38,7 +38,7 @@ struct NotchRecorderView: View {
             Spacer()
         }
         .frame(width: 40)
-        .padding(.leading, 16)
+        .padding(.leading, 12)
     }
     
     private var centerSection: some View {
@@ -64,7 +64,7 @@ struct NotchRecorderView: View {
             menuBarHeight: menuBarHeight
         )
         .frame(width: 70)
-        .padding(.trailing, 8)
+        .padding(.trailing, 4)
     }
     
     var body: some View {
