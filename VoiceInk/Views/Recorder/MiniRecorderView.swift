@@ -34,14 +34,9 @@ struct MiniRecorderView: View {
     
     private var contentLayout: some View {
         HStack(spacing: 0) {
-            // Left button zone - always visible
-            HStack(spacing: 4) {
-                RecorderPromptButton(activePopover: $activePopover)
-
-                // Profile badge (compact indicator)
-                RecorderProfileBadge(size: .small)
-            }
-            .padding(.leading, 7)
+            // Profile badge (compact indicator)
+            RecorderProfileBadge(size: .small)
+                .padding(.leading, 10)
 
             Spacer()
 
@@ -50,10 +45,6 @@ struct MiniRecorderView: View {
                 .frame(maxWidth: .infinity)
 
             Spacer()
-
-            // Right button zone - always visible
-            RecorderPowerModeButton(activePopover: $activePopover)
-                .padding(.trailing, 7)
         }
         .padding(.vertical, 9)
     }
