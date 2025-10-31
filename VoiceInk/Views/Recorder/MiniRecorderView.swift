@@ -38,13 +38,12 @@ struct MiniRecorderView: View {
             RecorderProfileBadge(size: .small)
                 .padding(.leading, 8)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 12)
 
             // Fixed visualizer zone
             statusView
-                .frame(maxWidth: .infinity)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 12)
         }
         .padding(.vertical, 9)
     }
