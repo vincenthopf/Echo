@@ -74,31 +74,20 @@ struct GeneralSection: View {
             }
 
             // Toggles
-            VStack(alignment: .leading, spacing: 12) {
-                Toggle("Enable profile", isOn: Binding(
-                    get: { config.isEnabled },
+            HStack(spacing: 8) {
+                Toggle("Make default", isOn: Binding(
+                    get: { config.isDefault },
                     set: { newValue in
-                        config.isEnabled = newValue
+                        config.isDefault = newValue
                         onSave()
                     }
                 ))
                 .toggleStyle(.switch)
 
-                HStack(spacing: 8) {
-                    Toggle("Make default", isOn: Binding(
-                        get: { config.isDefault },
-                        set: { newValue in
-                            config.isDefault = newValue
-                            onSave()
-                        }
-                    ))
-                    .toggleStyle(.switch)
-
-                    InfoTip(
-                        title: "Default Profile",
-                        message: "The default profile activates when no other triggers match. Only one profile can be set as default."
-                    )
-                }
+                InfoTip(
+                    title: "Default Profile",
+                    message: "The default profile activates when no other triggers match. Only one profile can be set as default."
+                )
             }
         }
     }
