@@ -45,15 +45,16 @@ struct GeneralSettingsView: View {
                                 updaterViewModel.toggleAutoUpdates(newValue)
                             }
 
-                        Toggle("Show app announcements", isOn: $enableAnnouncements)
-                            .toggleStyle(.switch)
-                            .onChange(of: enableAnnouncements) { _, newValue in
-                                if newValue {
-                                    AnnouncementsService.shared.start()
-                                } else {
-                                    AnnouncementsService.shared.stop()
-                                }
-                            }
+                        // Announcements disabled - can be re-enabled in the future
+                        // Toggle("Show app announcements", isOn: $enableAnnouncements)
+                        //     .toggleStyle(.switch)
+                        //     .onChange(of: enableAnnouncements) { _, newValue in
+                        //         if newValue {
+                        //             AnnouncementsService.shared.start()
+                        //         } else {
+                        //             AnnouncementsService.shared.stop()
+                        //         }
+                        //     }
                     }
                 }
 

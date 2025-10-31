@@ -118,9 +118,10 @@ struct VoiceInkApp: App {
                     .modelContainer(container)
                     .onAppear {
                         updaterViewModel.silentlyCheckForUpdates()
-                        if enableAnnouncements {
-                            AnnouncementsService.shared.start()
-                        }
+                        // Announcements disabled - can be re-enabled in the future
+                        // if enableAnnouncements {
+                        //     AnnouncementsService.shared.start()
+                        // }
 
                         // Start the transcription auto-cleanup service (handles immediate and scheduled transcript deletion)
                         transcriptionAutoCleanupService.startMonitoring(modelContext: container.mainContext)
@@ -143,7 +144,7 @@ struct VoiceInkApp: App {
                         WindowManager.shared.configureWindow(window)
                     })
                     .onDisappear {
-                        AnnouncementsService.shared.stop()
+                        // AnnouncementsService.shared.stop()
                         whisperState.unloadModel()
 
                         // Stop the transcription auto-cleanup service
