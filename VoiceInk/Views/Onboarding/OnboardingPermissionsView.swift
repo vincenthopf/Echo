@@ -38,7 +38,8 @@ struct OnboardingPermissionsView: View {
     @State private var showAnimation = false
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
-    @State private var showModelDownload = false
+    @State private var showModelSelection = false
+    @State private var showIntelGuidance = false
     
     private let permissions: [OnboardingPermission] = [
         OnboardingPermission(
@@ -241,8 +242,13 @@ struct OnboardingPermissionsView: View {
                 }
             }
             
-            if showModelDownload {
-                OnboardingModelDownloadView(hasCompletedOnboarding: $hasCompletedOnboarding)
+            if showModelSelection {
+                OnboardingModelSelectionView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+
+            if showIntelGuidance {
+                OnboardingIntelMacGuidanceView(hasCompletedOnboarding: $hasCompletedOnboarding)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
@@ -375,8 +381,13 @@ struct OnboardingPermissionsView: View {
                 resetAnimation()
             }
         } else {
+            // Route based on architecture
             withAnimation {
-                showModelDownload = true
+                if SystemInfoService.isIntelMac() {
+                    showIntelGuidance = true
+                } else {
+                    showModelSelection = true
+                }
             }
         }
     }

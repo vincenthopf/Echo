@@ -204,8 +204,8 @@ struct MetricsSetupView: View {
     }
 
     private func openModelManagement() {
-        // Set the selected tab to Models before opening Settings window
-        UserDefaults.standard.set("Models", forKey: "selectedSettingsTab")
+        // Set the selected tab to Transcription before opening Settings window
+        UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
         openSettings()
     }
 

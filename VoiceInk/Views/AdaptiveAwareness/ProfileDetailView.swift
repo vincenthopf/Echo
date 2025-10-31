@@ -45,6 +45,7 @@ struct ProfileDetailView: View {
             }
             .padding(24)
         }
+        .safeAreaPadding(.top, 0)
         .background(Color(NSColor.controlBackgroundColor))
         .onChange(of: config) { _, newConfig in
             // Reload from manager if config changes externally

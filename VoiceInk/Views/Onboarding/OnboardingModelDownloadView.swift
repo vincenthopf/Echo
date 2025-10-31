@@ -8,8 +8,19 @@ struct OnboardingModelDownloadView: View {
     @State private var isDownloading = false
     @State private var isModelSet = false
     @State private var showTutorial = false
-    
-    private let turboModel = PredefinedModels.models.first { $0.name == "ggml-large-v3-turbo-q5_0" } as! LocalModel
+
+    // Accept a selected model, defaulting to Parakeet V3 if not provided
+    var selectedModel: any TranscriptionModel = PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!
+
+    // Cast to appropriate type for download operations
+    private var downloadableModel: (any TranscriptionModel)? {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel
+        }
+        return nil
+    }
     
     var body: some View {
         ZStack {
@@ -61,10 +72,10 @@ struct OnboardingModelDownloadView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // Model name and details
                         VStack(alignment: .center, spacing: 8) {
-                            Text(turboModel.displayName)
+                            Text(selectedModel.displayName)
                                 .font(.headline)
                                 .foregroundColor(.white)
-                            Text("\(turboModel.size) • \(turboModel.language)")
+                            Text(modelDetailsText)
                                 .font(.caption)
                                 .foregroundColor(.white.opacity(0.7))
                         }
@@ -75,16 +86,16 @@ struct OnboardingModelDownloadView: View {
                         
                         // Performance indicators in a more compact layout
                         HStack(spacing: 20) {
-                            performanceIndicator(label: "Speed", value: turboModel.speed)
-                            performanceIndicator(label: "Accuracy", value: turboModel.accuracy)
-                            ramUsageLabel(gb: turboModel.ramUsage)
+                            performanceIndicator(label: "Speed", value: modelSpeed)
+                            performanceIndicator(label: "Accuracy", value: modelAccuracy)
+                            ramUsageLabel(gb: modelRAM)
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
-                        
+
                         // Download progress
                         if isDownloading {
                             DownloadProgressView(
-                                modelName: turboModel.name,
+                                modelName: selectedModel.name,
                                 downloadProgress: whisperState.downloadProgress
                             )
                             .transition(.opacity)
@@ -149,8 +160,8 @@ struct OnboardingModelDownloadView: View {
     }
     
     private func checkModelStatus() {
-        if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
-            isModelSet = whisperState.currentTranscriptionModel?.name == turboModel.name
+        if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
+            isModelSet = whisperState.currentTranscriptionModel?.name == selectedModel.name
         }
     }
     
@@ -159,13 +170,11 @@ struct OnboardingModelDownloadView: View {
             withAnimation {
                 showTutorial = true
             }
-        } else if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
-            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == turboModel.name }) {
-                Task {
-                    await whisperState.setDefaultTranscriptionModel(modelToSet)
-                    withAnimation {
-                        isModelSet = true
-                    }
+        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
+            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
+                whisperState.setDefaultTranscriptionModel(modelToSet)
+                withAnimation {
+                    isModelSet = true
                 }
             }
         } else {
@@ -173,9 +182,15 @@ struct OnboardingModelDownloadView: View {
                 isDownloading = true
             }
             Task {
-                await whisperState.downloadModel(turboModel)
-                if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == turboModel.name }) {
-                    await whisperState.setDefaultTranscriptionModel(modelToSet)
+                // Download the selected model (works for both LocalModel and ParakeetModel)
+                if let localModel = selectedModel as? LocalModel {
+                    await whisperState.downloadModel(localModel)
+                } else if let parakeetModel = selectedModel as? ParakeetModel {
+                    await whisperState.downloadParakeetModel(parakeetModel)
+                }
+
+                if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
+                    whisperState.setDefaultTranscriptionModel(modelToSet)
                     withAnimation {
                         isModelSet = true
                         isDownloading = false
@@ -190,11 +205,48 @@ struct OnboardingModelDownloadView: View {
             return "Continue"
         } else if isDownloading {
             return "Downloading..."
-        } else if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
+        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
             return "Set as Default"
         } else {
             return "Download Model"
         }
+    }
+
+    // Helper computed properties for model details
+    private var modelDetailsText: String {
+        if let localModel = selectedModel as? LocalModel {
+            return "\(localModel.size) • \(localModel.language)"
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return "\(parakeetModel.size) • Multilingual"
+        }
+        return selectedModel.displayName
+    }
+
+    private var modelSpeed: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.speed
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.speed
+        }
+        return 0.0
+    }
+
+    private var modelAccuracy: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.accuracy
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.accuracy
+        }
+        return 0.0
+    }
+
+    private var modelRAM: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.ramUsage
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.ramUsage
+        }
+        return 0.0
     }
     
     private func performanceIndicator(label: String, value: Double) -> some View {

@@ -87,6 +87,26 @@ class SystemInfoService {
         return ByteCountFormatter.string(fromByteCount: Int64(totalMemory), countStyle: .memory)
     }
 
+    // MARK: - Public Architecture Detection
+
+    /// Returns true if running on an Intel (x86_64) Mac
+    static func isIntelMac() -> Bool {
+        #if arch(x86_64)
+            return true
+        #else
+            return false
+        #endif
+    }
+
+    /// Returns true if running on Apple Silicon (ARM64) Mac
+    static func isAppleSilicon() -> Bool {
+        #if arch(arm64)
+            return true
+        #else
+            return false
+        #endif
+    }
+
     private func getArchitecture() -> String {
         #if arch(x86_64)
             return "Intel x86_64"

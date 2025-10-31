@@ -80,7 +80,6 @@ struct ActivationTriggersSection: View {
                 }
 
                 Button(action: {
-                    loadInstalledApps()
                     isShowingAppPicker = true
                 }) {
                     Label("Add Application", systemImage: "plus.circle")
@@ -102,6 +101,9 @@ struct ActivationTriggersSection: View {
                             isShowingAppPicker = false
                         }
                     )
+                    .onAppear {
+                        loadInstalledApps()
+                    }
                 }
             }
 
