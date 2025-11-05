@@ -162,7 +162,7 @@ struct VoiceInkApp: App {
                     .environmentObject(whisperState)
                     .environmentObject(aiService)
                     .environmentObject(enhancementService)
-                    .frame(minWidth: 880, minHeight: 780)
+                    .frame(minWidth: 1100, minHeight: 850)
                     .background(WindowAccessor { window in
                         // Ensure this is called only once or is idempotent
                         if window.title != "Echo Onboarding" { // Prevent re-configuration

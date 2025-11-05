@@ -172,7 +172,7 @@ struct ContentView: View {
                 .navigationTitle("")
         }
         .navigationSplitViewStyle(.balanced)
-        .frame(minWidth: 940, minHeight: 730)
+        .frame(minWidth: 1100, minHeight: 850)
         .onAppear {
             hasLoadedData = true
         }
