@@ -241,6 +241,43 @@ struct RecordingSettingsView: View {
                         Divider()
                             .padding(.vertical, 4)
 
+                        // Microphone Sensitivity Slider
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Text("Microphone Sensitivity")
+                                    .font(.system(size: 13, weight: .medium))
+                                
+                                InfoTip(
+                                    title: "Microphone Sensitivity",
+                                    message: "Adjust how sensitive the voice detection is. Higher values make it easier to trigger recording with quieter sounds, while lower values require louder input."
+                                )
+                                
+                                Spacer()
+                            }
+                            
+                            HStack(spacing: 12) {
+                                Text("Low")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                Slider(
+                                    value: Binding(
+                                        get: { UserDefaults.standard.double(forKey: "microphoneSensitivity") == 0 ? 0.5 : UserDefaults.standard.double(forKey: "microphoneSensitivity") },
+                                        set: { UserDefaults.standard.set($0, forKey: "microphoneSensitivity") }
+                                    ),
+                                    in: 0.1...1.0,
+                                    step: 0.1
+                                )
+                                
+                                Text("High")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Divider()
+                            .padding(.vertical, 4)
+
                         // Universal Paste Compatibility
                         HStack(spacing: 8) {
                             Toggle("Universal Paste Compatibility", isOn: Binding(

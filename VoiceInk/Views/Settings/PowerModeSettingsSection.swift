@@ -2,8 +2,8 @@ import SwiftUI
 
 struct PowerModeSettingsSection: View {
     @ObservedObject private var powerModeManager = PowerModeManager.shared
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = false
-    @AppStorage(PowerModeDefaults.autoRestoreKey) private var powerModeAutoRestoreEnabled = false
+    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
+    @AppStorage(PowerModeDefaults.autoRestoreKey) private var powerModeAutoRestoreEnabled = true
     @State private var showDisableAlert = false
     
     var body: some View {

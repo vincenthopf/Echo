@@ -31,9 +31,12 @@ struct VoiceInkApp: App {
         // Configure FluidAudio logging subsystem
         AppLogger.defaultSubsystem = "com.VincentHopf.embrvoice.parakeet"
 
+        // Set default values for Adaptive Awareness settings if not already set
         if UserDefaults.standard.object(forKey: "powerModeUIFlag") == nil {
-            let hasEnabledPowerModes = PowerModeManager.shared.configurations.contains { $0.isEnabled }
-            UserDefaults.standard.set(hasEnabledPowerModes, forKey: "powerModeUIFlag")
+            UserDefaults.standard.set(true, forKey: "powerModeUIFlag")
+        }
+        if UserDefaults.standard.object(forKey: PowerModeDefaults.autoRestoreKey) == nil {
+            UserDefaults.standard.set(true, forKey: PowerModeDefaults.autoRestoreKey)
         }
 
         do {

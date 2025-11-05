@@ -19,8 +19,14 @@ struct MenuBarView: View {
             if let activeConfig = powerModeManager.activeConfiguration {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
-                        Text(activeConfig.emoji)
-                            .font(.system(size: 16))
+                        if activeConfig.emoji.shouldRenderAsSFSymbol {
+                            Image(systemName: activeConfig.emoji)
+                                .font(.system(size: 16))
+                                .foregroundColor(.accentColor)
+                        } else {
+                            Text(activeConfig.emoji)
+                                .font(.system(size: 16))
+                        }
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(activeConfig.name)

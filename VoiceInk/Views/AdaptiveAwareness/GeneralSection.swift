@@ -31,8 +31,14 @@ struct GeneralSection: View {
                             .fill(Color.accentColor.opacity(0.15))
                             .frame(width: 56, height: 56)
 
-                        Text(config.emoji)
-                            .font(.system(size: 28))
+                        if config.emoji.shouldRenderAsSFSymbol {
+                            Image(systemName: config.emoji)
+                                .font(.system(size: 28))
+                                .foregroundColor(.accentColor)
+                        } else {
+                            Text(config.emoji)
+                                .font(.system(size: 28))
+                        }
                     }
                 }
                 .buttonStyle(.plain)

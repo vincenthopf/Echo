@@ -43,7 +43,7 @@ struct DynamicSidebar: View {
     @Binding var selectedView: ViewType
     @Binding var hoveredView: ViewType?
     @Environment(\.colorScheme) private var colorScheme
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = false
+    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @Namespace private var buttonAnimation
     
     private var visibleViewTypes: [ViewType] {
@@ -142,7 +142,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = false
+    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @State private var selectedView: ViewType = .metrics
     @State private var hoveredView: ViewType?
     @State private var hasLoadedData = false

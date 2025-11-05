@@ -27,7 +27,7 @@ struct AdaptiveAwarenessView: View {
                     showMigrationNotice = true
                 }
             )
-            .frame(minWidth: 240, idealWidth: 280, maxWidth: 320)
+            .frame(minWidth: 240, idealWidth: 320, maxWidth: 320)
 
             // Right Panel: Detail Editor
             if let selectedId = selectedProfileId,
@@ -57,14 +57,18 @@ struct AdaptiveAwarenessView: View {
         }
         .onAppear {
             // Select first profile by default if none selected
-            if selectedProfileId == nil, let firstConfig = powerModeManager.configurations.first {
-                selectedProfileId = firstConfig.id
+            Task {
+                if selectedProfileId == nil, let firstConfig = powerModeManager.configurations.first {
+                    selectedProfileId = firstConfig.id
+                }
             }
-
+        }
+        .task {
             // Show migration notice on first visit if migration occurred
             let didMigrate = UserDefaults.standard.bool(forKey: "didMigrateToAdaptiveAwareness")
             if didMigrate && !hasSeenMigrationNotice {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                try? await Task.sleep(for: .milliseconds(300))
+                await MainActor.run {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                         showMigrationNotice = true
                     }

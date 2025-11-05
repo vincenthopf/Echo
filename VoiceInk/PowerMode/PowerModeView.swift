@@ -150,8 +150,15 @@ struct PowerModeView: View {
                                         Circle()
                                             .fill(Color(NSColor.controlBackgroundColor))
                                             .frame(width: 40, height: 40)
-                                        Text(config.emoji)
-                                            .font(.system(size: 20))
+
+                                        if config.emoji.shouldRenderAsSFSymbol {
+                                            Image(systemName: config.emoji)
+                                                .font(.system(size: 20))
+                                                .foregroundColor(.accentColor)
+                                        } else {
+                                            Text(config.emoji)
+                                                .font(.system(size: 20))
+                                        }
                                     }
 
                                     Text(config.name)

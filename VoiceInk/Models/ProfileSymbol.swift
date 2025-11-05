@@ -103,15 +103,20 @@ extension String {
         #endif
     }
 
-    /// Checks if the string contains emoji characters
+    /// Checks if the string contains actual emoji characters (not just emoji-capable characters)
     var containsEmoji: Bool {
         return unicodeScalars.contains { scalar in
-            scalar.properties.isEmoji && scalar.value > 0x238C
+            // Check for actual emoji presentation or emoji modifiers
+            // This avoids false positives for regular text that can technically render as emoji
+            scalar.properties.isEmojiPresentation ||
+            (scalar.properties.isEmoji && scalar.properties.isEmojiModifier)
         }
     }
 
     /// Determines if this string should be rendered as an SF Symbol or text/emoji
     var shouldRenderAsSFSymbol: Bool {
-        return isSFSymbol && !containsEmoji
+        // If it's a valid SF Symbol, use it as a symbol regardless of emoji detection
+        // This ensures SF Symbol names like "sparkles" render correctly as icons
+        return isSFSymbol
     }
 }

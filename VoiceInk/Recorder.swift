@@ -172,7 +172,7 @@ class Recorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
         let averagePower = recorder.averagePower(forChannel: 0)
         let peakPower = recorder.peakPower(forChannel: 0)
         
-        let minVisibleDb: Float = -60.0 
+        let minVisibleDb: Float = -50.0 
         let maxVisibleDb: Float = 0.0
 
         let normalizedAverage: Float
@@ -195,7 +195,11 @@ class Recorder: NSObject, ObservableObject, AVAudioRecorderDelegate {
         
         let newAudioMeter = AudioMeter(averagePower: Double(normalizedAverage), peakPower: Double(normalizedPeak))
 
-        if !hasDetectedAudioInCurrentSession && newAudioMeter.averagePower > 0.01 {
+        let sensitivity = UserDefaults.standard.double(forKey: "microphoneSensitivity")
+        let baseSensitivity = sensitivity == 0 ? 0.5 : sensitivity
+        let detectionThreshold = 0.02 - (baseSensitivity * 0.015) // Range from 0.0035-0.0185
+        
+        if !hasDetectedAudioInCurrentSession && newAudioMeter.averagePower > detectionThreshold {
             hasDetectedAudioInCurrentSession = true
         }
         
