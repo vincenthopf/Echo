@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E1342C1F2EB4844800CED8A2 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = E1342C1E2EB4844800CED8A2 /* Atomics */; };
 		08DD4EE7B43BBBBBD3A1981D /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFA460FA5A5CA40F1D3DEA8 /* DesignSystem.swift */; };
 		3C414B37AC34E9EDB43D516A /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3E428AB12F318A7CA82AD7 /* ButtonStyles.swift */; };
 		41B5435EB178B9C75CC419EF /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26943EE9CF3BAD92874D091 /* SectionHeader.swift */; };
@@ -90,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E1342C1F2EB4844800CED8A2 /* Atomics in Frameworks */,
 				E1ECEC162E44591300DFFBA8 /* Zip in Frameworks */,
 				E1ADD45A2CC5352A00303ECB /* LaunchAtLogin in Frameworks */,
 				E11BBA4E2E5DC555000AB839 /* FluidAudio in Frameworks */,
@@ -173,6 +175,7 @@
 			);
 			name = VoiceInk;
 			packageProductDependencies = (
+				E1342C1E2EB4844800CED8A2 /* Atomics */,
 				E1A261112CC143AC00B233D1 /* KeyboardShortcuts */,
 				E1ADD4592CC5352A00303ECB /* LaunchAtLogin */,
 				E1ADD45E2CC544F100303ECB /* Sparkle */,
@@ -264,6 +267,7 @@
 			mainGroup = E11473A72CBE0F0A00318EE4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				E1342C1D2EB4844800CED8A2 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				E1A261102CC143AC00B233D1 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 				E1ADD4582CC5352A00303ECB /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				E1ADD45D2CC544F100303ECB /* XCRemoteSwiftPackageReference "Sparkle" */,
@@ -653,6 +657,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E1342C1D2EB4844800CED8A2 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		E11BBA4C2E5DC555000AB839 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/FluidInference/FluidAudio";
@@ -712,6 +724,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E1342C1E2EB4844800CED8A2 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1342C1D2EB4844800CED8A2 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
+		};
 		E11BBA4D2E5DC555000AB839 /* FluidAudio */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E11BBA4C2E5DC555000AB839 /* XCRemoteSwiftPackageReference "FluidAudio" */;
