@@ -14,6 +14,7 @@ struct TranscriptionCard: View {
     let onDelete: () -> Void
     let onToggleSelection: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedTab: ContentTab = .original
 
     private var availableTabs: [ContentTab] {
@@ -59,40 +60,44 @@ struct TranscriptionCard: View {
 
     private var originalContentView: some View {
         Text(transcription.text)
-            .font(.system(size: 15, weight: .regular, design: .default))
+            .font(Tokens.Typography.bodyLarge)
+            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
             .lineSpacing(2)
             .textSelection(.enabled)
     }
 
     private func enhancedContentView(_ enhancedText: String) -> some View {
         Text(enhancedText)
-            .font(.system(size: 15, weight: .regular, design: .default))
+            .font(Tokens.Typography.bodyLarge)
+            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
             .lineSpacing(2)
             .textSelection(.enabled)
     }
 
     private var aiRequestContentView: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
 
             if let systemMsg = transcription.aiRequestSystemMessage, !systemMsg.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                     Text("System Prompt")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
+                        .font(Tokens.Typography.bodySmall.weight(.semibold))
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     Text(systemMsg)
-                        .font(.system(size: 13, weight: .regular, design: .monospaced))
+                        .font(Tokens.Typography.labelMono)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                         .lineSpacing(2)
                         .textSelection(.enabled)
                 }
             }
 
             if let userMsg = transcription.aiRequestUserMessage, !userMsg.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                     Text("User Message")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(.secondary)
+                        .font(Tokens.Typography.bodySmall.weight(.semibold))
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     Text(userMsg)
-                        .font(.system(size: 13, weight: .regular, design: .monospaced))
+                        .font(Tokens.Typography.labelMono)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                         .lineSpacing(2)
                         .textSelection(.enabled)
                 }
@@ -104,56 +109,60 @@ struct TranscriptionCard: View {
         let title: String
         let isSelected: Bool
         let action: () -> Void
+        @Environment(\.colorScheme) private var colorScheme
 
         var body: some View {
             Button(action: action) {
                 Text(title)
-                    .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
-                    .foregroundColor(isSelected ? .white : .secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .font(Tokens.Typography.bodySmall.weight(isSelected ? .semibold : .medium))
+                    .foregroundColor(isSelected ? .white : Tokens.Colors.textSecondary(for: colorScheme))
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
                     .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(isSelected ? Color.accentColor.opacity(0.75) : Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .stroke(isSelected ? Color.clear : Color.secondary.opacity(0.3), lineWidth: 1)
-                            )
-                            .contentShape(.capsule)
+                        RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                            .fill(isSelected ? Tokens.Colors.orange : Color.clear)
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                            .stroke(
+                                isSelected ? Color.clear : Tokens.Colors.border(for: colorScheme),
+                                lineWidth: 1
+                            )
+                    )
+                    .contentShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
             }
             .buttonStyle(.plain)
-            .animation(.easeInOut(duration: 0.2), value: isSelected)
+            .animation(Tokens.Animation.easing, value: isSelected)
         }
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             Toggle("", isOn: Binding(
                 get: { isSelected },
                 set: { _ in onToggleSelection() }
             ))
             .toggleStyle(CircularCheckboxStyle())
             .labelsHidden()
-            
-            VStack(alignment: .leading, spacing: 12) {
+
+            VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
                 HStack {
                     Text(transcription.timestamp, format: .dateTime.month(.abbreviated).day().year().hour().minute())
-                        .font(.system(size: 14, weight: .medium, design: .default))
-                        .foregroundColor(.secondary)
+                        .font(Tokens.Typography.body.weight(.medium))
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     Spacer()
 
                     Text(formatTiming(transcription.duration))
-                        .font(.system(size: 14, weight: .medium, design: .default))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.accentColor.opacity(0.1))
-                        .foregroundColor(.accentColor)
-                        .cornerRadius(6)
+                        .font(Tokens.Typography.body.weight(.medium))
+                        .padding(.horizontal, Tokens.Spacing.sm)
+                        .padding(.vertical, Tokens.Spacing.xs)
+                        .background(Tokens.Colors.orangeMedium(for: colorScheme))
+                        .foregroundColor(Tokens.Colors.orange)
+                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
                 }
 
                 if isExpanded {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Tokens.Spacing.xs) {
                         ForEach(availableTabs, id: \.self) { tab in
                             TabButton(
                                 title: tab.rawValue,
@@ -166,11 +175,11 @@ struct TranscriptionCard: View {
 
                         AnimatedCopyButton(textToCopy: copyTextForCurrentTab)
                     }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 4)
+                    .padding(.vertical, Tokens.Spacing.sm)
+                    .padding(.horizontal, Tokens.Spacing.xs)
 
                     ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
                             switch selectedTab {
                             case .original:
                                 originalContentView
@@ -182,23 +191,27 @@ struct TranscriptionCard: View {
                                 aiRequestContentView
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, Tokens.Spacing.sm)
                     }
                     .frame(maxHeight: 300)
-                    .cornerRadius(8)
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
 
                     if hasAudioFile, let urlString = transcription.audioFileURL,
                        let url = URL(string: urlString) {
-                        Divider()
-                            .padding(.vertical, 8)
+                        Rectangle()
+                            .fill(Tokens.Colors.border(for: colorScheme))
+                            .frame(height: 1)
+                            .padding(.vertical, Tokens.Spacing.sm)
                         AudioPlayerView(url: url)
                     }
 
                     if hasMetadata {
-                        Divider()
-                            .padding(.vertical, 8)
+                        Rectangle()
+                            .fill(Tokens.Colors.border(for: colorScheme))
+                            .frame(height: 1)
+                            .padding(.vertical, Tokens.Spacing.sm)
 
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: Tokens.Spacing.sm + 2) {
                             if let powerModeValue = powerModeDisplay(
                                 name: transcription.powerModeName,
                                 emoji: transcription.powerModeEmoji
@@ -229,16 +242,20 @@ struct TranscriptionCard: View {
                     }
                 } else {
                     Text(transcription.text)
-                        .font(.system(size: 15, weight: .regular, design: .default))
+                        .font(Tokens.Typography.bodyLarge)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                         .lineSpacing(2)
                 }
             }
         }
-        .padding(16)
-        .background(CardBackground(isSelected: false))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+        .padding(Tokens.Spacing.lg)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
         .contextMenu {
             if let enhancedText = transcription.enhancedText {
                 Button {
@@ -290,19 +307,19 @@ struct TranscriptionCard: View {
     }
     
     private func metadataRow(icon: String, label: String, value: String) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.bodySmall.weight(.medium))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .frame(width: 20, alignment: .center)
-            
+
             Text(label)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.primary)
+                .font(Tokens.Typography.bodySmall.weight(.medium))
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
             Spacer()
             Text(value)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.bodySmall.weight(.semibold))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
         }
     }
 

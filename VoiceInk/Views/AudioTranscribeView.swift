@@ -5,6 +5,7 @@ import AVFoundation
 
 struct AudioTranscribeView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var whisperState: WhisperState
     @StateObject private var transcriptionManager = AudioTranscriptionManager.shared
     @State private var isDropTargeted = false
@@ -12,27 +13,27 @@ struct AudioTranscribeView: View {
     @State private var isAudioFileSelected = false
     @State private var isEnhancementEnabled = false
     @State private var selectedPromptId: UUID?
-    
+
     var body: some View {
         ZStack(alignment: .top) {
-            Color(NSColor.controlBackgroundColor)
+            Tokens.Colors.background(for: colorScheme)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Header Card
-                HStack(alignment: .top, spacing: 16) {
+                HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
                     // Icon
                     Image(systemName: "waveform.circle.fill")
                         .font(.system(size: 48))
-                        .foregroundStyle(.white, .accent)
+                        .foregroundStyle(.white, Tokens.Colors.orange)
                         .symbolRenderingMode(.palette)
 
                     // Title and Description
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
+                        HStack(spacing: Tokens.Spacing.sm) {
                             Text("Transcribe Files")
-                                .font(.system(size: 24, weight: .bold, design: .default))
-                                .foregroundColor(.primary)
+                                .font(Tokens.Typography.heading1)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             InfoTip(
                                 title: "Transcribe Audio Files",
@@ -41,23 +42,20 @@ struct AudioTranscribeView: View {
                         }
 
                         Text("Convert recordings and videos to text instantly.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     }
 
                     Spacer()
                 }
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(NSColor.controlBackgroundColor))
-                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
-                )
+                .padding(Tokens.Spacing.xl)
+                .background(Tokens.Colors.elevated(for: colorScheme))
+                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.xl))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Tokens.Radius.xl)
+                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                 )
-                .padding(20)
+                .padding(Tokens.Spacing.xl)
 
                 if transcriptionManager.isProcessing {
                     processingView
@@ -96,39 +94,42 @@ struct AudioTranscribeView: View {
             }
         }
     }
-    
+
     private var dropZoneView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Tokens.Spacing.lg) {
             if isAudioFileSelected {
-                VStack(spacing: 16) {
+                VStack(spacing: Tokens.Spacing.lg) {
                     Text("Audio file selected: \(selectedAudioURL?.lastPathComponent ?? "")")
-                        .font(.headline)
-                    
+                        .font(Tokens.Typography.heading3)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                     // AI Transformation Settings
                     if let enhancementService = whisperState.getEnhancementService() {
-                        VStack(spacing: 16) {
+                        VStack(spacing: Tokens.Spacing.lg) {
                             // Intelligent Transformation and Prompt in the same row
-                            HStack(spacing: 16) {
+                            HStack(spacing: Tokens.Spacing.lg) {
                                 Toggle("Intelligent Transformation", isOn: $isEnhancementEnabled)
                                     .toggleStyle(.switch)
+                                    .tint(Tokens.Colors.orange)
                                     .onChange(of: isEnhancementEnabled) { oldValue, newValue in
                                         enhancementService.isEnhancementEnabled = newValue
                                     }
-                                
+
                                 if isEnhancementEnabled {
                                     Divider()
                                         .frame(height: 20)
-                                    
+
                                     // Prompt Selection
-                                    HStack(spacing: 8) {
+                                    HStack(spacing: Tokens.Spacing.sm) {
                                         Text("Prompt:")
-                                            .font(.subheadline)
-                                        
+                                            .font(Tokens.Typography.bodySmall)
+                                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                                         if enhancementService.allPrompts.isEmpty {
                                             Text("No prompts available")
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                                 .italic()
-                                                .font(.caption)
+                                                .font(Tokens.Typography.caption)
                                         } else {
                                             let promptBinding = Binding<UUID>(
                                                 get: {
@@ -139,21 +140,27 @@ struct AudioTranscribeView: View {
                                                     enhancementService.selectedPromptId = newValue
                                                 }
                                             )
-                                            
+
                                             Picker("", selection: promptBinding) {
                                                 ForEach(enhancementService.allPrompts) { prompt in
                                                     Text(prompt.title).tag(prompt.id)
                                                 }
                                             }
+                                            .tint(Tokens.Colors.orange)
                                             .labelsHidden()
                                             .fixedSize()
                                         }
                                     }
                                 }
                             }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                                        .background(CardBackground(isSelected: false))
+                            .padding(.horizontal, Tokens.Spacing.md)
+                            .padding(.vertical, Tokens.Spacing.sm)
+                            .background(Tokens.Colors.elevated(for: colorScheme))
+                            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                            )
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
                         .onAppear {
@@ -162,9 +169,9 @@ struct AudioTranscribeView: View {
                             selectedPromptId = enhancementService.selectedPromptId
                         }
                     }
-                    
+
                     // Action Buttons in a row
-                    HStack(spacing: 12) {
+                    HStack(spacing: Tokens.Spacing.md) {
                         Button("Start Transcription") {
                             if let url = selectedAudioURL {
                                 transcriptionManager.startProcessing(
@@ -175,7 +182,8 @@ struct AudioTranscribeView: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        
+                        .tint(Tokens.Colors.orange)
+
                         Button("Choose Different File") {
                             selectedAudioURL = nil
                             isAudioFileSelected = false
@@ -183,61 +191,64 @@ struct AudioTranscribeView: View {
                         .buttonStyle(.bordered)
                     }
                 }
-                .padding()
+                .padding(Tokens.Spacing.lg)
             } else {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.windowBackgroundColor).opacity(0.4))
+                    RoundedRectangle(cornerRadius: Tokens.Radius.xl)
+                        .fill(Tokens.Colors.elevated(for: colorScheme))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: Tokens.Radius.xl)
                                 .strokeBorder(
                                     style: StrokeStyle(
                                         lineWidth: 2,
                                         dash: [8]
                                     )
                                 )
-                                .foregroundColor(isDropTargeted ? .accentColor : .gray.opacity(0.5))
+                                .foregroundColor(isDropTargeted ? Tokens.Colors.orange : Tokens.Colors.border(for: colorScheme))
                         )
 
-                    VStack(spacing: 16) {
+                    VStack(spacing: Tokens.Spacing.lg) {
                         Image(systemName: "arrow.down.doc")
                             .font(.system(size: 32))
-                            .foregroundColor(isDropTargeted ? .accentColor : .gray)
-                        
+                            .foregroundColor(isDropTargeted ? Tokens.Colors.orange : Tokens.Colors.textSecondary(for: colorScheme))
+
                         Text("Drop audio or video file here")
-                            .font(.headline)
-                        
+                            .font(Tokens.Typography.heading3)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                         Text("or")
-                            .foregroundColor(.secondary)
-                        
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
                         Button("Choose File") {
                             selectFile()
                         }
                         .buttonStyle(.bordered)
+                        .tint(Tokens.Colors.orange)
                     }
-                    .padding(32)
+                    .padding(Tokens.Spacing.xxl)
                 }
                 .frame(height: 200)
-                .padding(.horizontal)
+                .padding(.horizontal, Tokens.Spacing.lg)
             }
-            
+
             Text("Supported formats: WAV, MP3, M4A, AIFF, MP4, MOV")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
         }
-        .padding()
+        .padding(Tokens.Spacing.lg)
     }
-    
+
     private var processingView: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Tokens.Spacing.lg) {
             ProgressView()
                 .scaleEffect(0.8)
             Text(transcriptionManager.processingPhase.message)
-                .font(.headline)
+                .font(Tokens.Typography.heading3)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
         }
-        .padding()
+        .padding(Tokens.Spacing.lg)
     }
-    
+
     private func selectFile() {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
@@ -246,7 +257,7 @@ struct AudioTranscribeView: View {
         panel.allowedContentTypes = [
             .audio, .movie
         ]
-        
+
         if panel.runModal() == .OK {
             if let url = panel.url {
                 selectedAudioURL = url
@@ -254,10 +265,10 @@ struct AudioTranscribeView: View {
             }
         }
     }
-    
+
     private func handleDroppedFile(_ providers: [NSItemProvider]) {
         guard let provider = providers.first else { return }
-        
+
         // List of type identifiers to try
         let typeIdentifiers = [
             UTType.fileURL.identifier,
@@ -266,7 +277,7 @@ struct AudioTranscribeView: View {
             UTType.data.identifier,
             "public.file-url"
         ]
-        
+
         // Try each type identifier
         for typeIdentifier in typeIdentifiers {
             if provider.hasItemConformingToTypeIdentifier(typeIdentifier) {
@@ -275,9 +286,9 @@ struct AudioTranscribeView: View {
                         print("Error loading dropped file with type \(typeIdentifier): \(error)")
                         return
                     }
-                    
+
                     var fileURL: URL?
-                    
+
                     if let url = item as? URL {
                         fileURL = url
                     } else if let data = item as? Data {
@@ -291,7 +302,7 @@ struct AudioTranscribeView: View {
                     } else if let urlString = item as? String {
                         fileURL = URL(string: urlString)
                     }
-                    
+
                     if let finalURL = fileURL {
                         DispatchQueue.main.async {
                             self.validateAndSetAudioFile(finalURL)
@@ -303,16 +314,16 @@ struct AudioTranscribeView: View {
             }
         }
     }
-    
+
     private func validateAndSetAudioFile(_ url: URL) {
         print("Attempting to validate file: \(url.path)")
-        
+
         // Check if file exists
         guard FileManager.default.fileExists(atPath: url.path) else {
             print("File does not exist at path: \(url.path)")
             return
         }
-        
+
         // Try to access security scoped resource
         let accessing = url.startAccessingSecurityScopedResource()
         defer {
@@ -320,15 +331,15 @@ struct AudioTranscribeView: View {
                 url.stopAccessingSecurityScopedResource()
             }
         }
-        
+
         // Validate file type
         guard SupportedMedia.isSupported(url: url) else { return }
-        
+
         print("File validated successfully: \(url.lastPathComponent)")
         selectedAudioURL = url
         isAudioFileSelected = true
     }
-    
+
     private func formatDuration(_ duration: TimeInterval) -> String {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60

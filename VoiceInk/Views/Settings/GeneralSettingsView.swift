@@ -16,141 +16,36 @@ struct GeneralSettingsView: View {
     @AppStorage("enableAnnouncements") private var enableAnnouncements = true
     @State private var showResetOnboardingAlert = false
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                SettingsSection(
-                    icon: "gear",
-                    title: "Appearance",
-                    subtitle: "Customize how Echo appears"
-                ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Toggle("Hide Dock Icon (Menu Bar Only)", isOn: $menuBarManager.isMenuBarOnly)
-                            .toggleStyle(.switch)
-                    }
-                }
+            VStack(spacing: Tokens.Spacing.xl) {
+                // MARK: - Appearance Section
+                appearanceSection
 
-                SettingsSection(
-                    icon: "power",
-                    title: "Startup & Updates",
-                    subtitle: "Launch behavior and update preferences"
-                ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        LaunchAtLogin.Toggle()
-                            .toggleStyle(.switch)
+                // MARK: - Startup & Updates Section
+                startupSection
 
-                        Toggle("Enable automatic update checks", isOn: $autoUpdateCheck)
-                            .toggleStyle(.switch)
-                            .onChange(of: autoUpdateCheck) { _, newValue in
-                                updaterViewModel.toggleAutoUpdates(newValue)
-                            }
+                // MARK: - Permissions Section
+                permissionsSection
 
-                        // Announcements disabled - can be re-enabled in the future
-                        // Toggle("Show app announcements", isOn: $enableAnnouncements)
-                        //     .toggleStyle(.switch)
-                        //     .onChange(of: enableAnnouncements) { _, newValue in
-                        //         if newValue {
-                        //             AnnouncementsService.shared.start()
-                        //         } else {
-                        //             AnnouncementsService.shared.stop()
-                        //         }
-                        //     }
-                    }
-                }
+                // MARK: - Privacy Controls Section
+                privacySection
 
-                SettingsSection(
-                    icon: "shield.fill",
-                    title: "Permissions",
-                    subtitle: "Manage system permissions"
-                ) {
-                    PermissionsView()
-                }
+                // MARK: - Backup & Restore Section
+                backupSection
 
-                SettingsSection(
-                    icon: "lock.shield",
-                    title: "Privacy Controls",
-                    subtitle: "Control transcript history and storage"
-                ) {
-                    AudioCleanupSettingsView()
-                }
-
-                SettingsSection(
-                    icon: "arrow.up.arrow.down.circle",
-                    title: "Backup & Restore",
-                    subtitle: "Import or export your settings"
-                ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Export your custom prompts, configurations, smart corrections, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
-                            .settingsDescription()
-
-                        HStack(spacing: 12) {
-                            Button {
-                                ImportExportService.shared.importSettings(
-                                    enhancementService: enhancementService,
-                                    whisperPrompt: whisperState.whisperPrompt,
-                                    hotkeyManager: hotkeyManager,
-                                    menuBarManager: menuBarManager,
-                                    mediaController: MediaController.shared,
-                                    playbackController: PlaybackController.shared,
-                                    soundManager: SoundManager.shared,
-                                    whisperState: whisperState
-                                )
-                            } label: {
-                                Label("Import Settings...", systemImage: "arrow.down.doc")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .controlSize(.large)
-
-                            Button {
-                                ImportExportService.shared.exportSettings(
-                                    enhancementService: enhancementService,
-                                    whisperPrompt: whisperState.whisperPrompt,
-                                    hotkeyManager: hotkeyManager,
-                                    menuBarManager: menuBarManager,
-                                    mediaController: MediaController.shared,
-                                    playbackController: PlaybackController.shared,
-                                    soundManager: SoundManager.shared,
-                                    whisperState: whisperState
-                                )
-                            } label: {
-                                Label("Export Settings...", systemImage: "arrow.up.doc")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .controlSize(.large)
-                        }
-                    }
-                }
-
-                SettingsSection(
-                    icon: "arrow.counterclockwise",
-                    title: "Reset",
-                    subtitle: "Restore initial setup"
-                ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Reset the onboarding flow to see the introduction screens again.")
-                            .settingsDescription()
-
-                        Button("Reset Onboarding") {
-                            showResetOnboardingAlert = true
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                    }
-                }
+                // MARK: - Reset Section
+                resetSection
 
                 // MARK: - Experimental Features Section
-                SettingsSection(
-                    icon: "flask",
-                    title: "Experimental Features",
-                    subtitle: "Try new features that may be unstable"
-                ) {
-                    ExperimentalFeaturesSection()
-                }
+                experimentalSection
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 6)
+            .padding(.horizontal, Tokens.Spacing.lg)
+            .padding(.vertical, Tokens.Spacing.sm)
         }
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Tokens.Colors.background(for: colorScheme))
         .alert("Reset Onboarding", isPresented: $showResetOnboardingAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {
@@ -161,6 +56,289 @@ struct GeneralSettingsView: View {
             }
         } message: {
             Text("Are you sure you want to reset the onboarding? You'll see the introduction screens again the next time you launch the app.")
+        }
+    }
+
+    // MARK: - Appearance Section
+
+    private var appearanceSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Appearance",
+                subtitle: "Customize how Echo appears"
+            )
+
+            VStack(spacing: 0) {
+                FormRow(label: "Dock") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: $menuBarManager.isMenuBarOnly)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+
+                        Text("Hide Dock Icon (Menu Bar Only)")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Startup & Updates Section
+
+    private var startupSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Startup & Updates",
+                subtitle: "Launch behavior and update preferences"
+            )
+
+            VStack(spacing: 0) {
+                FormRow(label: "Launch") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        LaunchAtLogin.Toggle {
+                            EmptyView()
+                        }
+                        .toggleStyle(.switch)
+                        .tint(Tokens.Colors.orange)
+                        .labelsHidden()
+
+                        Text("Launch at Login")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+
+                FormDivider()
+
+                FormRow(label: "Updates") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: $autoUpdateCheck)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+                            .onChange(of: autoUpdateCheck) { _, newValue in
+                                updaterViewModel.toggleAutoUpdates(newValue)
+                            }
+
+                        Text("Enable automatic update checks")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Permissions Section
+
+    private var permissionsSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Permissions",
+                subtitle: "Manage system permissions"
+            )
+
+            VStack(spacing: 0) {
+                PermissionsView()
+                    .padding(Tokens.Spacing.lg)
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Privacy Controls Section
+
+    private var privacySection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Privacy Controls",
+                subtitle: "Control transcript history and storage"
+            )
+
+            VStack(spacing: 0) {
+                AudioCleanupSettingsView()
+                    .padding(Tokens.Spacing.lg)
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Backup & Restore Section
+
+    private var backupSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Backup & Restore",
+                subtitle: "Import or export your settings"
+            )
+
+            VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
+                Text("Export your custom prompts, configurations, smart corrections, keyboard shortcuts, and app preferences to a backup file. API keys are not included in the export.")
+                    .font(Tokens.Typography.bodySmall)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: Tokens.Spacing.md) {
+                    Button(action: {
+                        ImportExportService.shared.importSettings(
+                            enhancementService: enhancementService,
+                            whisperPrompt: whisperState.whisperPrompt,
+                            hotkeyManager: hotkeyManager,
+                            menuBarManager: menuBarManager,
+                            mediaController: MediaController.shared,
+                            playbackController: PlaybackController.shared,
+                            soundManager: SoundManager.shared,
+                            whisperState: whisperState
+                        )
+                    }) {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Image(systemName: "arrow.down.doc")
+                            Text("Import Settings...")
+                        }
+                        .font(Tokens.Typography.body)
+                        .padding(.vertical, Tokens.Spacing.sm)
+                        .padding(.horizontal, Tokens.Spacing.md)
+                        .background(Tokens.Colors.elevated(for: colorScheme))
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: {
+                        ImportExportService.shared.exportSettings(
+                            enhancementService: enhancementService,
+                            whisperPrompt: whisperState.whisperPrompt,
+                            hotkeyManager: hotkeyManager,
+                            menuBarManager: menuBarManager,
+                            mediaController: MediaController.shared,
+                            playbackController: PlaybackController.shared,
+                            soundManager: SoundManager.shared,
+                            whisperState: whisperState
+                        )
+                    }) {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Image(systemName: "arrow.up.doc")
+                            Text("Export Settings...")
+                        }
+                        .font(Tokens.Typography.body)
+                        .padding(.vertical, Tokens.Spacing.sm)
+                        .padding(.horizontal, Tokens.Spacing.md)
+                        .background(Tokens.Colors.elevated(for: colorScheme))
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(Tokens.Spacing.lg)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Reset Section
+
+    private var resetSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Reset",
+                subtitle: "Restore initial setup"
+            )
+
+            VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
+                Text("Reset the onboarding flow to see the introduction screens again.")
+                    .font(Tokens.Typography.bodySmall)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button(action: {
+                    showResetOnboardingAlert = true
+                }) {
+                    Text("Reset Onboarding")
+                        .font(Tokens.Typography.body)
+                        .padding(.vertical, Tokens.Spacing.sm)
+                        .padding(.horizontal, Tokens.Spacing.md)
+                        .background(Tokens.Colors.elevated(for: colorScheme))
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(Tokens.Spacing.lg)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Experimental Features Section
+
+    private var experimentalSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Experimental Features",
+                subtitle: "Try new features that may be unstable"
+            )
+
+            VStack(spacing: 0) {
+                ExperimentalFeaturesSection()
+                    .padding(Tokens.Spacing.lg)
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
         }
     }
 }

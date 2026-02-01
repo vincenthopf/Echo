@@ -1,11 +1,12 @@
 import SwiftUI
 
 /// Master-detail container for Adaptive Awareness profile management
-/// Uses NavigationSplitView following macOS HIG patterns
+/// Uses HSplitView following macOS HIG patterns with parallel.ai design tokens
 struct AdaptiveAwarenessView: View {
     @ObservedObject private var powerModeManager = PowerModeManager.shared
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @EnvironmentObject private var aiService: AIService
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var selectedProfileId: UUID?
     @State private var showingDeleteConfirmation = false
@@ -28,22 +29,35 @@ struct AdaptiveAwarenessView: View {
                 }
             )
             .frame(minWidth: 240, idealWidth: 320, maxWidth: 320)
+            .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
 
             // Right Panel: Detail Editor
             if let selectedId = selectedProfileId,
                let config = powerModeManager.getConfiguration(with: selectedId) {
                 ProfileDetailView(config: config)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(ParallelDesignTokens.Colors.background(for: colorScheme))
             } else {
                 // Empty state
-                ContentUnavailableView(
-                    "Select a Profile",
-                    systemImage: "sparkles.square.fill.on.square",
-                    description: Text("Choose a profile from the list to view and edit its settings")
-                )
+                VStack(spacing: ParallelDesignTokens.Spacing.lg) {
+                    Image(systemName: "sparkles.square.fill.on.square")
+                        .font(.system(size: 48))
+                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+
+                    Text("Select a Profile")
+                        .font(ParallelDesignTokens.Typography.heading2)
+                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+
+                    Text("Choose a profile from the list to view and edit its settings")
+                        .font(ParallelDesignTokens.Typography.bodySmall)
+                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(ParallelDesignTokens.Colors.background(for: colorScheme))
             }
         }
+        .background(ParallelDesignTokens.Colors.background(for: colorScheme))
         .sheet(isPresented: $showMigrationNotice) {
             AdaptiveAwarenessMigrationSheet(isPresented: $showMigrationNotice)
         }
@@ -80,7 +94,7 @@ struct AdaptiveAwarenessView: View {
     private func addNewProfile() {
         let newConfig = PowerModeConfig(
             name: "New Profile",
-            emoji: "✨",
+            emoji: "sparkles",
             isAIEnhancementEnabled: false
         )
         powerModeManager.addConfiguration(newConfig)
@@ -101,19 +115,20 @@ struct AdaptiveAwarenessView: View {
 
 struct AdaptiveAwarenessHelpSheet: View {
     @Binding var isPresented: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.xs) {
                     Text("What is Adaptive Awareness?")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .font(ParallelDesignTokens.Typography.heading2)
+                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
 
                     Text("Automatically apply custom transcription settings based on context")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
+                        .font(ParallelDesignTokens.Typography.bodySmall)
+                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                 }
 
                 Spacer()
@@ -123,22 +138,23 @@ struct AdaptiveAwarenessHelpSheet: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(24)
+            .padding(ParallelDesignTokens.Spacing.xl)
 
             Divider()
+                .background(ParallelDesignTokens.Colors.border(for: colorScheme))
 
             // Content
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.xl) {
                     Text("Trigger profiles using:")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.primary)
+                        .font(ParallelDesignTokens.Typography.heading3)
+                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
 
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.lg) {
                         HelpTriggerRow(
                             icon: "app.fill",
                             title: "Applications",
@@ -159,23 +175,25 @@ struct AdaptiveAwarenessHelpSheet: View {
                     }
 
                     Divider()
-                        .padding(.vertical, 8)
+                        .background(ParallelDesignTokens.Colors.border(for: colorScheme))
+                        .padding(.vertical, ParallelDesignTokens.Spacing.sm)
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.md) {
                         Text("What can profiles include?")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.primary)
+                            .font(ParallelDesignTokens.Typography.heading3)
+                            .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
 
                         Text("Each profile can have custom AI prompts, transcription models, language settings, and more. Mix and match any combination of triggers to create powerful context-aware workflows.")
-                            .font(.system(size: 13))
-                            .foregroundColor(.secondary)
+                            .font(ParallelDesignTokens.Typography.bodySmall)
+                            .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .padding(24)
+                .padding(ParallelDesignTokens.Spacing.xl)
             }
 
             Divider()
+                .background(ParallelDesignTokens.Colors.border(for: colorScheme))
 
             // Footer
             HStack {
@@ -185,7 +203,8 @@ struct AdaptiveAwarenessHelpSheet: View {
                     }
                 }) {
                     Text("Full Documentation")
-                        .font(.system(size: 13))
+                        .font(ParallelDesignTokens.Typography.bodySmall)
+                        .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                 }
                 .buttonStyle(PlainButtonStyle())
 
@@ -195,20 +214,20 @@ struct AdaptiveAwarenessHelpSheet: View {
                     isPresented = false
                 }) {
                     Text("Got It")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(ParallelDesignTokens.Typography.bodySmall.weight(.semibold))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.accentColor)
-                        .cornerRadius(6)
+                        .padding(.horizontal, ParallelDesignTokens.Spacing.lg)
+                        .padding(.vertical, ParallelDesignTokens.Spacing.sm)
+                        .background(ParallelDesignTokens.Colors.primaryOrange)
+                        .cornerRadius(ParallelDesignTokens.Radius.small)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .keyboardShortcut(.defaultAction)
             }
-            .padding(24)
+            .padding(ParallelDesignTokens.Spacing.xl)
         }
         .frame(width: 480, height: 520)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
     }
 }
 
@@ -217,21 +236,23 @@ struct HelpTriggerRow: View {
     let title: String
     let description: String
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: ParallelDesignTokens.Spacing.md) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .foregroundColor(.accentColor)
+                .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                 .frame(width: 24)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.xs) {
                 Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                    .font(ParallelDesignTokens.Typography.body.weight(.medium))
+                    .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
 
                 Text(description)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
+                    .font(ParallelDesignTokens.Typography.label)
+                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

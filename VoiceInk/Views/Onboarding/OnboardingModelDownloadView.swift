@@ -3,6 +3,7 @@ import SwiftUI
 struct OnboardingModelDownloadView: View {
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var whisperState: WhisperState
+    @Environment(\.colorScheme) private var colorScheme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
     @State private var isDownloading = false
@@ -126,7 +127,7 @@ struct OnboardingModelDownloadView: View {
                         .disabled(isDownloading)
                         
                         if !isModelSet {
-                            SkipButton(text: "Skip for now") {
+                            SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                 withAnimation {
                                     showTutorial = true
                                 }

@@ -1,50 +1,58 @@
 import SwiftUI
 
 /// Tag-style input for voice trigger keywords
+/// Updated to fit within the trigger grid column design
 struct VoiceKeywordInput: View {
     @Binding var triggerWords: [String]
 
     @State private var newKeyword = ""
     @FocusState private var isTextFieldFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+            // Existing keywords
             if !triggerWords.isEmpty {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120, maximum: 200))], spacing: 8) {
+                VStack(spacing: Tokens.Spacing.sm) {
                     ForEach(triggerWords, id: \.self) { word in
                         KeywordTagView(word: word) {
                             triggerWords.removeAll { $0 == word }
                         }
                     }
                 }
-                .padding(.bottom, 4)
-            } else {
-                Text("No voice keywords added")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
 
             // Input field
-            HStack {
+            HStack(spacing: Tokens.Spacing.sm) {
                 TextField("Add keyword", text: $newKeyword)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 13))
+                    .font(Tokens.Typography.bodySmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
+                    .padding(.vertical, Tokens.Spacing.xs)
+                    .background(Tokens.Colors.background(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
                     .focused($isTextFieldFocused)
                     .onSubmit {
                         addKeyword()
                     }
 
-                Button("Add") {
-                    addKeyword()
+                Button(action: addKeyword) {
+                    Text("Add")
+                        .font(.system(size: 11, weight: .medium))
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .disabled(newKeyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
-            Text("Tip: Say the keyword during recording to activate this profile")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            // Hint text
+            Text("Say keyword during recording")
+                .font(.system(size: 10))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
         }
     }
 
@@ -52,7 +60,6 @@ struct VoiceKeywordInput: View {
         let trimmed = newKeyword.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        // Check for duplicates (case insensitive)
         let lowerCased = trimmed.lowercased()
         guard !triggerWords.contains(where: { $0.lowercased() == lowerCased }) else {
             newKeyword = ""
@@ -70,39 +77,44 @@ struct KeywordTagView: View {
     let onDelete: () -> Void
 
     @State private var isHovered = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text(word)
-                .font(.system(size: 13))
+        HStack(spacing: Tokens.Spacing.sm) {
+            Image(systemName: "quote.bubble")
+                .font(.system(size: 10))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+
+            Text("\"\(word)\"")
+                .font(Tokens.Typography.bodySmall)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 .lineLimit(1)
-                .foregroundColor(.primary)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
-            Button(action: onDelete) {
-                Image(systemName: "xmark.circle.fill")
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(isHovered ? .red : .secondary)
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .buttonStyle(.borderless)
-            .help("Remove keyword")
-            .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isHovered = hovering
+            if isHovered {
+                Button(action: onDelete) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Tokens.Colors.error)
                 }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color(NSColor.textBackgroundColor))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+        .padding(.horizontal, Tokens.Spacing.sm)
+        .padding(.vertical, Tokens.Spacing.xs)
+        .background(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .fill(Tokens.Colors.background(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.15)) {
+                isHovered = hovering
+            }
         }
     }
 }

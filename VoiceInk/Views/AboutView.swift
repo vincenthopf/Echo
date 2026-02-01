@@ -2,6 +2,7 @@ import SwiftUI
 
 /// About page showcasing Echo's philosophy and capabilities
 struct AboutView: View {
+    @Environment(\.colorScheme) private var colorScheme
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 
     var body: some View {
@@ -14,11 +15,11 @@ struct AboutView: View {
                 mainContent
             }
         }
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Tokens.Colors.background(for: colorScheme))
     }
 
     private var heroSection: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Tokens.Spacing.xl) {
             // App icon
             if let appIcon = NSImage(named: "AppIcon") {
                 Image(nsImage: appIcon)
@@ -26,60 +27,61 @@ struct AboutView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 120, height: 120)
                     .cornerRadius(26)
-                    .shadow(color: Color.black.opacity(0.15), radius: 20, y: 8)
             }
 
-            VStack(spacing: 8) {
+            VStack(spacing: Tokens.Spacing.sm) {
                 Text("Echo")
-                    .font(.system(size: 36, weight: .bold))
+                    .font(Tokens.Typography.displayMedium)
+                    .fontWeight(.bold)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 Text("Version \(appVersion)")
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 50)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color.accentColor.opacity(0.05),
-                    Color(NSColor.controlBackgroundColor)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        .padding(.vertical, Tokens.Spacing.xxxl)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .overlay(
+            Rectangle()
+                .frame(height: 1)
+                .foregroundColor(Tokens.Colors.border(for: colorScheme)),
+            alignment: .bottom
         )
     }
 
     private var mainContent: some View {
-        VStack(alignment: .leading, spacing: 40) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.xxl) {
             // What You Can Do
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                 Text("Speak naturally. Work faster.")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(Tokens.Typography.heading1)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
                     Text("Turn your voice into text instantly. Echo transcribes everything you say with remarkable accuracy. Right on your Mac.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
+                        .font(Tokens.Typography.bodyLarge)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text("Your words stay private. No servers, cloud processing, or sneaky companies listening. Unless you choose otherwise.")
-                        .font(.system(size: 15))
-                        .foregroundColor(.primary)
+                        .font(Tokens.Typography.bodyLarge)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
             Divider()
+                .background(Tokens.Colors.border(for: colorScheme))
 
             // What Makes Echo Different
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.xl) {
                 Text("What you can do with Echo")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(Tokens.Typography.heading2)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.xl) {
                     FeatureComparison(
                         title: "Keep your voice private",
                         description: "Choose local transcription and your audio never leaves your Mac. No servers or cloud processing. Or select cloud services when you need them. It's always your choice.",
@@ -91,7 +93,7 @@ struct AboutView: View {
                         title: "Adapt to any task",
                         description: "Echo knows what you're working on and adapts accordingly. Writing code? Get technical accuracy. Drafting an email? Natural language flows in. Context aware transcription that thinks ahead.",
                         icon: "sparkles.square.fill.on.square",
-                        accentColor: .orange
+                        accentColor: Tokens.Colors.orange
                     )
 
                     FeatureComparison(
@@ -105,7 +107,7 @@ struct AboutView: View {
                         title: "Refine with AI",
                         description: "Go beyond basic transcription. Polish your words into professional emails, clean up technical documentation, or transform rough thoughts into clear writing. Configured by you!",
                         icon: "wand.and.stars",
-                        accentColor: .orange
+                        accentColor: Tokens.Colors.orange
                     )
 
                     FeatureComparison(
@@ -118,61 +120,63 @@ struct AboutView: View {
             }
 
             // Links and info
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                 Text("Learn More")
-                    .font(.system(size: 22, weight: .bold))
+                    .font(Tokens.Typography.heading2)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
                     LinkButton(title: "support", url: "https://vjh.io/embr-echo-support", icon: "book.fill")
                     LinkButton(title: "Tutorial Guide", url: "https://vjh.io/embr-echo-docs", icon: "graduationcap.fill")
                 }
             }
 
             // Footer
-            VStack(spacing: 12) {
-                Text("Made with ❤️ by Vince.")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+            VStack(spacing: Tokens.Spacing.md) {
+                Text("Made with love by Vince.")
+                    .font(Tokens.Typography.bodySmall)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
 
-                Text("© 2025 Echo")
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary.opacity(0.6))
+                Text("2025 Echo")
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
             }
             .frame(maxWidth: .infinity)
-            .padding(.top, 30)
+            .padding(.top, Tokens.Spacing.xxl)
         }
         .padding(.horizontal, 60)
-        .padding(.vertical, 40)
+        .padding(.vertical, Tokens.Spacing.xxl)
     }
 }
 
 // MARK: - Feature Comparison Component
 struct FeatureComparison: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let description: String
     let icon: String
     let accentColor: Color
 
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
             Image(systemName: icon)
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundColor(accentColor)
                 .frame(width: 44, height: 44)
                 .background(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: Tokens.Radius.lg)
                         .fill(accentColor.opacity(0.1))
                 )
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
                 Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.primary)
+                    .font(Tokens.Typography.heading3)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 Text(description)
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
                     .lineSpacing(3)
             }
@@ -182,6 +186,7 @@ struct FeatureComparison: View {
 
 // MARK: - Link Button Component
 struct LinkButton: View {
+    @Environment(\.colorScheme) private var colorScheme
     let title: String
     let url: String
     let icon: String
@@ -192,31 +197,31 @@ struct LinkButton: View {
                 NSWorkspace.shared.open(url)
             }
         }) {
-            HStack(spacing: 10) {
+            HStack(spacing: Tokens.Spacing.sm) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
-                    .foregroundColor(.accentColor)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.orange)
                     .frame(width: 20)
 
                 Text(title)
-                    .font(.system(size: 14))
-                    .foregroundColor(.primary)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 Spacer()
 
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Tokens.Spacing.md)
+            .padding(.vertical, Tokens.Spacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(NSColor.controlBackgroundColor))
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .fill(Tokens.Colors.elevated(for: colorScheme))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)

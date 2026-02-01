@@ -1,5 +1,16 @@
 import SwiftUI
 
+// MARK: - Design Tokens (parallel.ai style)
+private enum RecorderDesign {
+    static let primaryOrange = ParallelDesignTokens.Colors.primaryOrange
+    static let darkBg = ParallelDesignTokens.Colors.darkBg
+    static let darkCard = ParallelDesignTokens.Colors.darkCard
+    static let darkBorder = ParallelDesignTokens.Colors.darkBorder
+    static let secondaryText = ParallelDesignTokens.Colors.darkSecondaryText
+    static let radiusSmall = ParallelDesignTokens.Radius.small
+    static let radiusMedium = ParallelDesignTokens.Radius.medium
+}
+
 // MARK: - Shared Popover State
 enum ActivePopoverState {
     case none
@@ -29,7 +40,7 @@ struct RecorderToggleButton: View {
     let color: Color
     let disabled: Bool
     let action: () -> Void
-    
+
     init(isEnabled: Bool, icon: String, color: Color, disabled: Bool = false, action: @escaping () -> Void) {
         self.isEnabled = isEnabled
         self.icon = icon
@@ -37,11 +48,21 @@ struct RecorderToggleButton: View {
         self.disabled = disabled
         self.action = action
     }
-    
+
     private var isEmoji: Bool {
         return !icon.contains(".") && !icon.contains("-") && icon.unicodeScalars.contains { !$0.isASCII }
     }
-    
+
+    private var foregroundColor: Color {
+        if disabled {
+            return RecorderDesign.secondaryText.opacity(0.4)
+        } else if isEnabled {
+            return .white
+        } else {
+            return RecorderDesign.secondaryText
+        }
+    }
+
     var body: some View {
         Button(action: action) {
             Group {
@@ -53,7 +74,7 @@ struct RecorderToggleButton: View {
                         .font(.system(size: 13))
                 }
             }
-            .foregroundColor(disabled ? .white.opacity(0.3) : (isEnabled ? .white : .white.opacity(0.6)))
+            .foregroundColor(foregroundColor)
         }
         .buttonStyle(PlainButtonStyle())
         .disabled(disabled)
@@ -65,14 +86,14 @@ struct RecorderRecordButton: View {
     let isRecording: Bool
     let isProcessing: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             ZStack {
                 Circle()
                     .fill(buttonColor)
                     .frame(width: 25, height: 25)
-                
+
                 if isProcessing {
                     ProcessingIndicator(color: .white)
                         .frame(width: 16, height: 16)
@@ -90,14 +111,14 @@ struct RecorderRecordButton: View {
         .buttonStyle(PlainButtonStyle())
         .disabled(isProcessing)
     }
-    
+
     private var buttonColor: Color {
         if isProcessing {
-            return Color(red: 0.4, green: 0.4, blue: 0.45)
+            return RecorderDesign.darkCard
         } else if isRecording {
-            return .red
+            return RecorderDesign.primaryOrange
         } else {
-            return Color(red: 0.3, green: 0.3, blue: 0.35)
+            return RecorderDesign.darkBorder
         }
     }
 }
@@ -126,12 +147,14 @@ struct ProgressAnimation: View {
     @State private var currentDot = 0
     @State private var timer: Timer?
     let animationSpeed: Double
-    
+
     var body: some View {
         HStack(spacing: 2) {
             ForEach(0..<5, id: \.self) { index in
                 Circle()
-                    .fill(Color.white.opacity(index <= currentDot ? 0.8 : 0.2))
+                    .fill(index <= currentDot
+                          ? RecorderDesign.primaryOrange
+                          : RecorderDesign.secondaryText.opacity(0.3))
                     .frame(width: 3.5, height: 3.5)
             }
         }
@@ -168,7 +191,7 @@ struct RecorderPromptButton: View {
         RecorderToggleButton(
             isEnabled: enhancementService.isEnhancementEnabled,
             icon: enhancementService.activePrompt?.icon.rawValue ?? enhancementService.allPrompts.first(where: { $0.id == PredefinedPrompts.defaultPromptId })?.icon.rawValue ?? "checkmark.seal.fill",
-            color: .accentColor,
+            color: RecorderDesign.primaryOrange,
             disabled: false
         ) {
             if enhancementService.isEnhancementEnabled {
@@ -232,7 +255,7 @@ struct RecorderPowerModeButton: View {
         RecorderToggleButton(
             isEnabled: !powerModeManager.enabledConfigurations.isEmpty,
             icon: powerModeManager.enabledConfigurations.isEmpty ? "✨" : (powerModeManager.currentActiveConfiguration?.emoji ?? "✨"),
-            color: .orange,
+            color: RecorderDesign.primaryOrange,
             disabled: powerModeManager.enabledConfigurations.isEmpty
         ) {
             activePopover = activePopover == .power ? .none : .power

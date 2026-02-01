@@ -8,8 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		08DD4EE7B43BBBBBD3A1981D /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFA460FA5A5CA40F1D3DEA8 /* DesignSystem.swift */; };
+		295A49F99E3DFC561C69DCB4 /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D44E2DB6DA7B74851A2072 /* VisualEffectView.swift */; };
+		34E24EBAA72C269C5E54AC9D /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D44E2DB6DA7B74851A2072 /* VisualEffectView.swift */; };
 		3C414B37AC34E9EDB43D516A /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3E428AB12F318A7CA82AD7 /* ButtonStyles.swift */; };
 		41B5435EB178B9C75CC419EF /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26943EE9CF3BAD92874D091 /* SectionHeader.swift */; };
+		4A2243ED93A2B08B94AB4545 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3E428AB12F318A7CA82AD7 /* ButtonStyles.swift */; };
+		4E4C4CD3A1EF4150CDC4F0A4 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26943EE9CF3BAD92874D091 /* SectionHeader.swift */; };
+		5D7F425EB936676AB8BE8016 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D26943EE9CF3BAD92874D091 /* SectionHeader.swift */; };
+		71E74E99A683ED5DB641ED23 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3E428AB12F318A7CA82AD7 /* ButtonStyles.swift */; };
+		BFFF4DBCA2745E2CF8498687 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFA460FA5A5CA40F1D3DEA8 /* DesignSystem.swift */; };
+		CA654012BC8E7576821B03FF /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFA460FA5A5CA40F1D3DEA8 /* DesignSystem.swift */; };
 		E11BBA4E2E5DC555000AB839 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = E11BBA4D2E5DC555000AB839 /* FluidAudio */; };
 		E17382402E4C7D0E001BAEBE /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1B2DCAA2E3DE70A008DFD68 /* whisper.xcframework */; };
 		E17382412E4C7D0E001BAEBE /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1B2DCAA2E3DE70A008DFD68 /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -68,21 +76,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E11473B22CBE0F0A00318EE4 /* VoiceInk */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VoiceInk;
-			sourceTree = "<group>";
-		};
-		E11473C62CBE0F0B00318EE4 /* VoiceInkTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VoiceInkTests;
-			sourceTree = "<group>";
-		};
-		E11473D02CBE0F0B00318EE4 /* VoiceInkUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VoiceInkUITests;
-			sourceTree = "<group>";
-		};
+		E11473B22CBE0F0A00318EE4 /* VoiceInk */ = {isa = PBXFileSystemSynchronizedRootGroup; path = VoiceInk; sourceTree = "<group>"; };
+		E11473C62CBE0F0B00318EE4 /* VoiceInkTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = VoiceInkTests; sourceTree = "<group>"; };
+		E11473D02CBE0F0B00318EE4 /* VoiceInkUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = VoiceInkUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -314,6 +310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				08DD4EE7B43BBBBBD3A1981D /* DesignSystem.swift in Sources */,
+				71E74E99A683ED5DB641ED23 /* ButtonStyles.swift in Sources */,
 				41B5435EB178B9C75CC419EF /* SectionHeader.swift in Sources */,
 				E81C4B89B4986F40EA982471 /* VisualEffectView.swift in Sources */,
 			);
@@ -323,6 +320,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BFFF4DBCA2745E2CF8498687 /* DesignSystem.swift in Sources */,
+				4A2243ED93A2B08B94AB4545 /* ButtonStyles.swift in Sources */,
+				4E4C4CD3A1EF4150CDC4F0A4 /* SectionHeader.swift in Sources */,
+				295A49F99E3DFC561C69DCB4 /* VisualEffectView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,7 +331,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CA654012BC8E7576821B03FF /* DesignSystem.swift in Sources */,
 				3C414B37AC34E9EDB43D516A /* ButtonStyles.swift in Sources */,
+				5D7F425EB936676AB8BE8016 /* SectionHeader.swift in Sources */,
+				34E24EBAA72C269C5E54AC9D /* VisualEffectView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

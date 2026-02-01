@@ -18,12 +18,13 @@ struct ModelManagementView: View {
     @StateObject private var customModelManager = CustomModelManager.shared
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var whisperPrompt = WhisperPrompt()
     @ObservedObject private var warmupCoordinator = WhisperModelWarmupCoordinator.shared
 
     @State private var selectedFilter: ModelFilter = .recommended
     @State private var isShowingSettings = false
-    
+
     // State for the unified alert
     @State private var isShowingDeleteAlert = false
     @State private var alertTitle = ""
@@ -35,7 +36,7 @@ struct ModelManagementView: View {
             mainContent
         }
         .frame(minWidth: 600, minHeight: 500)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Tokens.Colors.background(for: colorScheme))
         .alert(isPresented: $isShowingDeleteAlert) {
             Alert(
                 title: Text(alertTitle),
@@ -47,28 +48,32 @@ struct ModelManagementView: View {
     }
 
     private var mainContent: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.xl) {
             defaultModelSection
             languageSelectionSection
             availableModelsSection
         }
         .padding(.horizontal, 40)
-        .padding(.vertical, 20)
+        .padding(.vertical, Tokens.Spacing.xl)
     }
     
     private var defaultModelSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
             Text("Default Model")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.label)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             Text(whisperState.currentTranscriptionModel?.displayName ?? "No model selected")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(Tokens.Typography.heading2)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
         }
-        .padding()
+        .padding(Tokens.Spacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CardBackground(isSelected: false))
-        .cornerRadius(10)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
     }
     
     private var languageSelectionSection: some View {
@@ -76,10 +81,10 @@ struct ModelManagementView: View {
     }
     
     private var availableModelsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             HStack {
                 // Modern compact pill switcher
-                HStack(spacing: 12) {
+                HStack(spacing: Tokens.Spacing.md) {
                     ForEach(ModelFilter.allCases, id: \.self) { filter in
                         Button(action: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -88,20 +93,25 @@ struct ModelManagementView: View {
                             }
                         }) {
                             Text(filter.rawValue)
-                                .font(.system(size: 14, weight: selectedFilter == filter ? .semibold : .medium))
-                                .foregroundColor(selectedFilter == filter ? .primary : .primary.opacity(0.7))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
+                                .font(Tokens.Typography.bodyMedium)
+                                .foregroundColor(selectedFilter == filter ? Tokens.Colors.textPrimary(for: colorScheme) : Tokens.Colors.textSecondary(for: colorScheme))
+                                .padding(.horizontal, Tokens.Spacing.lg)
+                                .padding(.vertical, Tokens.Spacing.sm)
                                 .background(
-                                    CardBackground(isSelected: selectedFilter == filter, cornerRadius: 22)
+                                    Capsule()
+                                        .fill(selectedFilter == filter ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(selectedFilter == filter ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isShowingSettings.toggle()
@@ -109,20 +119,25 @@ struct ModelManagementView: View {
                 }) {
                     Image(systemName: "gear")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(isShowingSettings ? .accentColor : .primary.opacity(0.7))
-                        .padding(12)
+                        .foregroundColor(isShowingSettings ? Tokens.Colors.orange : Tokens.Colors.textSecondary(for: colorScheme))
+                        .padding(Tokens.Spacing.md)
                         .background(
-                            CardBackground(isSelected: isShowingSettings, cornerRadius: 22)
+                            Circle()
+                                .fill(isShowingSettings ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(isShowingSettings ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, Tokens.Spacing.md)
             
             if isShowingSettings {
                 ModelSettingsView(whisperPrompt: whisperPrompt)
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: Tokens.Spacing.md) {
                     ForEach(filteredModels, id: \.id) { model in
                         let isWarming = (model as? LocalModel).map { localModel in
                             warmupCoordinator.isWarming(modelNamed: localModel.name)
@@ -215,7 +230,7 @@ struct ModelManagementView: View {
                 }
             }
         }
-        .padding()
+        .padding(Tokens.Spacing.lg)
     }
 
     private var filteredModels: [any TranscriptionModel] {

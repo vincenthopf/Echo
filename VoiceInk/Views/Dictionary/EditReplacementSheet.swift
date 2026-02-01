@@ -1,6 +1,7 @@
 import SwiftUI
 // Edit existing word replacement entry
 struct EditReplacementSheet: View {
+    @Environment(\.colorScheme) private var colorScheme
     @ObservedObject var manager: WordReplacementManager
     let originalKey: String
 
@@ -9,7 +10,7 @@ struct EditReplacementSheet: View {
     @State private var originalWord: String
     @State private var replacementWord: String
 
-    // MARK: – Initialiser
+    // MARK: - Initialiser
     init(manager: WordReplacementManager, originalKey: String) {
         self.manager = manager
         self.originalKey = originalKey
@@ -20,13 +21,15 @@ struct EditReplacementSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Divider()
+            Rectangle()
+                .fill(Tokens.Colors.border(for: colorScheme))
+                .frame(height: 1)
             formContent
         }
         .frame(width: 460, height: 560)
     }
 
-    // MARK: – Subviews
+    // MARK: - Subviews
     private var header: some View {
         HStack {
             Button("Cancel", role: .cancel) { dismiss() }
@@ -36,82 +39,94 @@ struct EditReplacementSheet: View {
             Spacer()
 
             Text("Edit Word Replacement")
-                .font(.headline)
+                .font(Tokens.Typography.heading3)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
             Spacer()
 
             Button("Save") { saveChanges() }
                 .buttonStyle(.borderedProminent)
+                .tint(Tokens.Colors.orange)
                 .controlSize(.small)
                 .disabled(originalWord.isEmpty || replacementWord.isEmpty)
                 .keyboardShortcut(.return, modifiers: [])
         }
-        .padding(.horizontal)
-        .padding(.vertical, 12)
-        .background(CardBackground(isSelected: false))
+        .padding(.horizontal, Tokens.Spacing.lg)
+        .padding(.vertical, Tokens.Spacing.md)
+        .background(Tokens.Colors.elevated(for: colorScheme))
     }
 
     private var formContent: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: Tokens.Spacing.lg) {
                 descriptionSection
                 inputSection
             }
-            .padding(.vertical)
+            .padding(.vertical, Tokens.Spacing.lg)
         }
+        .background(Tokens.Colors.background(for: colorScheme))
     }
 
     private var descriptionSection: some View {
         Text("Update the word or phrase that should be automatically replaced.")
-            .font(.subheadline)
-            .foregroundColor(.secondary)
+            .font(Tokens.Typography.bodySmall)
+            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.horizontal, Tokens.Spacing.lg)
+            .padding(.top, Tokens.Spacing.sm)
     }
 
     private var inputSection: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Tokens.Spacing.lg) {
             // Original Text Field
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                 HStack {
                     Text("Original Text")
-                        .font(.headline)
+                        .font(Tokens.Typography.bodyMedium)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                     Text("Required")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
                 }
                 TextField("Enter word or phrase to replace (use commas for multiple)", text: $originalWord)
-                    .textFieldStyle(.roundedBorder)
-                
-            }
-            .padding(.horizontal)
-
-            // Replacement Text Field
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text("Replacement Text")
-                        .font(.headline)
-                    Text("Required")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                TextEditor(text: $replacementWord)
-                    .font(.body)
-                    .frame(height: 100)
-                    .padding(8)
-                    .background(Color(.textBackgroundColor))
-                    .cornerRadius(6)
+                    .textFieldStyle(.plain)
+                    .font(Tokens.Typography.body)
+                    .padding(Tokens.Spacing.sm)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color(.separatorColor), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                     )
             }
-            .padding(.horizontal)
+            .padding(.horizontal, Tokens.Spacing.lg)
+
+            // Replacement Text Field
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                HStack {
+                    Text("Replacement Text")
+                        .font(Tokens.Typography.bodyMedium)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                    Text("Required")
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                }
+                TextEditor(text: $replacementWord)
+                    .font(Tokens.Typography.body)
+                    .frame(height: 100)
+                    .padding(Tokens.Spacing.sm)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+            }
+            .padding(.horizontal, Tokens.Spacing.lg)
         }
     }
 
-    // MARK: – Actions
+    // MARK: - Actions
     private func saveChanges() {
         let newOriginal = originalWord.trimmingCharacters(in: .whitespacesAndNewlines)
         let newReplacement = replacementWord

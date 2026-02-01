@@ -30,6 +30,7 @@ struct OnboardingPermission: Identifiable {
 }
 
 struct OnboardingPermissionsView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @ObservedObject private var audioDeviceManager = AudioDeviceManager.shared
@@ -78,52 +79,54 @@ struct OnboardingPermissionsView: View {
         ZStack {
             GeometryReader { geometry in
                 ZStack {
-                    // Reusable background
-                    OnboardingBackgroundView()
-                    
+                    // Clean solid background using design tokens
+                    ParallelDesignTokens.Colors.background(for: colorScheme)
+                        .ignoresSafeArea()
+
                     VStack(spacing: 40) {
-                        // Progress indicator
+                        // Progress indicator using primaryOrange
                         HStack(spacing: 8) {
                             ForEach(0..<permissions.count, id: \.self) { index in
                                 Circle()
-                                    .fill(index <= currentPermissionIndex ? Color.accentColor : Color.white.opacity(0.1))
+                                    .fill(index <= currentPermissionIndex
+                                          ? ParallelDesignTokens.Colors.primaryOrange
+                                          : ParallelDesignTokens.Colors.border(for: colorScheme))
                                     .frame(width: 8, height: 8)
                                     .scaleEffect(index == currentPermissionIndex ? 1.2 : 1.0)
                                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPermissionIndex)
                             }
                         }
                         .padding(.top, 40)
-                        
+
                         // Current permission card
                         VStack(spacing: 30) {
                             // Permission icon
                             ZStack {
                                 Circle()
-                                    .fill(Color.accentColor.opacity(0.1))
+                                    .fill(ParallelDesignTokens.Colors.primaryOrange.opacity(0.1))
                                     .frame(width: 100, height: 100)
-                                
+
                                 if permissionStates[currentPermissionIndex] {
                                     Image(systemName: "checkmark.seal.fill")
                                         .font(.system(size: 50))
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                                         .transition(.scale.combined(with: .opacity))
                                 } else {
                                     Image(systemName: permissions[currentPermissionIndex].icon)
                                         .font(.system(size: 40))
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                                 }
                             }
                             .scaleEffect(scale)
                             .opacity(opacity)
-                            
+
                             // Permission text
                             VStack(spacing: 12) {
                                 HStack(spacing: 8) {
                                     Text(permissions[currentPermissionIndex].title)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                    
+                                        .font(ParallelDesignTokens.Typography.heading2)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+
                                     if permissions[currentPermissionIndex].type == .screenRecording {
                                         InfoTip(
                                             title: "Screen Recording Access",
@@ -132,10 +135,10 @@ struct OnboardingPermissionsView: View {
                                         )
                                     }
                                 }
-                                
+
                                 Text(permissions[currentPermissionIndex].description)
-                                    .font(.body)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .font(ParallelDesignTokens.Typography.body)
+                                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
@@ -150,11 +153,11 @@ struct OnboardingPermissionsView: View {
                                             Image(systemName: "mic.slash.circle.fill")
                                                 .font(.system(size: 36))
                                                 .symbolRenderingMode(.hierarchical)
-                                                .foregroundStyle(.secondary)
+                                                .foregroundStyle(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
 
                                             Text("No microphones found")
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
+                                                .font(ParallelDesignTokens.Typography.bodySmall)
+                                                .foregroundStyle(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                         }
                                         .padding()
                                     } else {
@@ -189,8 +192,8 @@ struct OnboardingPermissionsView: View {
                                     }
 
                                     Text("System Default automatically uses your Mac's active microphone.")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.7))
+                                        .font(ParallelDesignTokens.Typography.caption)
+                                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal)
                                 }
@@ -220,18 +223,20 @@ struct OnboardingPermissionsView: View {
                         VStack(spacing: 16) {
                             Button(action: requestPermission) {
                                 Text(getButtonTitle())
-                                    .font(.headline)
+                                    .font(ParallelDesignTokens.Typography.heading3)
                                     .foregroundColor(.white)
                                     .frame(width: 200, height: 50)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(25)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.large)
+                                            .fill(ParallelDesignTokens.Colors.primaryOrange)
+                                    )
                             }
                             .buttonStyle(ScaleButtonStyle())
-                            
-                            if !permissionStates[currentPermissionIndex] && 
+
+                            if !permissionStates[currentPermissionIndex] &&
                                permissions[currentPermissionIndex].type != .keyboardShortcut &&
                                permissions[currentPermissionIndex].type != .audioDeviceSelection {
-                                SkipButton(text: "Skip for now") {
+                                SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                     moveToNext()
                                 }
                             }
@@ -415,11 +420,11 @@ struct OnboardingPermissionsView: View {
         VStack(spacing: 16) {
             HStack(spacing: 12) {
                 Spacer()
-                
+
                 Text(label)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
-                
+                    .font(ParallelDesignTokens.Typography.bodyLarge)
+                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+
                 Menu {
                     ForEach(options, id: \.self) { option in
                         Button(action: {
@@ -437,29 +442,29 @@ struct OnboardingPermissionsView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Text(displayValue)
-                            .foregroundColor(.white)
-                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                            .font(ParallelDesignTokens.Typography.bodyLarge)
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
+                    .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
+                    .cornerRadius(ParallelDesignTokens.Radius.medium)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.medium)
+                            .stroke(ParallelDesignTokens.Colors.border(for: colorScheme), lineWidth: ParallelDesignTokens.Border.width)
                     )
                 }
                 .menuStyle(.borderlessButton)
-                
+
                 Spacer()
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
+        .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme).opacity(0.5))
+        .cornerRadius(ParallelDesignTokens.Radius.large)
     }
 
     @ViewBuilder
@@ -475,8 +480,8 @@ struct OnboardingPermissionsView: View {
                 Spacer()
 
                 Text(label)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
+                    .font(ParallelDesignTokens.Typography.bodyLarge)
+                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
 
                 Menu {
                     // System Default option (first and recommended)
@@ -514,31 +519,31 @@ struct OnboardingPermissionsView: View {
                         if selectedMode == .systemDefault {
                             Image(systemName: "waveform.circle")
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme).opacity(0.9))
                             Text("System Default")
-                                .foregroundColor(.white)
-                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
                         } else if let deviceId = selectedDeviceID,
                                   let device = availableDevices.first(where: { $0.id == deviceId }) {
                             Text(device.name)
-                                .foregroundColor(.white)
-                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
                         } else {
                             Text("Select Device")
-                                .foregroundColor(.white)
-                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
                         }
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
+                    .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
+                    .cornerRadius(ParallelDesignTokens.Radius.medium)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.medium)
+                            .stroke(ParallelDesignTokens.Colors.border(for: colorScheme), lineWidth: ParallelDesignTokens.Border.width)
                     )
                 }
                 .menuStyle(.borderlessButton)
@@ -547,8 +552,8 @@ struct OnboardingPermissionsView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
+        .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme).opacity(0.5))
+        .cornerRadius(ParallelDesignTokens.Radius.large)
     }
 
     @ViewBuilder

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct OnboardingModelSelectionView: View {
     @Binding var hasCompletedOnboarding: Bool
+    @Environment(\.colorScheme) private var colorScheme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
     @State private var selectedModel: any TranscriptionModel = PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!
@@ -89,7 +90,7 @@ struct OnboardingModelSelectionView: View {
                             }
                             .buttonStyle(ScaleButtonStyle())
 
-                            SkipButton(text: "Skip for now") {
+                            SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                 withAnimation {
                                     showModelDownload = true
                                 }

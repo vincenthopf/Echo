@@ -21,24 +21,6 @@ enum ViewType: String, CaseIterable {
     }
 }
 
-struct VisualEffectView: NSViewRepresentable {
-    let material: NSVisualEffectView.Material
-    let blendingMode: NSVisualEffectView.BlendingMode
-    
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-        visualEffectView.state = .active
-        return visualEffectView
-    }
-    
-    func updateNSView(_ visualEffectView: NSVisualEffectView, context: Context) {
-        visualEffectView.material = material
-        visualEffectView.blendingMode = blendingMode
-    }
-}
-
 struct DynamicSidebar: View {
     @Binding var selectedView: ViewType
     @Binding var hoveredView: ViewType?
@@ -90,6 +72,7 @@ struct DynamicSidebar: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(ParallelDesignTokens.Colors.background(for: colorScheme))
     }
 }
 
@@ -100,34 +83,49 @@ struct DynamicSidebarButton: View {
     let isHovered: Bool
     let namespace: Namespace.ID
     let action: () -> Void
-    
+
     @Environment(\.colorScheme) private var colorScheme
+
+    /// Text/icon color based on selection and color scheme
+    private var foregroundColor: Color {
+        if isSelected {
+            return colorScheme == .dark ? .white : ParallelDesignTokens.Colors.primaryOrange
+        } else if isHovered {
+            return ParallelDesignTokens.Colors.primaryOrange
+        } else {
+            return ParallelDesignTokens.Colors.primaryText(for: colorScheme)
+        }
+    }
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 18, weight: .medium))
-                    .frame(width: 24, height: 24)
-                
-                Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .lineLimit(1)
-                Spacer()
+            HStack(spacing: 0) {
+                // Left vertical accent bar for selected state
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(isSelected ? ParallelDesignTokens.Colors.primaryOrange : Color.clear)
+                    .frame(width: 4)
+                    .padding(.vertical, 8)
+
+                HStack(spacing: 12) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 18, weight: .medium))
+                        .frame(width: 24, height: 24)
+
+                    Text(title)
+                        .font(.system(size: 14, weight: .medium))
+                        .lineLimit(1)
+                    Spacer()
+                }
+                .padding(.leading, 12)
             }
-            .foregroundColor(isSelected ? .white : (isHovered ? .accentColor : .primary))
+            .foregroundColor(foregroundColor)
             .frame(height: 40)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 16)
             .background(
-                ZStack {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.accentColor)
-                            .shadow(color: Color.accentColor.opacity(0.5), radius: 5, x: 0, y: 2)
-                    } else if isHovered {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                Group {
+                    if isHovered && !isSelected {
+                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.medium)
+                            .fill(ParallelDesignTokens.Colors.hoverBackground(for: colorScheme))
                     }
                 }
             )

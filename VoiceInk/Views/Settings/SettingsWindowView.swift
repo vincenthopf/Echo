@@ -8,6 +8,7 @@ struct SettingsWindowView: View {
     @EnvironmentObject private var aiService: AIService
     @EnvironmentObject private var enhancementService: AIEnhancementService
 
+    @Environment(\.colorScheme) private var colorScheme
     @AppStorage("selectedSettingsTab") private var selectedTab = SettingsTab.general
 
     var body: some View {
@@ -45,6 +46,7 @@ struct SettingsWindowView: View {
                 .tag(SettingsTab.intelligence)
         }
         .frame(minWidth: 700, minHeight: 500)
+        .background(Tokens.Colors.elevated(for: colorScheme))
     }
 }
 

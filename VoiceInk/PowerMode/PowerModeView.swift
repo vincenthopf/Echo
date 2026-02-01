@@ -259,14 +259,5 @@ struct PowerModeView: View {
 
 
 
-// New component for section headers
-struct SectionHeader: View {
-    let title: String
-    
-    var body: some View {
-        Text(title)
-            .font(.system(size: 16, weight: .bold))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 8)
-    }
-}
+// SectionHeader is now in Views/Common/SectionHeader.swift
+// Uses the new parallel.ai design with left vertical accent bar
