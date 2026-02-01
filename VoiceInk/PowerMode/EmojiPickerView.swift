@@ -1,10 +1,5 @@
 import SwiftUI
 
-enum IconType: String, CaseIterable {
-    case emoji = "Emoji"
-    case symbol = "Symbol"
-}
-
 struct EmojiPickerView: View {
     @StateObject private var emojiManager = EmojiManager.shared
     @Binding var selectedEmoji: String
@@ -15,61 +10,34 @@ struct EmojiPickerView: View {
     @State private var inputFeedbackMessage: String = ""
     @State private var showingEmojiInUseAlert = false
     @State private var emojiForAlert: String? = nil
-    @State private var iconType: IconType = .emoji
     private let columns: [GridItem] = [GridItem(.adaptive(minimum: 44), spacing: 10)]
 
     var body: some View {
         VStack(spacing: 12) {
-            // Icon type selector
-            Picker("Icon Type", selection: $iconType) {
-                Text("Emoji").tag(IconType.emoji)
-                Text("Symbol").tag(IconType.symbol)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 200)
-            .onChange(of: iconType) { _, _ in
-                isAddingCustomEmoji = false
-                inputFeedbackMessage = ""
-            }
-
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 10) {
-                    if iconType == .emoji {
-                        // Emoji grid
-                        ForEach(emojiManager.allEmojis, id: \.self) { emoji in
-                            EmojiButton(
-                                emoji: emoji,
-                                isSelected: selectedEmoji == emoji,
-                                isCustom: emojiManager.isCustomEmoji(emoji),
-                                removeAction: {
-                                    attemptToRemoveCustomEmoji(emoji)
-                                }
-                            ) {
-                                selectedEmoji = emoji
-                                inputFeedbackMessage = ""
-                                isPresented = false
+                    ForEach(emojiManager.allEmojis, id: \.self) { emoji in
+                        EmojiButton(
+                            emoji: emoji,
+                            isSelected: selectedEmoji == emoji,
+                            isCustom: emojiManager.isCustomEmoji(emoji),
+                            removeAction: {
+                                attemptToRemoveCustomEmoji(emoji)
                             }
-                        }
-
-                        AddEmojiButton {
-                            isAddingCustomEmoji.toggle()
-                            newEmojiText = ""
+                        ) {
+                            selectedEmoji = emoji
                             inputFeedbackMessage = ""
-                            if isAddingCustomEmoji {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    isEmojiTextFieldFocused = true
-                                }
-                            }
+                            isPresented = false
                         }
-                    } else {
-                        // SF Symbols grid
-                        ForEach(ProfileSymbol.allCases) { symbol in
-                            SymbolButton(
-                                symbol: symbol,
-                                isSelected: selectedEmoji == symbol.rawValue
-                            ) {
-                                selectedEmoji = symbol.rawValue
-                                isPresented = false
+                    }
+
+                    AddEmojiButton {
+                        isAddingCustomEmoji.toggle()
+                        newEmojiText = ""
+                        inputFeedbackMessage = ""
+                        if isAddingCustomEmoji {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isEmojiTextFieldFocused = true
                             }
                         }
                     }
@@ -131,12 +99,11 @@ struct EmojiPickerView: View {
             }
         }
         .padding()
-        .background(.regularMaterial)
         .frame(minWidth: 260, idealWidth: 300, maxWidth: 320, minHeight: 150, idealHeight: 280, maxHeight: 350)
         .alert("Emoji in Use", isPresented: $showingEmojiInUseAlert, presenting: emojiForAlert) { emojiStr in
             Button("OK", role: .cancel) { }
         } message: { emojiStr in
-            Text("The emoji \"\(emojiStr)\" is currently used by one or more configurations and cannot be removed.")
+            Text("The emoji \"\(emojiStr)\" is currently used by one or more Power Modes and cannot be removed.")
         }
     }
 
@@ -193,10 +160,6 @@ private struct EmojiButton: View {
                 Text(emoji)
                     .font(.largeTitle) 
                     .frame(width: 44, height: 44)
-                    .background(
-                        Circle()
-                            .fill(isSelected ? Color.accentColor.opacity(0.25) : Color.clear)
-                    )
                     .overlay( 
                         Circle()
                             .strokeBorder(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
@@ -229,10 +192,6 @@ private struct AddEmojiButton: View {
                 .labelStyle(.iconOnly)
                 .foregroundColor(.accentColor)
                 .frame(width: 44, height: 44)
-                .background(
-                    Circle()
-                        .fill(Color.secondary.opacity(0.1))
-                )
                 .overlay(
                     Circle()
                         .strokeBorder(Color.gray.opacity(0.3), lineWidth: 1)
@@ -240,31 +199,6 @@ private struct AddEmojiButton: View {
         }
         .buttonStyle(.plain)
         .help("Add custom emoji")
-    }
-}
-
-private struct SymbolButton: View {
-    let symbol: ProfileSymbol
-    let isSelected: Bool
-    let selectAction: () -> Void
-
-    var body: some View {
-        Button(action: selectAction) {
-            Image(systemName: symbol.rawValue)
-                .font(.title2)
-                .foregroundColor(isSelected ? .white : .accentColor)
-                .frame(width: 44, height: 44)
-                .background(
-                    Circle()
-                        .fill(isSelected ? Color.accentColor : Color.accentColor.opacity(0.15))
-                )
-                .overlay(
-                    Circle()
-                        .strokeBorder(isSelected ? Color.accentColor : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
-                )
-        }
-        .buttonStyle(.plain)
-        .help(symbol.displayName)
     }
 }
 

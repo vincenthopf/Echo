@@ -6,13 +6,14 @@ class MistralTranscriptionService {
     
     func transcribe(audioURL: URL, model: any TranscriptionModel) async throws -> String {
         logger.notice("Sending transcription request to Mistral for model: \(model.name)")
-        let apiKey = UserDefaults.standard.string(forKey: "MistralAPIKey") ?? ""
-        guard !apiKey.isEmpty else {
+        guard let apiKey = APIKeyManager.shared.getAPIKey(forProvider: "Mistral"), !apiKey.isEmpty else {
             logger.error("Mistral API key is missing.")
             throw CloudTranscriptionError.missingAPIKey
         }
 
-        let url = URL(string: "https://api.mistral.ai/v1/audio/transcriptions")!
+        guard let url = URL(string: "https://api.mistral.ai/v1/audio/transcriptions") else {
+            throw NSError(domain: "MistralTranscriptionService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid API URL"])
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 

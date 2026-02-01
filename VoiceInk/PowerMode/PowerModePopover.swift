@@ -6,7 +6,7 @@ struct PowerModePopover: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Select Configuration")
+            Text("Select Power Mode")
                 .font(.headline)
                 .foregroundColor(.white.opacity(0.9))
                 .padding(.horizontal)
@@ -23,7 +23,7 @@ struct PowerModePopover: View {
                             Image(systemName: "sparkles")
                                 .foregroundColor(.white.opacity(0.6))
                                 .font(.system(size: 16))
-                            Text("No Configurations Available")
+                            Text("No Power Modes Available")
                                 .foregroundColor(.white.opacity(0.8))
                                 .font(.system(size: 13))
                                 .lineLimit(1)
@@ -64,8 +64,7 @@ struct PowerModePopover: View {
     private func applySelectedConfiguration() {
         Task {
             if let config = selectedConfig {
-                // Manual selection from popover
-                await PowerModeSessionManager.shared.beginSession(with: config, activationSource: .manual)
+                await PowerModeSessionManager.shared.beginSession(with: config)
             }
         }
     }

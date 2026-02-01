@@ -14,12 +14,7 @@ class AudioTranscriptionService: ObservableObject {
     private let whisperState: WhisperState
     private let promptDetectionService = PromptDetectionService()
     private let logger = Logger(subsystem: "com.VincentHopf.embrvoice", category: "AudioTranscriptionService")
-    
-    // Transcription services
-    private let localTranscriptionService: LocalTranscriptionService
-    private lazy var cloudTranscriptionService = CloudTranscriptionService()
-    private lazy var nativeAppleTranscriptionService = NativeAppleTranscriptionService()
-    private lazy var parakeetTranscriptionService = ParakeetTranscriptionService()
+    private let serviceRegistry: TranscriptionServiceRegistry
     
     enum TranscriptionError: Error {
         case noAudioFile
@@ -32,7 +27,7 @@ class AudioTranscriptionService: ObservableObject {
         self.modelContext = modelContext
         self.whisperState = whisperState
         self.enhancementService = whisperState.enhancementService
-        self.localTranscriptionService = LocalTranscriptionService(modelsDirectory: whisperState.modelsDirectory, whisperState: whisperState)
+        self.serviceRegistry = TranscriptionServiceRegistry(whisperState: whisperState, modelsDirectory: whisperState.modelsDirectory)
     }
     
     func retranscribeAudio(from url: URL, using model: any TranscriptionModel) async throws -> Transcription {
@@ -45,21 +40,8 @@ class AudioTranscriptionService: ObservableObject {
         }
         
         do {
-            // Delegate transcription to appropriate service
             let transcriptionStart = Date()
-            var text: String
-            
-            switch model.provider {
-            case .local:
-                text = try await localTranscriptionService.transcribe(audioURL: url, model: model)
-            case .parakeet:
-                text = try await parakeetTranscriptionService.transcribe(audioURL: url, model: model)
-            case .nativeApple:
-                text = try await nativeAppleTranscriptionService.transcribe(audioURL: url, model: model)
-            default: // Cloud models
-                text = try await cloudTranscriptionService.transcribe(audioURL: url, model: model)
-            }
-            
+            var text = try await serviceRegistry.transcribe(audioURL: url, model: model)
             let transcriptionDuration = Date().timeIntervalSince(transcriptionStart)
             text = TranscriptionOutputFilter.filter(text)
             text = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -69,21 +51,15 @@ class AudioTranscriptionService: ObservableObject {
             let powerModeName = (activePowerModeConfig?.isEnabled == true) ? activePowerModeConfig?.name : nil
             let powerModeEmoji = (activePowerModeConfig?.isEnabled == true) ? activePowerModeConfig?.emoji : nil
 
-            if UserDefaults.standard.object(forKey: "IsTextFormattingEnabled") as? Bool ?? true {
+            if UserDefaults.standard.bool(forKey: "IsTextFormattingEnabled") {
                 text = WhisperTextFormatter.format(text)
             }
 
-            // Apply word replacements if enabled
-            if UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled") {
-                text = WordReplacementService.shared.applyReplacements(to: text)
-                logger.notice("✅ Word replacements applied")
-            }
-            
-            // Get audio duration
+            text = WordReplacementService.shared.applyReplacements(to: text, using: modelContext)
+            logger.notice("✅ Word replacements applied")
+
             let audioAsset = AVURLAsset(url: url)
             let duration = CMTimeGetSeconds(try await audioAsset.load(.duration))
-            
-            // Create a permanent copy of the audio file
             let recordingsDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                 .appendingPathComponent("com.prakashjoshipax.VoiceInk")
                 .appendingPathComponent("Recordings")
@@ -137,6 +113,7 @@ class AudioTranscriptionService: ObservableObject {
                     do {
                         try modelContext.save()
                         NotificationCenter.default.post(name: .transcriptionCreated, object: newTranscription)
+                        NotificationCenter.default.post(name: .transcriptionCompleted, object: newTranscription)
                     } catch {
                         logger.error("❌ Failed to save transcription: \(error.localizedDescription)")
                     }
@@ -167,14 +144,15 @@ class AudioTranscriptionService: ObservableObject {
                     do {
                         try modelContext.save()
                         NotificationCenter.default.post(name: .transcriptionCreated, object: newTranscription)
+                        NotificationCenter.default.post(name: .transcriptionCompleted, object: newTranscription)
                     } catch {
                         logger.error("❌ Failed to save transcription: \(error.localizedDescription)")
                     }
-                    
+
                     await MainActor.run {
                         isTranscribing = false
                     }
-                    
+
                     return newTranscription
                 }
             } else {
@@ -191,14 +169,15 @@ class AudioTranscriptionService: ObservableObject {
                 modelContext.insert(newTranscription)
                 do {
                     try modelContext.save()
+                    NotificationCenter.default.post(name: .transcriptionCompleted, object: newTranscription)
                 } catch {
                     logger.error("❌ Failed to save transcription: \(error.localizedDescription)")
                 }
-                
+
                 await MainActor.run {
                     isTranscribing = false
                 }
-                
+
                 return newTranscription
             }
         } catch {
