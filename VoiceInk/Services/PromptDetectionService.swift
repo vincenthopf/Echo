@@ -1,12 +1,15 @@
 import Foundation
 import os
 
+/// Service for detecting and processing voice trigger keywords
+/// NOTE: This service is now only used for Adaptive Awareness (PowerModeConfig) voice triggers
+/// CustomPrompt trigger words are deprecated and no longer supported
 class PromptDetectionService {
     private let logger = Logger(
         subsystem: "com.VincentHopf.embrvoice",
         category: "promptdetection"
     )
-    
+
     struct PromptDetectionResult {
         let shouldEnableAI: Bool
         let selectedPromptId: UUID?
@@ -15,34 +18,21 @@ class PromptDetectionService {
         let originalEnhancementState: Bool
         let originalPromptId: UUID?
     }
-    
+
+    /// DEPRECATED: Prompt trigger word detection is no longer supported
+    /// Voice triggers are now handled exclusively by Adaptive Awareness (PowerModeConfig)
+    @available(*, deprecated, message: "Use PowerModeConfig voice triggers via ActiveWindowService instead")
     @MainActor
     func analyzeText(_ text: String, with enhancementService: AIEnhancementService) -> PromptDetectionResult {
-        let originalEnhancementState = enhancementService.isEnhancementEnabled
-        let originalPromptId = enhancementService.selectedPromptId
-
-		for prompt in enhancementService.allPrompts {
-            if !prompt.triggerWords.isEmpty {
-				if let (detectedWord, processedText) = detectAndStripTriggerWord(from: text, triggerWords: prompt.triggerWords) {
-                    return PromptDetectionResult(
-                        shouldEnableAI: true,
-                        selectedPromptId: prompt.id,
-                        processedText: processedText,
-                        detectedTriggerWord: detectedWord,
-                        originalEnhancementState: originalEnhancementState,
-                        originalPromptId: originalPromptId
-                    )
-                }
-            }
-        }
-
+        // This method is deprecated - prompts no longer support trigger words
+        // Return empty result to maintain backward compatibility
         return PromptDetectionResult(
             shouldEnableAI: false,
             selectedPromptId: nil,
             processedText: text,
             detectedTriggerWord: nil,
-            originalEnhancementState: originalEnhancementState,
-            originalPromptId: originalPromptId
+            originalEnhancementState: enhancementService.isEnhancementEnabled,
+            originalPromptId: enhancementService.selectedPromptId
         )
     }
     
@@ -150,13 +140,21 @@ class PromptDetectionService {
         return remainingText
     }
     
-	private func detectAndStripTriggerWord(from text: String, triggerWords: [String]) -> (String, String)? {
+	// MARK: - Trigger Word Detection (Shared Logic)
+
+    /// Internal method to detect and strip trigger words from text
+    /// Used by both CustomPrompt detection and PowerModeConfig voice triggers
+    /// - Parameters:
+    ///   - text: The text to analyze
+    ///   - triggerWords: Array of trigger words to search for
+    /// - Returns: A tuple containing the detected trigger word and the processed text, or nil if no match
+    internal func detectAndStripTriggerWord(from text: String, triggerWords: [String]) -> (String, String)? {
         let trimmedWords = triggerWords.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-        
+
         // Sort by length (longest first) to match the most specific trigger word
         let sortedTriggerWords = trimmedWords.sorted { $0.count > $1.count }
-        
+
 		for triggerWord in sortedTriggerWords {
 			if let afterTrailing = stripTrailingTriggerWord(from: text, triggerWord: triggerWord) {
 				if let afterBoth = stripLeadingTriggerWord(from: afterTrailing, triggerWord: triggerWord) {
@@ -165,7 +163,7 @@ class PromptDetectionService {
 				return (triggerWord, afterTrailing)
 			}
 		}
-		
+
 		for triggerWord in sortedTriggerWords {
 			if let afterLeading = stripLeadingTriggerWord(from: text, triggerWord: triggerWord) {
 				if let afterBoth = stripTrailingTriggerWord(from: afterLeading, triggerWord: triggerWord) {

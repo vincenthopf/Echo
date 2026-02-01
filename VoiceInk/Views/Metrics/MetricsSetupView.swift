@@ -4,9 +4,10 @@ import KeyboardShortcuts
 struct MetricsSetupView: View {
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
-    @State private var isAccessibilityEnabled = AXIsProcessTrusted()
-    @State private var isScreenRecordingEnabled = CGPreflightScreenCaptureAccess()
-    
+    @State private var isAccessibilityEnabled = false
+    @State private var isScreenRecordingEnabled = false
+    @Environment(\.openSettings) private var openSettings
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -15,12 +16,12 @@ struct MetricsSetupView: View {
                     AppIconView()
                         .frame(width: 80, height: 80)
                         .padding(.bottom, 20)
-                       
+
                     VStack(spacing: 4) {
-                        Text("Welcome to VoiceInk")
+                        Text("Welcome to Echo")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.center)
-                        
+
                         Text("Complete the setup to get started")
                             .font(.system(size: 16))
                             .foregroundColor(.secondary)
@@ -29,7 +30,7 @@ struct MetricsSetupView: View {
                 }
                 .padding(.top, 20)
                 .padding(.bottom, 20)
-                
+
                 // Setup Steps
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(0..<4) { index in
@@ -46,13 +47,13 @@ struct MetricsSetupView: View {
                         .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                 )
                 .padding(.horizontal)
-                
+
                 Spacer(minLength: 20)
-                
+
                 // Action Button
                 actionButton
                     .frame(maxWidth: 400)
-                
+
                 // Help Text
                 helpText
             }
@@ -60,6 +61,13 @@ struct MetricsSetupView: View {
         }
         .frame(minWidth: 500, minHeight: 600)
         .background(Color(NSColor.controlBackgroundColor))
+        .onAppear {
+            refreshPermissions()
+            setupNotificationObservers()
+        }
+        .onDisappear {
+            removeNotificationObservers()
+        }
     }
     
     private func setupStep(for index: Int) -> some View {
@@ -71,7 +79,7 @@ struct MetricsSetupView: View {
                 isCompleted: hotkeyManager.selectedHotkey1 != .none,
                 icon: "command",
                 title: "Set Keyboard Shortcut",
-                description: "Use VoiceInk anywhere with a shortcut."
+                description: "Use Echo anywhere with a shortcut."
             )
         case 1:
             stepInfo = (
@@ -151,7 +159,7 @@ struct MetricsSetupView: View {
         } else {
             // Handle different permission requests based on which one is missing
             if hotkeyManager.selectedHotkey1 == .none {
-                openSettings()
+                openSettingsWindow()
             } else if !AXIsProcessTrusted() {
                 if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
                     NSWorkspace.shared.open(url)
@@ -191,20 +199,49 @@ struct MetricsSetupView: View {
         CGPreflightScreenCaptureAccess()
     }
     
-    private func openSettings() {
-        NotificationCenter.default.post(
-            name: .navigateToDestination,
-            object: nil,
-            userInfo: ["destination": "Settings"]
-        )
+    private func openSettingsWindow() {
+        openSettings()
     }
-    
+
     private func openModelManagement() {
-        NotificationCenter.default.post(
-            name: .navigateToDestination,
+        // Set the selected tab to Transcription before opening Settings window
+        UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
+        openSettings()
+    }
+
+    // MARK: - Permission Monitoring
+
+    private func refreshPermissions() {
+        isAccessibilityEnabled = AXIsProcessTrusted()
+        isScreenRecordingEnabled = CGPreflightScreenCaptureAccess()
+    }
+
+    private func setupNotificationObservers() {
+        // Observe when app becomes active (user returns from System Settings)
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification,
             object: nil,
-            userInfo: ["destination": "AI Models"]
-        )
+            queue: .main
+        ) { [self] _ in
+            refreshPermissions()
+        }
+
+        // Observe system-wide accessibility changes using DistributedNotificationCenter
+        DistributedNotificationCenter.default().addObserver(
+            forName: NSNotification.Name("com.apple.accessibility.api"),
+            object: nil,
+            queue: .main
+        ) { [self] _ in
+            // Add a small delay as permissions take time to reflect in the system
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                refreshPermissions()
+            }
+        }
+    }
+
+    private func removeNotificationObservers() {
+        NotificationCenter.default.removeObserver(self, name: NSApplication.didBecomeActiveNotification, object: nil)
+        DistributedNotificationCenter.default().removeObserver(self, name: NSNotification.Name("com.apple.accessibility.api"), object: nil)
     }
 }
 

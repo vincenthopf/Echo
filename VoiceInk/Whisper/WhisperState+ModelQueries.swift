@@ -15,17 +15,23 @@ extension WhisperState {
                     return false
                 }
             case .groq:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "Groq")
+                let key = UserDefaults.standard.string(forKey: "GROQAPIKey")
+                return key != nil && !key!.isEmpty
             case .elevenLabs:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "ElevenLabs")
+                let key = UserDefaults.standard.string(forKey: "ElevenLabsAPIKey")
+                return key != nil && !key!.isEmpty
             case .deepgram:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "Deepgram")
+                let key = UserDefaults.standard.string(forKey: "DeepgramAPIKey")
+                return key != nil && !key!.isEmpty
             case .mistral:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "Mistral")
+                let key = UserDefaults.standard.string(forKey: "MistralAPIKey")
+                return key != nil && !key!.isEmpty
             case .gemini:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "Gemini")
+                let key = UserDefaults.standard.string(forKey: "GeminiAPIKey")
+                return key != nil && !key!.isEmpty
             case .soniox:
-                return APIKeyManager.shared.hasAPIKey(forProvider: "Soniox")
+                let key = UserDefaults.standard.string(forKey: "SonioxAPIKey")
+                return key != nil && !key!.isEmpty
             case .custom:
                 // Custom models are always usable since they contain their own API keys
                 return true

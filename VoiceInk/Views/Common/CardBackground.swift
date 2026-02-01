@@ -1,87 +1,109 @@
 import SwiftUI
 
 // Style Constants for consistent styling across components
+// Refactored to use parallel.ai design tokens - clean, minimal, no glassmorphism
 struct StyleConstants {
-    // Colors - Glassmorphism Style
-    static let cardGradient = LinearGradient( // Simulates frosted glass
-        gradient: Gradient(stops: [
-            .init(color: Color(NSColor.windowBackgroundColor).opacity(0.6), location: 0.0),
-            .init(color: Color(NSColor.windowBackgroundColor).opacity(0.55), location: 0.70), // Hold start opacity longer
-            .init(color: Color(NSColor.windowBackgroundColor).opacity(0.3), location: 1.0)
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    static let cardGradientSelected = LinearGradient( // Selected glass, accent tint extends further
-        gradient: Gradient(stops: [
-            .init(color: Color.accentColor.opacity(0.3), location: 0.0),
-            .init(color: Color.accentColor.opacity(0.25), location: 0.70), // Accent tint held longer
-            .init(color: Color(NSColor.windowBackgroundColor).opacity(0.4), location: 1.0) // Blend to window bg at the end
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    // Border Colors - Adaptive and subtle for glass effect
-    static let cardBorder = LinearGradient(
-        gradient: Gradient(colors: [
-            Color(NSColor.quaternaryLabelColor).opacity(0.5), // Adaptive border color
-            Color(NSColor.quaternaryLabelColor).opacity(0.3)  // Adaptive border color
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    static let cardBorderSelected = LinearGradient(
-        gradient: Gradient(colors: [
-            Color.accentColor.opacity(0.4),
-            Color.accentColor.opacity(0.2)
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    // Shadows - Adaptive, soft and diffuse for a floating glass look
-    static let shadowDefault = Color(NSColor.shadowColor).opacity(0.1)
-    static let shadowSelected = Color(NSColor.shadowColor).opacity(0.15)
-    
-    // Corner Radius - Larger for a softer, glassy feel
-    static let cornerRadius: CGFloat = 16
-    
-    // Button Style (Keeping this as is unless specified)
+    // Corner Radius - Using parallel.ai standard
+    static let cornerRadius: CGFloat = ParallelDesignTokens.Radius.large // 12pt
+
+    // Shadow - Subtle, minimal
+    static let shadowColor = ParallelDesignTokens.Shadow.color
+    static let shadowRadius = ParallelDesignTokens.Shadow.radius
+    static let shadowY = ParallelDesignTokens.Shadow.y
+
+    // Border
+    static let borderWidth = ParallelDesignTokens.Border.width
+
+    // Button Style (accent color based)
     static let buttonGradient = LinearGradient(
-        colors: [Color.accentColor, Color.accentColor.opacity(0.8)],
+        colors: [ParallelDesignTokens.Colors.primaryOrange, ParallelDesignTokens.Colors.primaryOrange.opacity(0.9)],
         startPoint: .leading,
         endPoint: .trailing
     )
 }
 
-// Reusable background component
+// Reusable background component - parallel.ai style
+// Clean solid fills, subtle shadows, 1px borders
 struct CardBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var isSelected: Bool
     var cornerRadius: CGFloat = StyleConstants.cornerRadius
-    var useAccentGradientWhenSelected: Bool = false // This might need rethinking for pure glassmorphism
-    
+    var useAccentGradientWhenSelected: Bool = false
+
+    // MARK: - Computed Colors (adaptive for light/dark mode)
+
+    private var backgroundColor: Color {
+        if isSelected && useAccentGradientWhenSelected {
+            return ParallelDesignTokens.Colors.selectedBackground(for: colorScheme)
+        }
+        return ParallelDesignTokens.Colors.cardBackground(for: colorScheme)
+    }
+
+    private var borderColor: Color {
+        if isSelected {
+            return ParallelDesignTokens.Colors.primaryOrange.opacity(0.5)
+        }
+        return ParallelDesignTokens.Colors.border(for: colorScheme)
+    }
+
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(
-                useAccentGradientWhenSelected && isSelected ? 
-                    StyleConstants.cardGradientSelected :
-                    StyleConstants.cardGradient
-            )
+            .fill(backgroundColor)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(
-                        isSelected ? StyleConstants.cardBorderSelected : StyleConstants.cardBorder,
-                        lineWidth: 1.5 // Slightly thicker border for a defined glass edge
-                    )
+                    .stroke(borderColor, lineWidth: StyleConstants.borderWidth)
             )
             .shadow(
-                color: isSelected ? StyleConstants.shadowSelected : StyleConstants.shadowDefault,
-                radius: isSelected ? 15 : 10, // Larger radius for softer, more diffuse shadows
+                color: StyleConstants.shadowColor,
+                radius: StyleConstants.shadowRadius,
                 x: 0,
-                y: isSelected ? 8 : 5      // Slightly more y-offset for a lifted look
+                y: StyleConstants.shadowY
             )
     }
-} 
+}
+
+// MARK: - Preview
+
+#if DEBUG
+struct CardBackground_Previews: PreviewProvider {
+    static var previews: some View {
+        VStack(spacing: 20) {
+            // Light mode previews
+            Group {
+                Text("Default Card")
+                    .padding()
+                    .background(CardBackground(isSelected: false))
+
+                Text("Selected Card")
+                    .padding()
+                    .background(CardBackground(isSelected: true))
+
+                Text("Selected with Accent")
+                    .padding()
+                    .background(CardBackground(isSelected: true, useAccentGradientWhenSelected: true))
+            }
+            .preferredColorScheme(.light)
+
+            Divider()
+
+            // Dark mode previews
+            Group {
+                Text("Default Card (Dark)")
+                    .padding()
+                    .background(CardBackground(isSelected: false))
+
+                Text("Selected Card (Dark)")
+                    .padding()
+                    .background(CardBackground(isSelected: true))
+
+                Text("Selected with Accent (Dark)")
+                    .padding()
+                    .background(CardBackground(isSelected: true, useAccentGradientWhenSelected: true))
+            }
+            .preferredColorScheme(.dark)
+        }
+        .padding()
+    }
+}
+#endif

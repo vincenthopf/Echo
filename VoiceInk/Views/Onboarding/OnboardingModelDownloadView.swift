@@ -3,137 +3,148 @@ import SwiftUI
 struct OnboardingModelDownloadView: View {
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var whisperState: WhisperState
+    @Environment(\.colorScheme) private var colorScheme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
     @State private var isDownloading = false
     @State private var isModelSet = false
     @State private var showTutorial = false
-    
-    private let turboModel = PredefinedModels.models.first { $0.name == "ggml-large-v3-turbo-q5_0" } as! LocalModel
+
+    // Accept a selected model, defaulting to Parakeet V3 if not provided
+    var selectedModel: any TranscriptionModel = PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!
+
+    // Cast to appropriate type for download operations
+    private var downloadableModel: (any TranscriptionModel)? {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel
+        }
+        return nil
+    }
     
     var body: some View {
         ZStack {
-            if showTutorial {
-                OnboardingTutorialView(hasCompletedOnboarding: $hasCompletedOnboarding)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            } else {
-                GeometryReader { geometry in
-                    // Reusable background
-                    OnboardingBackgroundView()
-                    
-                    VStack(spacing: 40) {
-                        // Model icon and title
-                        VStack(spacing: 30) {
-                            // Model icon
-                            ZStack {
-                                Circle()
-                                    .fill(Color.accentColor.opacity(0.1))
-                                    .frame(width: 100, height: 100)
-                                
-                                if isModelSet {
-                                    Image(systemName: "checkmark.seal.fill")
-                                        .font(.system(size: 50))
-                                        .foregroundColor(.accentColor)
-                                        .transition(.scale.combined(with: .opacity))
-                                } else {
-                                    Image(systemName: "brain")
-                                        .font(.system(size: 40))
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
-                            .scaleEffect(scale)
-                            .opacity(opacity)
+            GeometryReader { geometry in
+                // Reusable background
+                OnboardingBackgroundView()
+                
+                VStack(spacing: 40) {
+                    // Model icon and title
+                    VStack(spacing: 30) {
+                        // Model icon
+                        ZStack {
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.1))
+                                .frame(width: 100, height: 100)
                             
-                            // Title and description
-                            VStack(spacing: 12) {
-                                Text("Download AI Model")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.white)
-                                
-                                Text("We'll download the optimized model to get you started.")
-                                    .font(.body)
-                                    .foregroundColor(.white.opacity(0.7))
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                            }
-                            .scaleEffect(scale)
-                            .opacity(opacity)
-                        }
-                        
-                        // Model card - Centered and compact
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Model name and details
-                            VStack(alignment: .center, spacing: 8) {
-                                Text(turboModel.displayName)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                Text("\(turboModel.size) • \(turboModel.language)")
-                                    .font(.caption)
-                                    .foregroundColor(.white.opacity(0.7))
-                            }
-                            .frame(maxWidth: .infinity)
-                            
-                            Divider()
-                                .background(Color.white.opacity(0.1))
-                            
-                            // Performance indicators in a more compact layout
-                            HStack(spacing: 20) {
-                                performanceIndicator(label: "Speed", value: turboModel.speed)
-                                performanceIndicator(label: "Accuracy", value: turboModel.accuracy)
-                                ramUsageLabel(gb: turboModel.ramUsage)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            
-                            // Download progress
-                            if isDownloading {
-                                DownloadProgressView(
-                                    modelName: turboModel.name,
-                                    downloadProgress: whisperState.downloadProgress
-                                )
-                                .transition(.opacity)
+                            if isModelSet {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .font(.system(size: 50))
+                                    .foregroundColor(.accentColor)
+                                    .transition(.scale.combined(with: .opacity))
+                            } else {
+                                Image(systemName: "brain")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(.accentColor)
                             }
                         }
-                        .padding(24)
-                        .frame(width: min(geometry.size.width * 0.6, 400))
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                        )
                         .scaleEffect(scale)
                         .opacity(opacity)
                         
-                        // Action buttons
-                        VStack(spacing: 16) {
-                            Button(action: handleAction) {
-                                Text(getButtonTitle())
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .frame(width: 200, height: 50)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(25)
-                            }
-                            .buttonStyle(ScaleButtonStyle())
-                            .disabled(isDownloading)
+                        // Title and description
+                        VStack(spacing: 12) {
+                            Text("Download AI Model")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
                             
-                            if !isModelSet {
-                                SkipButton(text: "Skip for now") {
-                                    withAnimation {
-                                        showTutorial = true
-                                    }
+                            Text("We'll download the optimized model to get you started.")
+                                .font(.body)
+                                .foregroundColor(.white.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .scaleEffect(scale)
+                        .opacity(opacity)
+                    }
+                    
+                    // Model card - Centered and compact
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Model name and details
+                        VStack(alignment: .center, spacing: 8) {
+                            Text(selectedModel.displayName)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text(modelDetailsText)
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                        .frame(maxWidth: .infinity)
+                        
+                        Divider()
+                            .background(Color.white.opacity(0.1))
+                        
+                        // Performance indicators in a more compact layout
+                        HStack(spacing: 20) {
+                            performanceIndicator(label: "Speed", value: modelSpeed)
+                            performanceIndicator(label: "Accuracy", value: modelAccuracy)
+                            ramUsageLabel(gb: modelRAM)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                        // Download progress
+                        if isDownloading {
+                            DownloadProgressView(
+                                modelName: selectedModel.name,
+                                downloadProgress: whisperState.downloadProgress
+                            )
+                            .transition(.opacity)
+                        }
+                    }
+                    .padding(24)
+                    .frame(width: min(geometry.size.width * 0.6, 400))
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
+                    .scaleEffect(scale)
+                    .opacity(opacity)
+                    
+                    // Action buttons
+                    VStack(spacing: 16) {
+                        Button(action: handleAction) {
+                            Text(getButtonTitle())
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(width: 200, height: 50)
+                                .background(Color.accentColor)
+                                .cornerRadius(25)
+                        }
+                        .buttonStyle(ScaleButtonStyle())
+                        .disabled(isDownloading)
+                        
+                        if !isModelSet {
+                            SkipButton(text: "Skip for now", colorScheme: colorScheme) {
+                                withAnimation {
+                                    showTutorial = true
                                 }
                             }
                         }
-                        .opacity(opacity)
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .frame(width: min(geometry.size.width * 0.8, 600))
-                    .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    .opacity(opacity)
                 }
-                .transition(.move(edge: .leading).combined(with: .opacity))
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: min(geometry.size.width * 0.8, 600))
+                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            }
+            
+            if showTutorial {
+                OnboardingTutorialView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .onAppear {
@@ -150,8 +161,8 @@ struct OnboardingModelDownloadView: View {
     }
     
     private func checkModelStatus() {
-        if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
-            isModelSet = whisperState.currentTranscriptionModel?.name == turboModel.name
+        if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
+            isModelSet = whisperState.currentTranscriptionModel?.name == selectedModel.name
         }
     }
     
@@ -160,13 +171,11 @@ struct OnboardingModelDownloadView: View {
             withAnimation {
                 showTutorial = true
             }
-        } else if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
-            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == turboModel.name }) {
-                Task {
-                    await whisperState.setDefaultTranscriptionModel(modelToSet)
-                    withAnimation {
-                        isModelSet = true
-                    }
+        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
+            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
+                whisperState.setDefaultTranscriptionModel(modelToSet)
+                withAnimation {
+                    isModelSet = true
                 }
             }
         } else {
@@ -174,9 +183,15 @@ struct OnboardingModelDownloadView: View {
                 isDownloading = true
             }
             Task {
-                await whisperState.downloadModel(turboModel)
-                if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == turboModel.name }) {
-                    await whisperState.setDefaultTranscriptionModel(modelToSet)
+                // Download the selected model (works for both LocalModel and ParakeetModel)
+                if let localModel = selectedModel as? LocalModel {
+                    await whisperState.downloadModel(localModel)
+                } else if let parakeetModel = selectedModel as? ParakeetModel {
+                    await whisperState.downloadParakeetModel(parakeetModel)
+                }
+
+                if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
+                    whisperState.setDefaultTranscriptionModel(modelToSet)
                     withAnimation {
                         isModelSet = true
                         isDownloading = false
@@ -191,11 +206,48 @@ struct OnboardingModelDownloadView: View {
             return "Continue"
         } else if isDownloading {
             return "Downloading..."
-        } else if whisperState.availableModels.contains(where: { $0.name == turboModel.name }) {
+        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
             return "Set as Default"
         } else {
             return "Download Model"
         }
+    }
+
+    // Helper computed properties for model details
+    private var modelDetailsText: String {
+        if let localModel = selectedModel as? LocalModel {
+            return "\(localModel.size) • \(localModel.language)"
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return "\(parakeetModel.size) • Multilingual"
+        }
+        return selectedModel.displayName
+    }
+
+    private var modelSpeed: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.speed
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.speed
+        }
+        return 0.0
+    }
+
+    private var modelAccuracy: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.accuracy
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.accuracy
+        }
+        return 0.0
+    }
+
+    private var modelRAM: Double {
+        if let localModel = selectedModel as? LocalModel {
+            return localModel.ramUsage
+        } else if let parakeetModel = selectedModel as? ParakeetModel {
+            return parakeetModel.ramUsage
+        }
+        return 0.0
     }
     
     private func performanceIndicator(label: String, value: Double) -> some View {
@@ -226,3 +278,4 @@ struct OnboardingModelDownloadView: View {
         }
     }
 }
+

@@ -90,10 +90,11 @@ struct PermissionCard: View {
     let buttonTitle: String
     let buttonAction: () -> Void
     let checkPermission: () -> Void
+    var infoTipTitle: String?
     var infoTipMessage: String?
     var infoTipLink: String?
     @State private var isRefreshing = false
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 16) {
@@ -102,23 +103,23 @@ struct PermissionCard: View {
                     Circle()
                         .fill(isGranted ? Color.green.opacity(0.15) : Color.orange.opacity(0.15))
                         .frame(width: 44, height: 44)
-
+                    
                     Image(systemName: isGranted ? "\(icon).fill" : icon)
                         .font(.system(size: 20, weight: .semibold))
                         .foregroundColor(isGranted ? .green : .orange)
                         .symbolRenderingMode(.hierarchical)
                 }
-
+                
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text(title)
                             .font(.headline)
-                        if let message = infoTipMessage {
-                            if let link = infoTipLink, !link.isEmpty {
-                                InfoTip(message, learnMoreURL: link)
-                            } else {
-                                InfoTip(message)
-                            }
+                        if let infoTipTitle = infoTipTitle, let infoTipMessage = infoTipMessage {
+                            InfoTip(
+                                title: infoTipTitle,
+                                message: infoTipMessage,
+                                learnMoreURL: infoTipLink ?? ""
+                            )
                         }
                     }
                     Text(description)
@@ -200,20 +201,13 @@ struct PermissionsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
-                // Header
-                CompactHeroSection(
-                    icon: "shield.lefthalf.filled",
-                    title: "App Permissions",
-                    description: "VoiceInk requires the following permissions to function properly"
-                )
-                
                 // Permission Cards
                 VStack(spacing: 16) {
                     // Keyboard Shortcut Permission
                     PermissionCard(
                         icon: "keyboard",
                         title: "Keyboard Shortcut",
-                        description: "Set up a keyboard shortcut to use VoiceInk anywhere",
+                        description: "Set up a keyboard shortcut to use Echo anywhere",
                         isGranted: hotkeyManager.selectedHotkey1 != .none,
                         buttonTitle: "Configure Shortcut",
                         buttonAction: {
@@ -230,7 +224,7 @@ struct PermissionsView: View {
                     PermissionCard(
                         icon: "mic",
                         title: "Microphone Access",
-                        description: "Allow VoiceInk to record your voice for transcription",
+                        description: "Allow Echo to record your voice for transcription",
                         isGranted: permissionManager.audioPermissionStatus == .authorized,
                         buttonTitle: permissionManager.audioPermissionStatus == .notDetermined ? "Request Permission" : "Open System Settings",
                         buttonAction: {
@@ -249,7 +243,7 @@ struct PermissionsView: View {
                     PermissionCard(
                         icon: "hand.raised",
                         title: "Accessibility Access",
-                        description: "Allow VoiceInk to paste transcribed text directly at your cursor position",
+                        description: "Allow Echo to paste transcribed text directly at your cursor position",
                         isGranted: permissionManager.isAccessibilityEnabled,
                         buttonTitle: "Open System Settings",
                         buttonAction: {
@@ -258,14 +252,15 @@ struct PermissionsView: View {
                             }
                         },
                         checkPermission: { permissionManager.checkAccessibilityPermissions() },
-                        infoTipMessage: "VoiceInk uses Accessibility permissions to paste the transcribed text directly into other applications at your cursor's position. This allows for a seamless dictation experience across your Mac."
+                        infoTipTitle: "Accessibility Access",
+                        infoTipMessage: "Echo uses Accessibility permissions to paste the transcribed text directly into other applications at your cursor's position. This allows for a seamless dictation experience across your Mac."
                     )
                     
                     // Screen Recording Permission
                     PermissionCard(
                         icon: "rectangle.on.rectangle",
                         title: "Screen Recording Access",
-                        description: "Allow VoiceInk to understand context from your screen for transcript Enhancement",
+                        description: "Allow Echo to understand context from your screen for transcript Enhancement",
                         isGranted: permissionManager.isScreenRecordingEnabled,
                         buttonTitle: "Request Permission",
                         buttonAction: {
@@ -276,12 +271,14 @@ struct PermissionsView: View {
                             }
                         },
                         checkPermission: { permissionManager.checkScreenRecordingPermission() },
-                        infoTipMessage: "VoiceInk captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
-                        infoTipLink: "https://tryvoiceink.com/docs/contextual-awareness"
+                        infoTipTitle: "Screen Recording Access",
+                        infoTipMessage: "Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
+                        infoTipLink: "https://embr.sh/docs/contextual-awareness"
                     )
                 }
             }
-            .padding(24)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 20)
         }
         .background(Color(NSColor.controlBackgroundColor))
         .onAppear {

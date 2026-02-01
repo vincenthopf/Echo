@@ -2,7 +2,6 @@ import Foundation
 import os
 import Zip
 import SwiftUI
-import Atomics
 
 
 struct WhisperModel: Identifiable {
@@ -35,17 +34,13 @@ struct WhisperModel: Identifiable {
 
 private class TaskDelegate: NSObject, URLSessionTaskDelegate {
     private let continuation: CheckedContinuation<Void, Never>
-    private let finished = ManagedAtomic(false)
-
+    
     init(_ continuation: CheckedContinuation<Void, Never>) {
         self.continuation = continuation
     }
-
+    
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        // Ensure continuation is resumed only once, even if called multiple times
-        if finished.exchange(true, ordering: .acquiring) == false {
-            continuation.resume()
-        }
+        continuation.resume()
     }
 }
 
@@ -103,72 +98,59 @@ extension WhisperState {
     /// Helper function to download a file from a URL with progress tracking
     private func downloadFileWithProgress(from url: URL, progressKey: String) async throws -> Data {
         let destinationURL = modelsDirectory.appendingPathComponent(UUID().uuidString)
-
+        
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Error>) in
-            // Guard to prevent double resume
-            let finished = ManagedAtomic(false)
-
-            func finishOnce(_ result: Result<Data, Error>) {
-                if finished.exchange(true, ordering: .acquiring) == false {
-                    continuation.resume(with: result)
-                }
-            }
-
             let task = URLSession.shared.downloadTask(with: url) { tempURL, response, error in
                 if let error = error {
-                    finishOnce(.failure(error))
+                    continuation.resume(throwing: error)
                     return
                 }
-
+                
                 guard let httpResponse = response as? HTTPURLResponse,
                       (200...299).contains(httpResponse.statusCode),
                       let tempURL = tempURL else {
-                    finishOnce(.failure(URLError(.badServerResponse)))
+                    continuation.resume(throwing: URLError(.badServerResponse))
                     return
                 }
-
+                
                 do {
                     // Move the downloaded file to the final destination
                     try FileManager.default.moveItem(at: tempURL, to: destinationURL)
-
+                    
                     // Read the file in chunks to avoid memory pressure
                     let data = try Data(contentsOf: destinationURL, options: .mappedIfSafe)
-                    finishOnce(.success(data))
-
+                    continuation.resume(returning: data)
+                    
                     // Clean up the temporary file
                     try? FileManager.default.removeItem(at: destinationURL)
                 } catch {
-                    finishOnce(.failure(error))
+                    continuation.resume(throwing: error)
                 }
             }
-
+            
             task.resume()
-
+            
             var lastUpdateTime = Date()
             var lastProgressValue: Double = 0
-
+            
             let observation = task.progress.observe(\.fractionCompleted) { progress, _ in
                 let currentTime = Date()
                 let timeSinceLastUpdate = currentTime.timeIntervalSince(lastUpdateTime)
                 let currentProgress = round(progress.fractionCompleted * 100) / 100
-
+                
                 if timeSinceLastUpdate >= 0.5 && abs(currentProgress - lastProgressValue) >= 0.01 {
                     lastUpdateTime = currentTime
                     lastProgressValue = currentProgress
-
+                    
                     DispatchQueue.main.async {
                         self.downloadProgress[progressKey] = currentProgress
                     }
                 }
             }
-
+            
             Task {
                 await withTaskCancellationHandler {
                     observation.invalidate()
-                    // Also ensure continuation is resumed with cancellation if task is cancelled
-                    if finished.exchange(true, ordering: .acquiring) == false {
-                        continuation.resume(throwing: CancellationError())
-                    }
                 } operation: {
                     await withCheckedContinuation { (_: CheckedContinuation<Void, Never>) in }
                 }
@@ -229,21 +211,13 @@ extension WhisperState {
     }
     
     private func unzipCoreMLFile(_ zipPath: URL, to destination: URL) async throws {
-        let finished = ManagedAtomic(false)
-
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            func finishOnce(_ result: Result<Void, Error>) {
-                if finished.exchange(true, ordering: .acquiring) == false {
-                    continuation.resume(with: result)
-                }
-            }
-
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             do {
                 try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
                 try Zip.unzipFile(zipPath, destination: destination, overwrite: true, password: nil)
-                finishOnce(.success(()))
+                continuation.resume()
             } catch {
-                finishOnce(.failure(error))
+                continuation.resume(throwing: error)
             }
         }
     }
@@ -315,7 +289,11 @@ extension WhisperState {
             await whisperContext?.releaseResources()
             whisperContext = nil
             isModelLoaded = false
-            self.recordedFile = nil
+            
+            if let recordedFile = recordedFile {
+                try? FileManager.default.removeItem(at: recordedFile)
+                self.recordedFile = nil
+            }
         }
     }
     
@@ -336,7 +314,8 @@ extension WhisperState {
         await whisperContext?.releaseResources()
         whisperContext = nil
         isModelLoaded = false
-        serviceRegistry.cleanup()
+
+        parakeetTranscriptionService.cleanup()
     }
     
     // MARK: - Helper Methods

@@ -31,23 +31,14 @@ struct NotchRecorderView: View {
     }
     
     private var leftSection: some View {
-        HStack(spacing: 12) {
-            RecorderPromptButton(
-                activePopover: $activePopover,
-                buttonSize: 22,
-                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-            )
-
-            RecorderPowerModeButton(
-                activePopover: $activePopover,
-                buttonSize: 22,
-                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
-            )
+        HStack(spacing: 8) {
+            // Compact profile badge for notch (tiny size)
+            RecorderProfileBadge(size: .tiny)
 
             Spacer()
         }
-        .frame(width: 64)
-        .padding(.leading, 16)
+        .frame(width: 40)
+        .padding(.leading, 12)
     }
     
     private var centerSection: some View {
@@ -73,7 +64,7 @@ struct NotchRecorderView: View {
             menuBarHeight: menuBarHeight
         )
         .frame(width: 70)
-        .padding(.trailing, 8)
+        .padding(.trailing, 4)
     }
     
     var body: some View {

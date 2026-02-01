@@ -18,12 +18,13 @@ struct ModelManagementView: View {
     @StateObject private var customModelManager = CustomModelManager.shared
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject private var whisperPrompt = WhisperPrompt()
     @ObservedObject private var warmupCoordinator = WhisperModelWarmupCoordinator.shared
 
     @State private var selectedFilter: ModelFilter = .recommended
     @State private var isShowingSettings = false
-    
+
     // State for the unified alert
     @State private var isShowingDeleteAlert = false
     @State private var alertTitle = ""
@@ -32,19 +33,10 @@ struct ModelManagementView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                if SystemArchitecture.isIntelMac {
-                    intelMacWarningBanner
-                }
-
-                defaultModelSection
-                languageSelectionSection
-                availableModelsSection
-            }
-            .padding(40)
+            mainContent
         }
         .frame(minWidth: 600, minHeight: 500)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Tokens.Colors.background(for: colorScheme))
         .alert(isPresented: $isShowingDeleteAlert) {
             Alert(
                 title: Text(alertTitle),
@@ -54,20 +46,34 @@ struct ModelManagementView: View {
             )
         }
     }
+
+    private var mainContent: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.xl) {
+            defaultModelSection
+            languageSelectionSection
+            availableModelsSection
+        }
+        .padding(.horizontal, 40)
+        .padding(.vertical, Tokens.Spacing.xl)
+    }
     
     private var defaultModelSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
             Text("Default Model")
-                .font(.headline)
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.label)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             Text(whisperState.currentTranscriptionModel?.displayName ?? "No model selected")
-                .font(.title2)
-                .fontWeight(.bold)
+                .font(Tokens.Typography.heading2)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
         }
-        .padding()
+        .padding(Tokens.Spacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CardBackground(isSelected: false))
-        .cornerRadius(10)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
     }
     
     private var languageSelectionSection: some View {
@@ -75,10 +81,10 @@ struct ModelManagementView: View {
     }
     
     private var availableModelsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             HStack {
                 // Modern compact pill switcher
-                HStack(spacing: 12) {
+                HStack(spacing: Tokens.Spacing.md) {
                     ForEach(ModelFilter.allCases, id: \.self) { filter in
                         Button(action: {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -87,20 +93,25 @@ struct ModelManagementView: View {
                             }
                         }) {
                             Text(filter.rawValue)
-                                .font(.system(size: 14, weight: selectedFilter == filter ? .semibold : .medium))
-                                .foregroundColor(selectedFilter == filter ? .primary : .primary.opacity(0.7))
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
+                                .font(Tokens.Typography.bodyMedium)
+                                .foregroundColor(selectedFilter == filter ? Tokens.Colors.textPrimary(for: colorScheme) : Tokens.Colors.textSecondary(for: colorScheme))
+                                .padding(.horizontal, Tokens.Spacing.lg)
+                                .padding(.vertical, Tokens.Spacing.sm)
                                 .background(
-                                    CardBackground(isSelected: selectedFilter == filter, cornerRadius: 22)
+                                    Capsule()
+                                        .fill(selectedFilter == filter ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+                                )
+                                .overlay(
+                                    Capsule()
+                                        .stroke(selectedFilter == filter ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isShowingSettings.toggle()
@@ -108,20 +119,25 @@ struct ModelManagementView: View {
                 }) {
                     Image(systemName: "gear")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(isShowingSettings ? .accentColor : .primary.opacity(0.7))
-                        .padding(12)
+                        .foregroundColor(isShowingSettings ? Tokens.Colors.orange : Tokens.Colors.textSecondary(for: colorScheme))
+                        .padding(Tokens.Spacing.md)
                         .background(
-                            CardBackground(isSelected: isShowingSettings, cornerRadius: 22)
+                            Circle()
+                                .fill(isShowingSettings ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(isShowingSettings ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                         )
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, Tokens.Spacing.md)
             
             if isShowingSettings {
                 ModelSettingsView(whisperPrompt: whisperPrompt)
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: Tokens.Spacing.md) {
                     ForEach(filteredModels, id: \.id) { model in
                         let isWarming = (model as? LocalModel).map { localModel in
                             warmupCoordinator.isWarming(modelNamed: localModel.name)
@@ -171,6 +187,9 @@ struct ModelManagementView: View {
                         )
                     }
                     
+                    // MARK: - DISABLED: Import Local Model Feature
+                    // Uncomment below to re-enable custom Whisper model import
+                    /*
                     // Import button as a card at the end of the Local list
                     if selectedFilter == .local {
                         HStack(spacing: 8) {
@@ -188,12 +207,14 @@ struct ModelManagementView: View {
                             .buttonStyle(.plain)
 
                             InfoTip(
-                                "Add a custom fine-tuned whisper model to use with VoiceInk. Select the downloaded .bin file.",
-                                learnMoreURL: "https://tryvoiceink.com/docs/custom-local-whisper-models"
+                                title: "Import local Whisper models",
+                                message: "Add a custom fine-tuned whisper model to use with Echo. Select the downloaded .bin file.",
+                                learnMoreURL: "https://vjh.io/embr-echo-docs"
                             )
                             .help("Read more about custom local models")
                         }
                     }
+                    */
                     
                     if selectedFilter == .custom {
                         // Add Custom Model Card at the bottom
@@ -209,54 +230,17 @@ struct ModelManagementView: View {
                 }
             }
         }
-        .padding()
-    }
-
-    private var intelMacWarningBanner: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.orange)
-
-            Text("Local models don't work reliably on Intel Macs")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.primary.opacity(0.85))
-
-            Spacer()
-
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    selectedFilter = .cloud
-                }
-            }) {
-                HStack(spacing: 4) {
-                    Text("Use Cloud")
-                        .font(.system(size: 12, weight: .semibold))
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 10, weight: .bold))
-                }
-                .foregroundColor(.orange)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.orange.opacity(0.12))
-                .cornerRadius(6)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color.orange.opacity(0.08))
-        .cornerRadius(8)
+        .padding(Tokens.Spacing.lg)
     }
 
     private var filteredModels: [any TranscriptionModel] {
         switch selectedFilter {
         case .recommended:
             return whisperState.allAvailableModels.filter {
-                let recommendedNames = ["ggml-base.en", "ggml-large-v3-turbo-q5_0", "ggml-large-v3-turbo", "whisper-large-v3-turbo"]
+                let recommendedNames = ["parakeet-tdt-0.6b-v3", "ggml-base.en", "ggml-large-v3-turbo-q5_0", "whisper-large-v3-turbo"]
                 return recommendedNames.contains($0.name)
             }.sorted { model1, model2 in
-                let recommendedOrder = ["ggml-base.en", "ggml-large-v3-turbo-q5_0", "ggml-large-v3-turbo", "whisper-large-v3-turbo"]
+                let recommendedOrder = ["parakeet-tdt-0.6b-v3", "ggml-base.en", "ggml-large-v3-turbo-q5_0", "whisper-large-v3-turbo"]
                 let index1 = recommendedOrder.firstIndex(of: model1.name) ?? Int.max
                 let index2 = recommendedOrder.firstIndex(of: model2.name) ?? Int.max
                 return index1 < index2
@@ -264,14 +248,16 @@ struct ModelManagementView: View {
         case .local:
             return whisperState.allAvailableModels.filter { $0.provider == .local || $0.provider == .nativeApple || $0.provider == .parakeet }
         case .cloud:
-            let cloudProviders: [ModelProvider] = [.groq, .elevenLabs, .deepgram, .mistral, .gemini, .soniox]
+            let cloudProviders: [ModelProvider] = [.groq, .elevenLabs, .deepgram, .mistral, .gemini]
             return whisperState.allAvailableModels.filter { cloudProviders.contains($0.provider) }
         case .custom:
             return whisperState.allAvailableModels.filter { $0.provider == .custom }
         }
     }
 
-    // MARK: - Import Panel
+    // MARK: - Import Panel (DISABLED)
+    // Uncomment below to re-enable custom Whisper model import
+    /*
     private func presentImportPanel() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.init(filenameExtension: "bin")!]
@@ -285,4 +271,5 @@ struct ModelManagementView: View {
             }
         }
     }
+    */
 }

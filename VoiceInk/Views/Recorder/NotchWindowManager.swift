@@ -41,9 +41,11 @@ class NotchWindowManager: ObservableObject {
     
     func hide() {
         guard isVisible else { return }
-
+        
+        // Remove animation for instant state change
         self.isVisible = false
-
+        
+        // Don't wait for animation, clean up immediately
         self.notchPanel?.hide { [weak self] in
             guard let self = self else { return }
             self.deinitializeWindow()
@@ -70,7 +72,6 @@ class NotchWindowManager: ObservableObject {
     }
     
     private func deinitializeWindow() {
-        notchPanel?.orderOut(nil)
         windowController?.close()
         windowController = nil
         notchPanel = nil

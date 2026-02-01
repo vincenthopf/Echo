@@ -42,24 +42,6 @@ class SystemInfoService {
         AI Provider: \(getAIProvider())
         AI Model: \(getAIModel())
 
-        UI SETTINGS:
-        Menu Bar Only: \(UserDefaults.standard.bool(forKey: "IsMenuBarOnly"))
-
-        CLIPBOARD & PASTE SETTINGS:
-        Restore Clipboard After Paste: \(UserDefaults.standard.bool(forKey: "restoreClipboardAfterPaste"))
-        Clipboard Restore Delay: \(UserDefaults.standard.double(forKey: "clipboardRestoreDelay"))s
-        Use AppleScript Paste: \(UserDefaults.standard.bool(forKey: "UseAppleScriptPaste"))
-
-        POWER MODE:
-        Power Mode Enabled: \(UserDefaults.standard.bool(forKey: "powerModeUIFlag"))
-        Auto-Restore Enabled: \(UserDefaults.standard.bool(forKey: "powerModeAutoRestoreEnabled"))
-
-        DATA CLEANUP SETTINGS:
-        Auto-Delete Transcriptions: \(UserDefaults.standard.bool(forKey: "IsTranscriptionCleanupEnabled"))
-        Transcription Retention: \(UserDefaults.standard.integer(forKey: "TranscriptionRetentionMinutes")) minutes
-        Auto-Delete Audio Files: \(UserDefaults.standard.bool(forKey: "IsAudioCleanupEnabled"))
-        Audio Retention Period: \(UserDefaults.standard.integer(forKey: "AudioRetentionPeriod")) days
-
         PERMISSIONS:
         Accessibility: \(getAccessibilityStatus())
         Screen Recording: \(getScreenRecordingStatus())
@@ -105,8 +87,34 @@ class SystemInfoService {
         return ByteCountFormatter.string(fromByteCount: Int64(totalMemory), countStyle: .memory)
     }
 
+    // MARK: - Public Architecture Detection
+
+    /// Returns true if running on an Intel (x86_64) Mac
+    static func isIntelMac() -> Bool {
+        #if arch(x86_64)
+            return true
+        #else
+            return false
+        #endif
+    }
+
+    /// Returns true if running on Apple Silicon (ARM64) Mac
+    static func isAppleSilicon() -> Bool {
+        #if arch(arm64)
+            return true
+        #else
+            return false
+        #endif
+    }
+
     private func getArchitecture() -> String {
-        return SystemArchitecture.current
+        #if arch(x86_64)
+            return "Intel x86_64"
+        #elseif arch(arm64)
+            return "Apple Silicon (ARM64)"
+        #else
+            return "Unknown"
+        #endif
     }
 
     private func getAudioInputMode() -> String {
@@ -119,11 +127,11 @@ class SystemInfoService {
 
     private func getCurrentAudioDevice() -> String {
         let audioManager = AudioDeviceManager.shared
-        let deviceID = audioManager.getCurrentDevice()
-        if deviceID != 0, let deviceName = audioManager.getDeviceName(deviceID: deviceID) {
+        if let deviceID = audioManager.selectedDeviceID ?? audioManager.fallbackDeviceID,
+           let deviceName = audioManager.getDeviceName(deviceID: deviceID) {
             return deviceName
         }
-        return "Unknown"
+        return "System Default"
     }
 
     private func getAvailableAudioDevices() -> String {
@@ -206,16 +214,7 @@ class SystemInfoService {
     }
 
     private func getLicenseStatus() -> String {
-        let licenseManager = LicenseManager.shared
-
-        // Check for existing license key and activation
-        if licenseManager.licenseKey != nil {
-            if licenseManager.activationId != nil || !UserDefaults.standard.bool(forKey: "VoiceInkLicenseRequiresActivation") {
-                return "Licensed (Pro)"
-            }
-        }
-
-        return "Not Licensed"
+        return "Free (Fully Licensed)"
     }
 
     private func getCurrentLanguage() -> String {

@@ -30,6 +30,7 @@ struct OnboardingPermission: Identifiable {
 }
 
 struct OnboardingPermissionsView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @ObservedObject private var audioDeviceManager = AudioDeviceManager.shared
@@ -38,7 +39,8 @@ struct OnboardingPermissionsView: View {
     @State private var showAnimation = false
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
-    @State private var showModelDownload = false
+    @State private var showModelSelection = false
+    @State private var showIntelGuidance = false
     
     private let permissions: [OnboardingPermission] = [
         OnboardingPermission(
@@ -49,13 +51,13 @@ struct OnboardingPermissionsView: View {
         ),
         OnboardingPermission(
             title: "Microphone Selection",
-            description: "Select the audio input device you want to use with VoiceInk.",
+            description: "Select the audio input device you want to use with Echo.",
             icon: "headphones",
             type: .audioDeviceSelection
         ),
         OnboardingPermission(
             title: "Accessibility Access",
-            description: "Allow VoiceInk to help you type anywhere in your Mac.",
+            description: "Allow Echo to help you type anywhere in your Mac.",
             icon: "accessibility",
             type: .accessibility
         ),
@@ -67,7 +69,7 @@ struct OnboardingPermissionsView: View {
         ),
         OnboardingPermission(
             title: "Keyboard Shortcut",
-            description: "Set up a keyboard shortcut to quickly access VoiceInk from anywhere.",
+            description: "Set up a keyboard shortcut to quickly access Echo from anywhere.",
             icon: "keyboard",
             type: .keyboardShortcut
         )
@@ -77,63 +79,66 @@ struct OnboardingPermissionsView: View {
         ZStack {
             GeometryReader { geometry in
                 ZStack {
-                    // Reusable background
-                    OnboardingBackgroundView()
-                    
+                    // Clean solid background using design tokens
+                    ParallelDesignTokens.Colors.background(for: colorScheme)
+                        .ignoresSafeArea()
+
                     VStack(spacing: 40) {
-                        // Progress indicator
+                        // Progress indicator using primaryOrange
                         HStack(spacing: 8) {
                             ForEach(0..<permissions.count, id: \.self) { index in
                                 Circle()
-                                    .fill(index <= currentPermissionIndex ? Color.accentColor : Color.white.opacity(0.1))
+                                    .fill(index <= currentPermissionIndex
+                                          ? ParallelDesignTokens.Colors.primaryOrange
+                                          : ParallelDesignTokens.Colors.border(for: colorScheme))
                                     .frame(width: 8, height: 8)
                                     .scaleEffect(index == currentPermissionIndex ? 1.2 : 1.0)
                                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPermissionIndex)
                             }
                         }
                         .padding(.top, 40)
-                        
+
                         // Current permission card
                         VStack(spacing: 30) {
                             // Permission icon
                             ZStack {
                                 Circle()
-                                    .fill(Color.accentColor.opacity(0.1))
+                                    .fill(ParallelDesignTokens.Colors.primaryOrange.opacity(0.1))
                                     .frame(width: 100, height: 100)
-                                
+
                                 if permissionStates[currentPermissionIndex] {
                                     Image(systemName: "checkmark.seal.fill")
                                         .font(.system(size: 50))
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                                         .transition(.scale.combined(with: .opacity))
                                 } else {
                                     Image(systemName: permissions[currentPermissionIndex].icon)
                                         .font(.system(size: 40))
-                                        .foregroundColor(.accentColor)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryOrange)
                                 }
                             }
                             .scaleEffect(scale)
                             .opacity(opacity)
-                            
+
                             // Permission text
                             VStack(spacing: 12) {
                                 HStack(spacing: 8) {
                                     Text(permissions[currentPermissionIndex].title)
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                    
+                                        .font(ParallelDesignTokens.Typography.heading2)
+                                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+
                                     if permissions[currentPermissionIndex].type == .screenRecording {
                                         InfoTip(
-                                            "VoiceInk captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
-                                            learnMoreURL: "https://tryvoiceink.com/docs/contextual-awareness"
+                                            title: "Screen Recording Access",
+                                            message: "Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
+                                            learnMoreURL: "https://vjh.io/embr-echo-docs"
                                         )
                                     }
                                 }
-                                
+
                                 Text(permissions[currentPermissionIndex].description)
-                                    .font(.body)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .font(ParallelDesignTokens.Typography.body)
+                                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
@@ -148,25 +153,26 @@ struct OnboardingPermissionsView: View {
                                             Image(systemName: "mic.slash.circle.fill")
                                                 .font(.system(size: 36))
                                                 .symbolRenderingMode(.hierarchical)
-                                                .foregroundStyle(.secondary)
-                                            
+                                                .foregroundStyle(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+
                                             Text("No microphones found")
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
+                                                .font(ParallelDesignTokens.Typography.bodySmall)
+                                                .foregroundStyle(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                         }
                                         .padding()
                                     } else {
-                                        styledPicker(
+                                        styledPickerWithSystemDefault(
                                             label: "Microphone:",
-                                            selectedValue: audioDeviceManager.selectedDeviceID ?? 0,
-                                            displayValue: audioDeviceManager.availableDevices.first { $0.id == audioDeviceManager.selectedDeviceID }?.name ?? "Select Device",
-                                            options: audioDeviceManager.availableDevices.map { $0.id },
-                                            optionDisplayName: { deviceId in
-                                                audioDeviceManager.availableDevices.first { $0.id == deviceId }?.name ?? "Unknown Device"
-                                            },
-                                            onSelection: { deviceId in
-                                                audioDeviceManager.selectDevice(id: deviceId)
-                                                audioDeviceManager.selectInputMode(.custom)
+                                            selectedMode: audioDeviceManager.inputMode,
+                                            selectedDeviceID: audioDeviceManager.selectedDeviceID,
+                                            availableDevices: audioDeviceManager.availableDevices,
+                                            onSelection: { mode, deviceId in
+                                                if mode == .systemDefault {
+                                                    audioDeviceManager.selectInputMode(.systemDefault)
+                                                } else if let deviceId = deviceId {
+                                                    audioDeviceManager.selectDevice(id: deviceId)
+                                                    audioDeviceManager.selectInputMode(.custom)
+                                                }
                                                 withAnimation {
                                                     permissionStates[currentPermissionIndex] = true
                                                     showAnimation = true
@@ -174,22 +180,20 @@ struct OnboardingPermissionsView: View {
                                             }
                                         )
                                         .onAppear {
-                                            if !audioDeviceManager.availableDevices.isEmpty {
-                                                if let deviceID = audioDeviceManager.findBestAvailableDevice() {
-                                                    audioDeviceManager.selectDevice(id: deviceID)
-                                                    audioDeviceManager.selectInputMode(.custom)
-                                                    withAnimation {
-                                                        permissionStates[currentPermissionIndex] = true
-                                                        showAnimation = true
-                                                    }
+                                            // Auto-select system default if nothing is configured
+                                            if audioDeviceManager.inputMode != .systemDefault && audioDeviceManager.selectedDeviceID == nil {
+                                                audioDeviceManager.selectInputMode(.systemDefault)
+                                                withAnimation {
+                                                    permissionStates[currentPermissionIndex] = true
+                                                    showAnimation = true
                                                 }
                                             }
                                         }
                                     }
-                                    
-                                    Text("For best results, using your Mac's built-in microphone is recommended.")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.7))
+
+                                    Text("System Default automatically uses your Mac's active microphone.")
+                                        .font(ParallelDesignTokens.Typography.caption)
+                                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal)
                                 }
@@ -219,18 +223,20 @@ struct OnboardingPermissionsView: View {
                         VStack(spacing: 16) {
                             Button(action: requestPermission) {
                                 Text(getButtonTitle())
-                                    .font(.headline)
+                                    .font(ParallelDesignTokens.Typography.heading3)
                                     .foregroundColor(.white)
                                     .frame(width: 200, height: 50)
-                                    .background(Color.accentColor)
-                                    .cornerRadius(25)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.large)
+                                            .fill(ParallelDesignTokens.Colors.primaryOrange)
+                                    )
                             }
                             .buttonStyle(ScaleButtonStyle())
-                            
-                            if !permissionStates[currentPermissionIndex] && 
+
+                            if !permissionStates[currentPermissionIndex] &&
                                permissions[currentPermissionIndex].type != .keyboardShortcut &&
                                permissions[currentPermissionIndex].type != .audioDeviceSelection {
-                                SkipButton(text: "Skip for now") {
+                                SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                     moveToNext()
                                 }
                             }
@@ -241,8 +247,13 @@ struct OnboardingPermissionsView: View {
                 }
             }
             
-            if showModelDownload {
-                OnboardingModelDownloadView(hasCompletedOnboarding: $hasCompletedOnboarding)
+            if showModelSelection {
+                OnboardingModelSelectionView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+
+            if showIntelGuidance {
+                OnboardingIntelMacGuidanceView(hasCompletedOnboarding: $hasCompletedOnboarding)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
@@ -271,8 +282,8 @@ struct OnboardingPermissionsView: View {
         // Check microphone permission
         permissionStates[0] = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
         
-        // Check if device is selected
-        permissionStates[1] = audioDeviceManager.selectedDeviceID != nil
+        // Check if device is selected or system default mode is being used
+        permissionStates[1] = audioDeviceManager.selectedDeviceID != nil || audioDeviceManager.inputMode == .systemDefault
         
         // Check accessibility permission
         permissionStates[2] = AXIsProcessTrusted()
@@ -308,7 +319,7 @@ struct OnboardingPermissionsView: View {
             audioDeviceManager.loadAvailableDevices()
 
             if audioDeviceManager.availableDevices.isEmpty {
-                audioDeviceManager.selectInputMode(.custom)
+                audioDeviceManager.selectInputMode(.systemDefault)
                 withAnimation {
                     permissionStates[currentPermissionIndex] = true
                     showAnimation = true
@@ -317,9 +328,9 @@ struct OnboardingPermissionsView: View {
                 return
             }
 
-            if let deviceID = audioDeviceManager.findBestAvailableDevice() {
-                audioDeviceManager.selectDevice(id: deviceID)
-                audioDeviceManager.selectInputMode(.custom)
+            // If no mode is configured yet, auto-select system default
+            if audioDeviceManager.inputMode != .systemDefault && audioDeviceManager.selectedDeviceID == nil {
+                audioDeviceManager.selectInputMode(.systemDefault)
                 withAnimation {
                     permissionStates[currentPermissionIndex] = true
                     showAnimation = true
@@ -375,8 +386,13 @@ struct OnboardingPermissionsView: View {
                 resetAnimation()
             }
         } else {
+            // Route based on architecture
             withAnimation {
-                showModelDownload = true
+                if SystemInfoService.isIntelMac() {
+                    showIntelGuidance = true
+                } else {
+                    showModelSelection = true
+                }
             }
         }
     }
@@ -404,11 +420,11 @@ struct OnboardingPermissionsView: View {
         VStack(spacing: 16) {
             HStack(spacing: 12) {
                 Spacer()
-                
+
                 Text(label)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white.opacity(0.8))
-                
+                    .font(ParallelDesignTokens.Typography.bodyLarge)
+                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+
                 Menu {
                     ForEach(options, id: \.self) { option in
                         Button(action: {
@@ -426,29 +442,118 @@ struct OnboardingPermissionsView: View {
                 } label: {
                     HStack(spacing: 8) {
                         Text(displayValue)
-                            .foregroundColor(.white)
-                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                            .font(ParallelDesignTokens.Typography.bodyLarge)
                         Image(systemName: "chevron.up.chevron.down")
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
+                    .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
+                    .cornerRadius(ParallelDesignTokens.Radius.medium)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.medium)
+                            .stroke(ParallelDesignTokens.Colors.border(for: colorScheme), lineWidth: ParallelDesignTokens.Border.width)
                     )
                 }
                 .menuStyle(.borderlessButton)
-                
+
                 Spacer()
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(12)
+        .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme).opacity(0.5))
+        .cornerRadius(ParallelDesignTokens.Radius.large)
+    }
+
+    @ViewBuilder
+    private func styledPickerWithSystemDefault(
+        label: String,
+        selectedMode: AudioInputMode,
+        selectedDeviceID: AudioDeviceID?,
+        availableDevices: [(id: AudioDeviceID, uid: String, name: String)],
+        onSelection: @escaping (AudioInputMode, AudioDeviceID?) -> Void
+    ) -> some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 12) {
+                Spacer()
+
+                Text(label)
+                    .font(ParallelDesignTokens.Typography.bodyLarge)
+                    .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+
+                Menu {
+                    // System Default option (first and recommended)
+                    Button(action: {
+                        onSelection(.systemDefault, nil)
+                    }) {
+                        HStack {
+                            Image(systemName: "waveform.circle")
+                            Text("System Default")
+                            if selectedMode == .systemDefault {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+
+                    Divider()
+
+                    // Individual device options
+                    ForEach(availableDevices, id: \.id) { device in
+                        Button(action: {
+                            onSelection(.custom, device.id)
+                        }) {
+                            HStack {
+                                Text(device.name)
+                                if selectedMode == .custom && selectedDeviceID == device.id {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if selectedMode == .systemDefault {
+                            Image(systemName: "waveform.circle")
+                                .font(.system(size: 14))
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme).opacity(0.9))
+                            Text("System Default")
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
+                        } else if let deviceId = selectedDeviceID,
+                                  let device = availableDevices.first(where: { $0.id == deviceId }) {
+                            Text(device.name)
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
+                        } else {
+                            Text("Select Device")
+                                .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+                                .font(ParallelDesignTokens.Typography.bodyLarge)
+                        }
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 12))
+                            .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
+                    .cornerRadius(ParallelDesignTokens.Radius.medium)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.medium)
+                            .stroke(ParallelDesignTokens.Colors.border(for: colorScheme), lineWidth: ParallelDesignTokens.Border.width)
+                    )
+                }
+                .menuStyle(.borderlessButton)
+
+                Spacer()
+            }
+        }
+        .padding()
+        .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme).opacity(0.5))
+        .cornerRadius(ParallelDesignTokens.Radius.large)
     }
 
     @ViewBuilder

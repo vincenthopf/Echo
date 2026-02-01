@@ -24,23 +24,23 @@ struct VoiceInkButton: View {
 
 struct PowerModeEmptyStateView: View {
     let action: () -> Void
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "bolt.circle.fill")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            
-            Text("No Power Modes")
+
+            Text("No Configurations")
                 .font(.title2)
                 .fontWeight(.semibold)
-            
-            Text("Add customized power modes for different contexts")
+
+            Text("Add customized configurations for different contexts")
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-            
+
             VoiceInkButton(
-                title: "Add New Power Mode",
+                title: "Add Configuration",
                 action: action
             )
             .frame(maxWidth: 250)
@@ -65,26 +65,7 @@ struct PowerModeConfigurationsGrid: View {
                 )
             }
         }
-    }
-}
-
-/// Small, consistent icon-only add button used across Power Mode configuration rows.
-struct AddIconButton: View {
-    let helpText: String
-    var isDisabled: Bool = false
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: "plus.circle.fill")
-                .font(.system(size: 18))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-        }
-        .buttonStyle(.plain)
-        .help(helpText)
-        .accessibilityLabel(helpText)
-        .disabled(isDisabled)
+        .padding(.horizontal)
     }
 }
 
@@ -156,11 +137,17 @@ struct ConfigurationRow: View {
                     Circle()
                         .fill(Color(NSColor.controlBackgroundColor))
                         .frame(width: 40, height: 40)
-                    
-                    Text(config.emoji)
-                        .font(.system(size: 20))
+
+                    if config.emoji.shouldRenderAsSFSymbol {
+                        Image(systemName: config.emoji)
+                            .font(.system(size: 20))
+                            .foregroundColor(.accentColor)
+                    } else {
+                        Text(config.emoji)
+                            .font(.system(size: 20))
+                    }
                 }
-                
+
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(config.name)
@@ -185,7 +172,7 @@ struct ConfigurationRow: View {
                                     .font(.caption2)
                             }
                         }
-
+                        
                         if websiteCount > 0 {
                             HStack(spacing: 4) {
                                 Image(systemName: "globe")
@@ -195,7 +182,6 @@ struct ConfigurationRow: View {
                             }
                         }
                     }
-                    .padding(.top, 2)
                     .foregroundColor(.secondary)
                 }
                 
@@ -213,6 +199,7 @@ struct ConfigurationRow: View {
             
             if selectedModel != nil || selectedLanguage != nil || config.isAIEnhancementEnabled || config.isAutoSendEnabled {
                 Divider()
+                    .padding(.horizontal, 16)
                 
                 HStack(spacing: 8) {
                     if let model = selectedModel, model != "Default" {
@@ -222,8 +209,8 @@ struct ConfigurationRow: View {
                             Text(model)
                                 .font(.caption)
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Capsule()
                             .fill(Color(NSColor.controlBackgroundColor)))
                         .overlay(
@@ -239,8 +226,8 @@ struct ConfigurationRow: View {
                             Text(language)
                                 .font(.caption)
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Capsule()
                             .fill(Color(NSColor.controlBackgroundColor)))
                         .overlay(
@@ -256,8 +243,8 @@ struct ConfigurationRow: View {
                             Text(modelName.count > 20 ? String(modelName.prefix(18)) + "..." : modelName)
                                 .font(.caption)
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Capsule()
                             .fill(Color(NSColor.controlBackgroundColor)))
                         .overlay(
@@ -273,8 +260,8 @@ struct ConfigurationRow: View {
                             Text("Auto Send")
                                 .font(.caption)
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Capsule()
                             .fill(Color(NSColor.controlBackgroundColor)))
                         .overlay(
@@ -287,11 +274,11 @@ struct ConfigurationRow: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "camera.viewfinder")
                                     .font(.system(size: 10))
-                                Text("Context Awareness")
+                                Text("Visual Context")
                                     .font(.caption)
                             }
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
                             .background(Capsule()
                                 .fill(Color(NSColor.controlBackgroundColor)))
                             .overlay(
@@ -306,8 +293,8 @@ struct ConfigurationRow: View {
                             Text(selectedPrompt?.title ?? "AI")
                                 .font(.caption)
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
                         .background(Capsule()
                             .fill(Color.accentColor.opacity(0.1)))
                         .foregroundColor(.accentColor)
@@ -315,13 +302,10 @@ struct ConfigurationRow: View {
 
                     Spacer()
                 }
-                
-                .padding(.vertical, 6)
+                .padding(.vertical, 10)
                 .padding(.horizontal, 16)
-                .background(Color.secondary.opacity(0.1))
             }
     }
-    .clipShape(RoundedRectangle(cornerRadius: 16))
     .background(CardBackground(isSelected: isEditing))
     .opacity(config.isEnabled ? 1.0 : 0.5)
 
@@ -341,8 +325,8 @@ struct ConfigurationRow: View {
         }
         Button(role: .destructive, action: {
             let alert = NSAlert()
-            alert.messageText = "Delete Power Mode?"
-            alert.informativeText = "Are you sure you want to delete the '\(config.name)' power mode? This action cannot be undone."
+            alert.messageText = "Delete Configuration?"
+            alert.informativeText = "Are you sure you want to delete the '\(config.name)' configuration? This action cannot be undone."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "Delete")
             alert.addButton(withTitle: "Cancel")

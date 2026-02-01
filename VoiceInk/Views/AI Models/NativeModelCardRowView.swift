@@ -3,110 +3,118 @@ import AppKit
 
 // MARK: - Native Apple Model Card View
 struct NativeAppleModelCardView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let model: NativeAppleModel
     let isCurrent: Bool
     var setDefaultAction: () -> Void
-    
+
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
             // Main Content
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                 headerSection
                 metadataSection
                 descriptionSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             // Action Controls
             actionSection
         }
-        .padding(16)
-        .background(CardBackground(isSelected: isCurrent, useAccentGradientWhenSelected: isCurrent))
+        .padding(Tokens.Spacing.lg)
+        .background(isCurrent ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(isCurrent ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
     }
-    
+
     private var headerSection: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(model.displayName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color(.labelColor))
-            
+                .font(Tokens.Typography.bodyMedium)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
             statusBadge
-            
+
             Spacer()
         }
     }
-    
+
     private var statusBadge: some View {
         Group {
             if isCurrent {
                 Text("Default")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color.accentColor))
+                    .background(Capsule().fill(Tokens.Colors.orange))
                     .foregroundColor(.white)
             } else {
                 Text("Built-in")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color.blue.opacity(0.2)))
-                    .foregroundColor(Color.blue)
+                    .background(Capsule().fill(Tokens.Colors.orangeMedium(for: colorScheme)))
+                    .foregroundColor(Tokens.Colors.orange)
             }
         }
     }
-    
+
     private var metadataSection: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             // Native Apple
             Label("Native Apple", systemImage: "apple.logo")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             // Language
             Label(model.language, systemImage: "globe")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             // On-Device
             Label("On-Device", systemImage: "checkmark.shield")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             // Requires macOS 26+
             Label("macOS 26+", systemImage: "macbook")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
         }
         .lineLimit(1)
     }
-    
+
     private var descriptionSection: some View {
         Text(model.description)
-            .font(.system(size: 11))
-            .foregroundColor(Color(.secondaryLabelColor))
+            .font(Tokens.Typography.caption)
+            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             .lineLimit(2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 4)
+            .padding(.top, Tokens.Spacing.xs)
     }
-    
+
     private var actionSection: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Tokens.Spacing.sm) {
             if isCurrent {
                 Text("Default Model")
-                    .font(.system(size: 12))
-                    .foregroundColor(Color(.secondaryLabelColor))
+                    .font(Tokens.Typography.label)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             } else {
                 Button(action: setDefaultAction) {
                     Text("Set as Default")
-                        .font(.system(size: 12))
+                        .font(Tokens.Typography.label)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .tint(Tokens.Colors.orange)
             }
         }
     }

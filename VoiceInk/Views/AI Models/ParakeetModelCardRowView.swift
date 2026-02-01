@@ -3,6 +3,8 @@ import Combine
 import AppKit
 
 struct ParakeetModelCardRowView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let model: ParakeetModel
     @ObservedObject var whisperState: WhisperState
 
@@ -19,33 +21,31 @@ struct ParakeetModelCardRowView: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            VStack(alignment: .leading, spacing: 6) {
+        HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                 headerSection
                 metadataSection
                 descriptionSection
                 progressSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+
             actionSection
         }
-        .padding(16)
-        .background(CardBackground(isSelected: isCurrent, useAccentGradientWhenSelected: isCurrent))
+        .padding(Tokens.Spacing.lg)
+        .background(isCurrent ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(isCurrent ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
     }
 
     private var headerSection: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(model.displayName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color(.labelColor))
-            
-            Text("Experimental")
-                .font(.system(size: 11, weight: .medium))
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Capsule().fill(Color.orange.opacity(0.8)))
-                .foregroundColor(.white)
+                .font(Tokens.Typography.bodyMedium)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
             statusBadge
             Spacer()
@@ -56,24 +56,24 @@ struct ParakeetModelCardRowView: View {
         Group {
             if isCurrent {
                 Text("Default")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color.accentColor))
+                    .background(Capsule().fill(Tokens.Colors.orange))
                     .foregroundColor(.white)
             } else if isDownloaded {
                 Text("Downloaded")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color(.quaternaryLabelColor)))
-                    .foregroundColor(Color(.labelColor))
+                    .background(Capsule().fill(Tokens.Colors.border(for: colorScheme)))
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             }
         }
     }
 
     private var metadataSection: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             Label(model.language, systemImage: "globe")
             Label(model.size, systemImage: "internaldrive")
             HStack(spacing: 3) {
@@ -87,18 +87,18 @@ struct ParakeetModelCardRowView: View {
             }
             .fixedSize(horizontal: true, vertical: false)
         }
-        .font(.system(size: 11))
-        .foregroundColor(Color(.secondaryLabelColor))
+        .font(Tokens.Typography.caption)
+        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
         .lineLimit(1)
     }
 
     private var descriptionSection: some View {
         Text(model.description)
-            .font(.system(size: 11))
-            .foregroundColor(Color(.secondaryLabelColor))
+            .font(Tokens.Typography.caption)
+            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             .lineLimit(2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 4)
+            .padding(.top, Tokens.Spacing.xs)
     }
 
     private var progressSection: some View {
@@ -107,18 +107,19 @@ struct ParakeetModelCardRowView: View {
                 let progress = whisperState.downloadProgress[model.name] ?? 0.0
                 ProgressView(value: progress)
                     .progressViewStyle(LinearProgressViewStyle())
+                    .tint(Tokens.Colors.orange)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 8)
+                    .padding(.top, Tokens.Spacing.sm)
             }
         }
     }
 
     private var actionSection: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Tokens.Spacing.sm) {
             if isCurrent {
                 Text("Default Model")
-                    .font(.system(size: 12))
-                    .foregroundColor(Color(.secondaryLabelColor))
+                    .font(Tokens.Typography.label)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             } else if isDownloaded {
                 Button(action: {
                     Task {
@@ -126,30 +127,31 @@ struct ParakeetModelCardRowView: View {
                     }
                 }) {
                     Text("Set as Default")
-                        .font(.system(size: 12))
+                        .font(Tokens.Typography.label)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .tint(Tokens.Colors.orange)
             } else {
                 Button(action: {
                     Task {
                         await whisperState.downloadParakeetModel(model)
                     }
                 }) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Tokens.Spacing.xs) {
                         Text(isDownloading ? "Downloading..." : "Download")
                         Image(systemName: "arrow.down.circle")
                     }
-                    .font(.system(size: 12, weight: .medium))
+                    .font(Tokens.Typography.label)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.accentColor))
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
+                    .background(Capsule().fill(Tokens.Colors.orange))
                 }
                 .buttonStyle(.plain)
                 .disabled(isDownloading)
             }
-            
+
             if isDownloaded {
                 Menu {
                     Button(action: {
@@ -157,7 +159,7 @@ struct ParakeetModelCardRowView: View {
                     }) {
                         Label("Delete Model", systemImage: "trash")
                     }
-                    
+
                     Button {
                         whisperState.showParakeetModelInFinder(model)
                     } label: {
@@ -166,6 +168,7 @@ struct ParakeetModelCardRowView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 14))
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)

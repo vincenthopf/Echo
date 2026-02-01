@@ -65,7 +65,7 @@ class AIEnhancementService: ObservableObject {
 
     private let aiService: AIService
     private let screenCaptureService: ScreenCaptureService
-    private let customVocabularyService: CustomVocabularyService
+    private let dictionaryContextService: DictionaryContextService
     private let baseTimeout: TimeInterval = 30
     private let rateLimitInterval: TimeInterval = 1.0
     private var lastRequestTime: Date?
@@ -77,7 +77,7 @@ class AIEnhancementService: ObservableObject {
         self.aiService = aiService
         self.modelContext = modelContext
         self.screenCaptureService = ScreenCaptureService()
-        self.customVocabularyService = CustomVocabularyService.shared
+        self.dictionaryContextService = DictionaryContextService.shared
 
         self.isEnhancementEnabled = UserDefaults.standard.bool(forKey: "isAIEnhancementEnabled")
         self.useClipboardContext = UserDefaults.standard.bool(forKey: "useClipboardContext")
@@ -140,15 +140,12 @@ class AIEnhancementService: ObservableObject {
     }
 
     private func getSystemMessage(for mode: EnhancementPrompt) async -> String {
-        let selectedTextContext: String
-        if AXIsProcessTrusted() {
-            if let selectedText = await SelectedTextService.fetchSelectedText(), !selectedText.isEmpty {
-                selectedTextContext = "\n\n<CURRENTLY_SELECTED_TEXT>\n\(selectedText)\n</CURRENTLY_SELECTED_TEXT>"
-            } else {
-                selectedTextContext = ""
-            }
+        let selectedText = await SelectedTextService.fetchSelectedText()
+
+        let selectedTextContext = if let selectedText = selectedText, !selectedText.isEmpty {
+            "\n\n<CURRENTLY_SELECTED_TEXT>\n\(selectedText)\n</CURRENTLY_SELECTED_TEXT>"
         } else {
-            selectedTextContext = ""
+            ""
         }
 
         let clipboardContext = if useClipboardContext,
@@ -167,17 +164,17 @@ class AIEnhancementService: ObservableObject {
             ""
         }
 
-        let customVocabulary = customVocabularyService.getCustomVocabulary(from: modelContext)
+        let dictionaryContext = dictionaryContextService.getDictionaryContext()
 
         let allContextSections = selectedTextContext + clipboardContext + screenCaptureContext
 
-        let customVocabularySection = if !customVocabulary.isEmpty {
-            "\n\n<CUSTOM_VOCABULARY>\(customVocabulary)\n</CUSTOM_VOCABULARY>"
+        let dictionaryContextSection = if !dictionaryContext.isEmpty {
+            "\n\n<DICTIONARY_CONTEXT>\(dictionaryContext)\n</DICTIONARY_CONTEXT>"
         } else {
             ""
         }
 
-        let finalContextSection = allContextSections + customVocabularySection
+        let finalContextSection = allContextSections + dictionaryContextSection
 
         if let activePrompt = activePrompt {
             if activePrompt.id == PredefinedPrompts.assistantPromptId {
@@ -208,6 +205,10 @@ class AIEnhancementService: ObservableObject {
             self.lastSystemMessageSent = systemMessage
             self.lastUserMessageSent = formattedText
         }
+
+        // Log the message being sent to AI enhancement
+        logger.notice("AI Enhancement - System Message: \(systemMessage, privacy: .public)")
+        logger.notice("AI Enhancement - User Message: \(formattedText, privacy: .public)")
 
         if aiService.selectedProvider == .ollama {
             do {
@@ -291,17 +292,12 @@ class AIEnhancementService: ObservableObject {
                 ["role": "user", "content": formattedText]
             ]
 
-            var requestBody: [String: Any] = [
+            let requestBody: [String: Any] = [
                 "model": aiService.currentModel,
                 "messages": messages,
                 "temperature": aiService.currentModel.lowercased().hasPrefix("gpt-5") ? 1.0 : 0.3,
                 "stream": false
             ]
-
-            // Add reasoning_effort parameter if the model supports it
-            if let reasoningEffort = ReasoningConfig.getReasoningParameter(for: aiService.currentModel) {
-                requestBody["reasoning_effort"] = reasoningEffort
-            }
 
             request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody)
 
@@ -403,17 +399,13 @@ class AIEnhancementService: ObservableObject {
     }
 
     func captureScreenContext() async {
-        guard CGPreflightScreenCaptureAccess() else {
-            return
-        }
-
         if let capturedText = await screenCaptureService.captureAndExtractText() {
             await MainActor.run {
                 self.objectWillChange.send()
             }
         }
     }
-
+    
     func captureClipboardContext() {
         lastCapturedClipboard = NSPasteboard.general.string(forType: .string)
     }
@@ -423,7 +415,7 @@ class AIEnhancementService: ObservableObject {
         screenCaptureService.lastCapturedText = nil
     }
 
-    func addPrompt(title: String, promptText: String, icon: PromptIcon = "doc.text.fill", description: String? = nil, triggerWords: [String] = [], useSystemInstructions: Bool = true) {
+    func addPrompt(title: String, promptText: String, icon: PromptIcon = .documentFill, description: String? = nil, triggerWords: [String] = [], useSystemInstructions: Bool = true) {
         let newPrompt = CustomPrompt(title: title, promptText: promptText, icon: icon, description: description, isPredefined: false, triggerWords: triggerWords, useSystemInstructions: useSystemInstructions)
         customPrompts.append(newPrompt)
         if customPrompts.count == 1 {
@@ -438,6 +430,14 @@ class AIEnhancementService: ObservableObject {
     }
 
     func deletePrompt(_ prompt: CustomPrompt) {
+        // Check if prompt can be deleted (not in use by any profile)
+        let deleteCheck = canDeletePrompt(promptId: prompt.id)
+        if !deleteCheck.canDelete {
+            logger.warning("Attempted to delete in-use prompt: \(prompt.title). Reason: \(deleteCheck.reason ?? "unknown")")
+            // Note: UI should prevent this via deletion protection, but log for debugging
+            return
+        }
+
         customPrompts.removeAll { $0.id == prompt.id }
         if selectedPromptId == prompt.id {
             selectedPromptId = allPrompts.first?.id
@@ -446,6 +446,30 @@ class AIEnhancementService: ObservableObject {
 
     func setActivePrompt(_ prompt: CustomPrompt) {
         selectedPromptId = prompt.id
+    }
+
+    // MARK: - Adaptive Awareness Relationship Methods (Stage 4)
+
+    /// Returns usage information for a prompt: count and list of configs using it
+    func getPromptUsageInfo(promptId: UUID) -> (count: Int, configs: [PowerModeConfig]) {
+        let idString = promptId.uuidString
+        let configs = PowerModeManager.shared.configurations.filter { config in
+            config.selectedPrompt == idString
+        }
+        return (configs.count, configs)
+    }
+
+    /// Determines if a prompt can be deleted and returns a reason if not
+    func canDeletePrompt(promptId: UUID) -> (canDelete: Bool, reason: String?) {
+        let usageInfo = getPromptUsageInfo(promptId: promptId)
+
+        if usageInfo.count > 0 {
+            let configNames = usageInfo.configs.map { $0.name }.joined(separator: ", ")
+            let reason = "Cannot delete - used by \(usageInfo.count) profile\(usageInfo.count == 1 ? "" : "s"): \(configNames). Remove from profiles first."
+            return (false, reason)
+        }
+
+        return (true, nil)
     }
 
     private func initializePredefinedPrompts() {

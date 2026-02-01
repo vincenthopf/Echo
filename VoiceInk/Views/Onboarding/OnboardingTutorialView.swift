@@ -5,6 +5,7 @@ struct OnboardingTutorialView: View {
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @EnvironmentObject private var whisperState: WhisperState
+    @Environment(\.colorScheme) private var colorScheme
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
     @State private var transcribedText: String = ""
@@ -27,7 +28,7 @@ struct OnboardingTutorialView: View {
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                             
-                            Text("Let's test your VoiceInk setup.")
+                            Text("Let's test your Echo setup.")
                                 .font(.system(size: 24, weight: .medium, design: .rounded))
                                 .foregroundColor(.white.opacity(0.7))
                                 .lineSpacing(4)
@@ -82,7 +83,7 @@ struct OnboardingTutorialView: View {
                         .opacity(transcribedText.isEmpty ? 0.5 : 1)
                         .disabled(transcribedText.isEmpty)
                         
-                        SkipButton(text: "Skip for now") {
+                        SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                             hasCompletedOnboarding = true
                         }
                     }

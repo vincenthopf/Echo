@@ -3,10 +3,12 @@ import AppKit
 
 // MARK: - Cloud Model Card View
 struct CloudModelCardView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let model: CloudModel
     let isCurrent: Bool
     var setDefaultAction: () -> Void
-    
+
     @EnvironmentObject private var whisperState: WhisperState
     @StateObject private var aiService = AIService()
     @State private var isExpanded = false
@@ -14,20 +16,22 @@ struct CloudModelCardView: View {
     @State private var isVerifying = false
     @State private var verificationStatus: VerificationStatus = .none
     @State private var isConfiguredState: Bool = false
-    @State private var verificationError: String? = nil
-    
+
     enum VerificationStatus {
         case none, verifying, success, failure
     }
-    
+
     private var isConfigured: Bool {
-        return APIKeyManager.shared.hasAPIKey(forProvider: providerKey)
+        guard let savedKey = UserDefaults.standard.string(forKey: "\(providerKey)APIKey") else {
+            return false
+        }
+        return !savedKey.isEmpty
     }
-    
+
     private var providerKey: String {
         switch model.provider {
         case .groq:
-            return "Groq"
+            return "GROQ"
         case .elevenLabs:
             return "ElevenLabs"
         case .deepgram:
@@ -42,32 +46,37 @@ struct CloudModelCardView: View {
             return model.provider.rawValue
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Main card content
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
                     headerSection
                     metadataSection
                     descriptionSection
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                
+
                 actionSection
             }
-            .padding(16)
-            
+            .padding(Tokens.Spacing.lg)
+
             // Expandable configuration section
             if isExpanded {
                 Divider()
-                    .padding(.horizontal, 16)
-                
+                    .padding(.horizontal, Tokens.Spacing.lg)
+
                 configurationSection
-                    .padding(16)
+                    .padding(Tokens.Spacing.lg)
             }
         }
-        .background(CardBackground(isSelected: isCurrent, useAccentGradientWhenSelected: isCurrent))
+        .background(isCurrent ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(isCurrent ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
         .onAppear {
             loadSavedAPIKey()
             isConfiguredState = isConfigured
@@ -77,66 +86,66 @@ struct CloudModelCardView: View {
     private var headerSection: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(model.displayName)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color(.labelColor))
-            
+                .font(Tokens.Typography.bodyMedium)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
             statusBadge
-            
+
             Spacer()
         }
     }
-    
+
     private var statusBadge: some View {
         Group {
             if isCurrent {
                 Text("Default")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color.accentColor))
+                    .background(Capsule().fill(Tokens.Colors.orange))
                     .foregroundColor(.white)
             } else if isConfiguredState {
                 Text("Configured")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color(.systemGreen).opacity(0.2)))
-                    .foregroundColor(Color(.systemGreen))
+                    .background(Capsule().fill(Tokens.Colors.successSoft(for: colorScheme)))
+                    .foregroundColor(Tokens.Colors.success)
             } else {
                 Text("Setup Required")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(.horizontal, 6)
+                    .font(Tokens.Typography.labelSmall)
+                    .padding(.horizontal, Tokens.Spacing.sm)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Color(.systemOrange).opacity(0.2)))
-                    .foregroundColor(Color(.systemOrange))
+                    .background(Capsule().fill(Tokens.Colors.orangeMedium(for: colorScheme)))
+                    .foregroundColor(Tokens.Colors.orange)
             }
         }
     }
     
     private var metadataSection: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             // Provider
             Label(model.provider.rawValue, systemImage: "cloud")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             // Language
             Label(model.language, systemImage: "globe")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             Label("Cloud Model", systemImage: "icloud")
-                .font(.system(size: 11))
-                .foregroundColor(Color(.secondaryLabelColor))
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 .lineLimit(1)
-            
+
             // Accuracy
             HStack(spacing: 3) {
                 Text("Accuracy")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(Color(.secondaryLabelColor))
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 progressDotsWithNumber(value: model.accuracy * 10)
             }
             .lineLimit(1)
@@ -144,53 +153,53 @@ struct CloudModelCardView: View {
         }
         .lineLimit(1)
     }
-    
+
     private var descriptionSection: some View {
         Text(model.description)
-            .font(.system(size: 11))
-            .foregroundColor(Color(.secondaryLabelColor))
+            .font(Tokens.Typography.caption)
+            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             .lineLimit(2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 4)
+            .padding(.top, Tokens.Spacing.xs)
     }
     
     private var actionSection: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Tokens.Spacing.sm) {
             if isCurrent {
                 Text("Default Model")
-                    .font(.system(size: 12))
-                    .foregroundColor(Color(.secondaryLabelColor))
+                    .font(Tokens.Typography.label)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             } else if isConfiguredState {
                 Button(action: setDefaultAction) {
                     Text("Set as Default")
-                        .font(.system(size: 12))
+                        .font(Tokens.Typography.label)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .tint(Tokens.Colors.orange)
             } else {
                 Button(action: {
                     withAnimation(.interpolatingSpring(stiffness: 170, damping: 20)) {
                         isExpanded.toggle()
                     }
                 }) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Tokens.Spacing.xs) {
                         Text("Configure")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(Tokens.Typography.label)
                         Image(systemName: "gear")
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
                     .background(
                         Capsule()
-                            .fill(Color(.controlAccentColor))
-                            .shadow(color: Color(.controlAccentColor).opacity(0.2), radius: 2, x: 0, y: 1)
+                            .fill(Tokens.Colors.orange)
                     )
                 }
                 .buttonStyle(.plain)
             }
-            
+
             if isConfiguredState {
                 Menu {
                     Button {
@@ -201,6 +210,7 @@ struct CloudModelCardView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 14))
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
@@ -210,18 +220,18 @@ struct CloudModelCardView: View {
     }
     
     private var configurationSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
             Text("API Key Configuration")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(Color(.labelColor))
-            
-            HStack(spacing: 8) {
+                .font(Tokens.Typography.bodyMedium)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+            HStack(spacing: Tokens.Spacing.sm) {
                 SecureField("Enter your \(model.provider.rawValue) API key", text: $apiKey)
                     .textFieldStyle(.roundedBorder)
                     .disabled(isVerifying)
-                
+
                 Button(action: verifyAPIKey) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: Tokens.Spacing.xs) {
                         if isVerifying {
                             ProgressView()
                                 .scaleEffect(0.7)
@@ -231,40 +241,34 @@ struct CloudModelCardView: View {
                                 .font(.system(size: 12, weight: .medium))
                         }
                         Text(isVerifying ? "Verifying..." : "Verify")
-                            .font(.system(size: 12, weight: .medium))
+                            .font(Tokens.Typography.label)
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
                     .background(
                         Capsule()
-                            .fill(verificationStatus == .success ? Color(.systemGreen) : Color(.controlAccentColor))
+                            .fill(verificationStatus == .success ? Tokens.Colors.success : Tokens.Colors.orange)
                     )
                 }
                 .buttonStyle(.plain)
                 .disabled(apiKey.isEmpty || isVerifying)
             }
-            
+
             if verificationStatus == .failure {
-                if let error = verificationError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(Color(.systemRed))
-                } else {
-                    Text("Verification failed")
-                        .font(.caption)
-                        .foregroundColor(Color(.systemRed))
-                }
+                Text("Invalid API key. Please check your key and try again.")
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.error)
             } else if verificationStatus == .success {
                 Text("API key verified successfully!")
-                    .font(.caption)
-                    .foregroundColor(Color(.systemGreen))
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.success)
             }
         }
     }
     
     private func loadSavedAPIKey() {
-        if let savedKey = APIKeyManager.shared.getAPIKey(forProvider: providerKey) {
+        if let savedKey = UserDefaults.standard.string(forKey: "\(providerKey)APIKey") {
             apiKey = savedKey
             verificationStatus = .success
         }
@@ -287,8 +291,6 @@ struct CloudModelCardView: View {
             aiService.selectedProvider = .mistral
         case .gemini:
             aiService.selectedProvider = .gemini
-        case .soniox:
-            aiService.selectedProvider = .soniox
         default:
             // This case should ideally not be hit for cloud models in this view
             print("Warning: verifyAPIKey called for unsupported provider \(model.provider.rawValue)")
@@ -297,35 +299,35 @@ struct CloudModelCardView: View {
             return
         }
         
-        aiService.saveAPIKey(apiKey) { isValid, errorMessage in
+        aiService.saveAPIKey(apiKey) { isValid in
             DispatchQueue.main.async {
                 self.isVerifying = false
                 if isValid {
                     self.verificationStatus = .success
-                    self.verificationError = nil
-                    // Save the API key to Keychain
-                    APIKeyManager.shared.saveAPIKey(self.apiKey, forProvider: self.providerKey)
+                    // Save the API key
+                    UserDefaults.standard.set(self.apiKey, forKey: "\(self.providerKey)APIKey")
                     self.isConfiguredState = true
-
+                    
                     // Collapse the configuration section after successful verification
                     withAnimation(.easeInOut(duration: 0.3)) {
                         self.isExpanded = false
                     }
                 } else {
                     self.verificationStatus = .failure
-                    self.verificationError = errorMessage
                 }
+                
+                // Restore original provider
+                // aiService.selectedProvider = originalProvider // This line was removed as per the new_code
             }
         }
     }
     
     private func clearAPIKey() {
-        APIKeyManager.shared.deleteAPIKey(forProvider: providerKey)
+        UserDefaults.standard.removeObject(forKey: "\(providerKey)APIKey")
         apiKey = ""
         verificationStatus = .none
-        verificationError = nil
         isConfiguredState = false
-
+        
         // If this model is currently the default, clear it
         if isCurrent {
             Task {
@@ -335,7 +337,7 @@ struct CloudModelCardView: View {
                 }
             }
         }
-
+        
         withAnimation(.easeInOut(duration: 0.3)) {
             isExpanded = false
         }

@@ -31,32 +31,16 @@ class WhisperState: NSObject, ObservableObject {
 
     @Published var recorderType: String = UserDefaults.standard.string(forKey: "RecorderType") ?? "mini" {
         didSet {
-            if isMiniRecorderVisible {
-                if oldValue == "notch" {
-                    notchWindowManager?.hide()
-                    notchWindowManager = nil
-                } else {
-                    miniWindowManager?.hide()
-                    miniWindowManager = nil
-                }
-                Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 50_000_000)
-                    showRecorderPanel()
-                }
-            }
             UserDefaults.standard.set(recorderType, forKey: "RecorderType")
         }
     }
     
     @Published var isMiniRecorderVisible = false {
         didSet {
-            // Dispatch asynchronously to avoid "Publishing changes from within view updates" warning
-            DispatchQueue.main.async { [self] in
-                if isMiniRecorderVisible {
-                    showRecorderPanel()
-                } else {
-                    hideRecorderPanel()
-                }
+            if isMiniRecorderVisible {
+                showRecorderPanel()
+            } else {
+                hideRecorderPanel()
             }
         }
     }
@@ -67,11 +51,17 @@ class WhisperState: NSObject, ObservableObject {
     let whisperPrompt = WhisperPrompt()
     
     // Prompt detection service for trigger word handling
+    // Note: PromptDetectionService is deprecated for CustomPrompt trigger words
+    // Still used internally by ActiveWindowService for PowerModeConfig voice triggers
     private let promptDetectionService = PromptDetectionService()
     
     let modelContext: ModelContext
     
-    internal var serviceRegistry: TranscriptionServiceRegistry!
+    // Transcription Services
+    private var localTranscriptionService: LocalTranscriptionService!
+    private lazy var cloudTranscriptionService = CloudTranscriptionService()
+    private lazy var nativeAppleTranscriptionService = NativeAppleTranscriptionService()
+    internal lazy var parakeetTranscriptionService = ParakeetTranscriptionService()
     
     private var modelUrl: URL? {
         let possibleURLs = [
@@ -95,7 +85,6 @@ class WhisperState: NSObject, ObservableObject {
     let modelsDirectory: URL
     let recordingsDirectory: URL
     let enhancementService: AIEnhancementService?
-    var licenseViewModel: LicenseViewModel
     let logger = Logger(subsystem: "com.VincentHopf.embrvoice", category: "WhisperState")
     var notchWindowManager: NotchWindowManager?
     var miniWindowManager: MiniWindowManager?
@@ -111,19 +100,18 @@ class WhisperState: NSObject, ObservableObject {
         
         self.modelsDirectory = appSupportDirectory.appendingPathComponent("WhisperModels")
         self.recordingsDirectory = appSupportDirectory.appendingPathComponent("Recordings")
-        
+
         self.enhancementService = enhancementService
-        self.licenseViewModel = LicenseViewModel()
-        
+
         super.init()
         
         // Configure the session manager
         if let enhancementService = enhancementService {
             PowerModeSessionManager.shared.configure(whisperState: self, enhancementService: enhancementService)
         }
-
-        // Initialize the transcription service registry
-        self.serviceRegistry = TranscriptionServiceRegistry(whisperState: self, modelsDirectory: self.modelsDirectory)
+        
+        // Set the whisperState reference after super.init()
+        self.localTranscriptionService = LocalTranscriptionService(modelsDirectory: self.modelsDirectory, whisperState: self)
         
         setupNotifications()
         createModelsDirectoryIfNeeded()
@@ -141,7 +129,7 @@ class WhisperState: NSObject, ObservableObject {
         }
     }
     
-    func toggleRecord(powerModeId: UUID? = nil) async {
+    func toggleRecord() async {
         if recordingState == .recording {
             await recorder.stopRecording()
             if let recordedFile {
@@ -161,7 +149,6 @@ class WhisperState: NSObject, ObservableObject {
 
                     await transcribeAudio(on: transcription)
                 } else {
-                    try? FileManager.default.removeItem(at: recordedFile)
                     await MainActor.run {
                         recordingState = .idle
                     }
@@ -192,44 +179,34 @@ class WhisperState: NSObject, ObservableObject {
                             let fileName = "\(UUID().uuidString).wav"
                             let permanentURL = self.recordingsDirectory.appendingPathComponent(fileName)
                             self.recordedFile = permanentURL
-
+        
                             try await self.recorder.startRecording(toOutputFile: permanentURL)
-
+                            
                             await MainActor.run {
                                 self.recordingState = .recording
                             }
-
-                            // Detect and apply Power Mode for current app/website in background
-                            Task {
-                                await ActiveWindowService.shared.applyConfiguration(powerModeId: powerModeId)
-                            }
-
-                            // Load model and capture context in background without blocking
-                            Task.detached { [weak self] in
-                                guard let self = self else { return }
-
-                                // Only load model if it's a local model and not already loaded
-                                if let model = await self.currentTranscriptionModel, model.provider == .local {
-                                    if let localWhisperModel = await self.availableModels.first(where: { $0.name == model.name }),
-                                       await self.whisperContext == nil {
-                                        do {
-                                            try await self.loadModel(localWhisperModel)
-                                        } catch {
-                                            await self.logger.error("❌ Model loading failed: \(error.localizedDescription)")
-                                        }
+                            
+                            await ActiveWindowService.shared.applyConfigurationForCurrentApp()
+         
+                            // Only load model if it's a local model and not already loaded
+                            if let model = self.currentTranscriptionModel, model.provider == .local {
+                                if let localWhisperModel = self.availableModels.first(where: { $0.name == model.name }),
+                                   self.whisperContext == nil {
+                                    do {
+                                        try await self.loadModel(localWhisperModel)
+                                    } catch {
+                                        self.logger.error("❌ Model loading failed: \(error.localizedDescription)")
                                     }
-                                } else if let parakeetModel = await self.currentTranscriptionModel as? ParakeetModel {
-                                    try? await self.serviceRegistry.parakeetTranscriptionService.loadModel(for: parakeetModel)
                                 }
-
-                                if let enhancementService = await self.enhancementService {
-                                    await MainActor.run {
-                                        enhancementService.captureClipboardContext()
-                                    }
-                                    await enhancementService.captureScreenContext()
-                                }
+                            } else if let parakeetModel = self.currentTranscriptionModel as? ParakeetModel {
+                                try? await self.parakeetTranscriptionService.loadModel(for: parakeetModel)
                             }
-
+        
+                            if let enhancementService = self.enhancementService {
+                                enhancementService.captureClipboardContext()
+                                await enhancementService.captureScreenContext()
+                            }
+        
                         } catch {
                             self.logger.error("❌ Failed to start recording: \(error.localizedDescription)")
                             await NotificationManager.shared.showNotification(title: "Recording failed to start", type: .error)
@@ -293,20 +270,31 @@ class WhisperState: NSObject, ObservableObject {
         }
 
         logger.notice("🔄 Starting transcription...")
-        
+
         var finalPastedText: String?
-        var promptDetectionResult: PromptDetectionService.PromptDetectionResult?
 
         do {
             guard let model = currentTranscriptionModel else {
                 throw WhisperStateError.transcriptionFailed
             }
 
+            let transcriptionService: TranscriptionService
+            switch model.provider {
+            case .local:
+                transcriptionService = localTranscriptionService
+            case .parakeet:
+                transcriptionService = parakeetTranscriptionService
+            case .nativeApple:
+                transcriptionService = nativeAppleTranscriptionService
+            default:
+                transcriptionService = cloudTranscriptionService
+            }
+
             let transcriptionStart = Date()
-            var text = try await serviceRegistry.transcribe(audioURL: url, model: model)
-            logger.notice("📝 Raw transcript: \(text, privacy: .public)")
+            var text = try await transcriptionService.transcribe(audioURL: url, model: model)
+            logger.notice("📝 Raw transcript: \(text)")
             text = TranscriptionOutputFilter.filter(text)
-            logger.notice("📝 Output filter result: \(text, privacy: .public)")
+            logger.notice("📝 Output filter result: \(text)")
             let transcriptionDuration = Date().timeIntervalSince(transcriptionStart)
 
             let powerModeManager = PowerModeManager.shared
@@ -318,17 +306,45 @@ class WhisperState: NSObject, ObservableObject {
 
             text = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
-            if UserDefaults.standard.bool(forKey: "IsTextFormattingEnabled") {
+            if UserDefaults.standard.object(forKey: "IsTextFormattingEnabled") as? Bool ?? true {
                 text = WhisperTextFormatter.format(text)
-                logger.notice("📝 Formatted transcript: \(text, privacy: .public)")
+                logger.notice("📝 Formatted transcript: \(text)")
             }
 
-            text = WordReplacementService.shared.applyReplacements(to: text, using: modelContext)
-            logger.notice("📝 WordReplacement: \(text, privacy: .public)")
+            if UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled") {
+                text = WordReplacementService.shared.applyReplacements(to: text)
+                logger.notice("📝 WordReplacement: \(text)")
+            }
+
+            // MARK: - Voice Trigger Detection (Stage 2: Adaptive Awareness)
+            // Check for voice triggers in the transcribed text BEFORE prompt detection
+            // Voice triggers have highest precedence and override automatic app/URL detection
+            let voiceTriggerResult = await ActiveWindowService.shared.detectVoiceTrigger(in: text)
+
+            if let voiceActivatedConfig = voiceTriggerResult.config,
+               let detectedKeyword = voiceTriggerResult.detectedKeyword {
+                // Voice trigger detected - apply the config with voice activation source
+                logger.notice("🎤 Activating PowerMode via voice trigger: '\(voiceActivatedConfig.name)' (keyword: '\(detectedKeyword)')")
+
+                await MainActor.run {
+                    PowerModeManager.shared.setActiveConfiguration(voiceActivatedConfig)
+                }
+
+                // Create activation source with the detected keyword
+                let activationSource = ActivationSource.voice(keyword: detectedKeyword)
+                await PowerModeSessionManager.shared.beginSession(
+                    with: voiceActivatedConfig,
+                    activationSource: activationSource
+                )
+
+                // Use the stripped text (with trigger word removed) for the rest of the pipeline
+                text = voiceTriggerResult.strippedText
+                logger.notice("📝 Text after voice trigger removal: \(text)")
+            }
 
             let audioAsset = AVURLAsset(url: url)
             let actualDuration = (try? CMTimeGetSeconds(await audioAsset.load(.duration))) ?? 0.0
-            
+
             transcription.text = text
             transcription.duration = actualDuration
             transcription.transcriptionModelName = model.displayName
@@ -336,12 +352,10 @@ class WhisperState: NSObject, ObservableObject {
             transcription.powerModeName = powerModeName
             transcription.powerModeEmoji = powerModeEmoji
             finalPastedText = text
-            
-            if let enhancementService = enhancementService, enhancementService.isConfigured {
-                let detectionResult = await promptDetectionService.analyzeText(text, with: enhancementService)
-                promptDetectionResult = detectionResult
-                await promptDetectionService.applyDetectionResult(detectionResult, to: enhancementService)
-            }
+
+            // Note: Prompt trigger word detection has been deprecated
+            // Voice triggers are now handled by Adaptive Awareness (PowerModeConfig)
+            // via ActiveWindowService earlier in the pipeline
 
             if let enhancementService = enhancementService,
                enhancementService.isEnhancementEnabled,
@@ -349,11 +363,11 @@ class WhisperState: NSObject, ObservableObject {
                 if await checkCancellationAndCleanup() { return }
 
                 await MainActor.run { self.recordingState = .enhancing }
-                let textForAI = promptDetectionResult?.processedText ?? text
+                let textForAI = text
                 
                 do {
                     let (enhancedText, enhancementDuration, promptName) = try await enhancementService.enhance(textForAI)
-                    logger.notice("📝 AI enhancement: \(enhancedText, privacy: .public)")
+                    logger.notice("📝 AI enhancement: \(enhancedText)")
                     transcription.enhancedText = enhancedText
                     transcription.aiEnhancementModelName = enhancementService.getAIService()?.currentModel
                     transcription.promptName = promptName
@@ -389,15 +403,13 @@ class WhisperState: NSObject, ObservableObject {
         if await checkCancellationAndCleanup() { return }
 
         if var textToPaste = finalPastedText, transcription.transcriptionStatus == TranscriptionStatus.completed.rawValue {
-            if case .trialExpired = licenseViewModel.licenseState {
-                textToPaste = """
-                    Your trial has expired. Upgrade to VoiceInk Pro at tryvoiceink.com/buy
-                    \n\(textToPaste)
-                    """
+            let shouldAddSpace = UserDefaults.standard.object(forKey: "AppendTrailingSpace") as? Bool ?? true
+            if shouldAddSpace {
+                textToPaste += " "
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                CursorPaster.pasteAtCursor(textToPaste + " ")
+                CursorPaster.pasteAtCursor(textToPaste)
 
                 let powerMode = PowerModeManager.shared
                 if let activeConfig = powerMode.currentActiveConfiguration, activeConfig.isAutoSendEnabled {
@@ -409,11 +421,8 @@ class WhisperState: NSObject, ObservableObject {
             }
         }
 
-        if let result = promptDetectionResult,
-           let enhancementService = enhancementService,
-           result.shouldEnableAI {
-            await promptDetectionService.restoreOriginalSettings(result, to: enhancementService)
-        }
+        // Note: Prompt detection result restoration removed - no longer needed
+        // Voice triggers for PowerModeConfig are handled by ActiveWindowService
 
         await self.dismissMiniRecorder()
 

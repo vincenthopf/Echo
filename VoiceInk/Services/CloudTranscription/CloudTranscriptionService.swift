@@ -1,5 +1,4 @@
 import Foundation
-import SwiftData
 import os
 
 enum CloudTranscriptionError: Error, LocalizedError {
@@ -35,19 +34,14 @@ enum CloudTranscriptionError: Error, LocalizedError {
 }
 
 class CloudTranscriptionService: TranscriptionService {
-    private let modelContext: ModelContext
-
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
-
+    
     private lazy var groqService = GroqTranscriptionService()
     private lazy var elevenLabsService = ElevenLabsTranscriptionService()
     private lazy var deepgramService = DeepgramTranscriptionService()
     private lazy var mistralService = MistralTranscriptionService()
     private lazy var geminiService = GeminiTranscriptionService()
+    private lazy var sonioxService = SonioxTranscriptionService()
     private lazy var openAICompatibleService = OpenAICompatibleTranscriptionService()
-    private lazy var sonioxService = SonioxTranscriptionService(modelContext: modelContext)
     
     func transcribe(audioURL: URL, model: any TranscriptionModel) async throws -> String {
         var text: String

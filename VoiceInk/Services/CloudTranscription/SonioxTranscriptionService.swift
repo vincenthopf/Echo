@@ -1,35 +1,29 @@
 import Foundation
-import SwiftData
 
 class SonioxTranscriptionService {
     private let apiBase = "https://api.soniox.com/v1"
-    private let modelContext: ModelContext
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-    }
-    
     func transcribe(audioURL: URL, model: any TranscriptionModel) async throws -> String {
         let config = try getAPIConfig(for: model)
-        
+
         let fileId = try await uploadFile(audioURL: audioURL, apiKey: config.apiKey)
         let transcriptionId = try await createTranscription(fileId: fileId, apiKey: config.apiKey, modelName: model.name)
         try await pollTranscriptionStatus(id: transcriptionId, apiKey: config.apiKey)
         let transcript = try await fetchTranscript(id: transcriptionId, apiKey: config.apiKey)
-        
+
         guard !transcript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw CloudTranscriptionError.noTranscriptionReturned
         }
         return transcript
     }
-    
+
     private func getAPIConfig(for model: any TranscriptionModel) throws -> APIConfig {
-        guard let apiKey = APIKeyManager.shared.getAPIKey(forProvider: "Soniox"), !apiKey.isEmpty else {
+        guard let apiKey = UserDefaults.standard.string(forKey: "SonioxAPIKey"), !apiKey.isEmpty else {
             throw CloudTranscriptionError.missingAPIKey
         }
         return APIConfig(apiKey: apiKey)
     }
-    
+
     private func uploadFile(audioURL: URL, apiKey: String) async throws -> String {
         guard let apiURL = URL(string: "\(apiBase)/files") else {
             throw CloudTranscriptionError.dataEncodingError
@@ -55,7 +49,7 @@ class SonioxTranscriptionService {
             throw CloudTranscriptionError.noTranscriptionReturned
         }
     }
-    
+
     private func createTranscription(fileId: String, apiKey: String, modelName: String) async throws -> String {
         guard let apiURL = URL(string: "\(apiBase)/transcriptions") else {
             throw CloudTranscriptionError.dataEncodingError
@@ -97,7 +91,7 @@ class SonioxTranscriptionService {
             throw CloudTranscriptionError.noTranscriptionReturned
         }
     }
-    
+
     private func pollTranscriptionStatus(id: String, apiKey: String) async throws {
         guard let baseURL = URL(string: "\(apiBase)/transcriptions/\(id)") else {
             throw CloudTranscriptionError.dataEncodingError
@@ -135,7 +129,7 @@ class SonioxTranscriptionService {
             try await Task.sleep(nanoseconds: 1_000_000_000)
         }
     }
-    
+
     private func fetchTranscript(id: String, apiKey: String) async throws -> String {
         guard let apiURL = URL(string: "\(apiBase)/transcriptions/\(id)/transcript") else {
             throw CloudTranscriptionError.dataEncodingError
@@ -159,7 +153,7 @@ class SonioxTranscriptionService {
         }
         throw CloudTranscriptionError.noTranscriptionReturned
     }
-    
+
     private func createMultipartBody(fileURL: URL, boundary: String) throws -> Data {
         var body = Data()
         let crlf = "\r\n"
@@ -174,18 +168,18 @@ class SonioxTranscriptionService {
         body.append("--\(boundary)--\(crlf)".data(using: .utf8)!)
         return body
     }
-    
+
     private func getCustomDictionaryTerms() -> [String] {
-        // Fetch vocabulary words from SwiftData
-        let descriptor = FetchDescriptor<VocabularyWord>(sortBy: [SortDescriptor(\.word)])
-        guard let vocabularyWords = try? modelContext.fetch(descriptor) else {
+        guard let data = UserDefaults.standard.data(forKey: "CustomDictionaryItems") else {
             return []
         }
-
-        let words = vocabularyWords
-            .map { $0.word.trimmingCharacters(in: .whitespacesAndNewlines) }
+        // Decode without depending on UI layer types; extract "word" strings
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            return []
+        }
+        let words = json.compactMap { $0["word"] as? String }
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-
         // De-duplicate while preserving order
         var seen = Set<String>()
         var unique: [String] = []
@@ -198,7 +192,7 @@ class SonioxTranscriptionService {
         }
         return unique
     }
-    
+
     private struct APIConfig { let apiKey: String }
     private struct FileUploadResponse: Decodable { let id: String }
     private struct CreateTranscriptionResponse: Decodable { let id: String }
