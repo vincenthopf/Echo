@@ -7,7 +7,7 @@ final class KeychainService {
     static let shared = KeychainService()
 
     private let logger = Logger(subsystem: "com.VincentHopf.embrvoice", category: "KeychainService")
-    private let service = "com.prakashjoshipax.VoiceInk"
+    private let service = "com.VincentHopf.EmbrVoice"
 
     private init() {}
 

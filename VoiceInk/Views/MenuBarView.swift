@@ -1,57 +1,25 @@
 import SwiftUI
+import LaunchAtLogin
 
 struct MenuBarView: View {
     @EnvironmentObject var whisperState: WhisperState
     @EnvironmentObject var hotkeyManager: HotkeyManager
     @EnvironmentObject var menuBarManager: MenuBarManager
+    @EnvironmentObject var updaterViewModel: UpdaterViewModel
     @EnvironmentObject var enhancementService: AIEnhancementService
     @EnvironmentObject var aiService: AIService
-    @State private var menuRefreshTrigger = false  // Added to force menu updates
+    @ObservedObject var audioDeviceManager = AudioDeviceManager.shared
+    @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
+    @State private var menuRefreshTrigger = false
     @State private var isHovered = false
-    @Environment(\.openSettings) private var openSettings
-
-    @ObservedObject private var powerModeManager = PowerModeManager.shared
-    @ObservedObject private var sessionManager = PowerModeSessionManager.shared
-
+    
     var body: some View {
         VStack {
-            // Active Profile Status Section
-            if let activeConfig = powerModeManager.activeConfiguration {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 8) {
-                        if activeConfig.emoji.shouldRenderAsSFSymbol {
-                            Image(systemName: activeConfig.emoji)
-                                .font(.system(size: 16))
-                                .foregroundColor(.accentColor)
-                        } else {
-                            Text(activeConfig.emoji)
-                                .font(.system(size: 16))
-                        }
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(activeConfig.name)
-                                .font(.system(size: 13, weight: .semibold))
-
-                            if let source = sessionManager.activationSource {
-                                Text(source.statusString())
-                                    .font(.system(size: 11))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
-                        Spacer()
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .background(Color.accentColor.opacity(0.1))
-                    .cornerRadius(6)
-                }
-                .padding(.horizontal, 4)
-                .padding(.top, 4)
-
-                Divider()
+            Button("Toggle Recorder") {
+                whisperState.handleToggleMiniRecorder()
             }
 
+            Divider()
 
             Menu {
                 ForEach(whisperState.usableModels, id: \.id) { model in
@@ -72,9 +40,7 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage Models") {
-                    // Set the selected tab to Transcription before opening Settings window
-                    UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
-                    openSettings()
+                    menuBarManager.openMainWindowAndNavigate(to: "AI Models")
                 }
             } label: {
                 HStack {
@@ -85,8 +51,8 @@ struct MenuBarView: View {
             }
             
             Divider()
-
-            Toggle("Intelligent Transformation", isOn: $enhancementService.isEnhancementEnabled)
+            
+            Toggle("AI Enhancement", isOn: $enhancementService.isEnhancementEnabled)
             
             Menu {
                 ForEach(enhancementService.allPrompts) { prompt in
@@ -94,7 +60,7 @@ struct MenuBarView: View {
                         enhancementService.setActivePrompt(prompt)
                     } label: {
                         HStack {
-                            Image(systemName: prompt.icon.rawValue)
+                            Image(systemName: prompt.icon)
                                 .foregroundColor(.accentColor)
                             Text(prompt.title)
                             if enhancementService.selectedPromptId == prompt.id {
@@ -111,7 +77,6 @@ struct MenuBarView: View {
                         .font(.system(size: 10))
                 }
             }
-            .disabled(!enhancementService.isEnhancementEnabled)
             
             Menu {
                 ForEach(aiService.connectedProviders, id: \.self) { provider in
@@ -126,16 +91,10 @@ struct MenuBarView: View {
                         }
                     }
                 }
-                
+
                 if aiService.connectedProviders.isEmpty {
                     Text("No providers connected")
                         .foregroundColor(.secondary)
-                }
-                
-                Divider()
-                
-                Button("Manage AI Providers") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
                 }
             } label: {
                 HStack {
@@ -144,7 +103,6 @@ struct MenuBarView: View {
                         .font(.system(size: 10))
                 }
             }
-            .disabled(!enhancementService.isEnhancementEnabled)
             
             Menu {
                 ForEach(aiService.availableModels, id: \.self) { model in
@@ -159,16 +117,10 @@ struct MenuBarView: View {
                         }
                     }
                 }
-                
+
                 if aiService.availableModels.isEmpty {
                     Text("No models available")
                         .foregroundColor(.secondary)
-                }
-                
-                Divider()
-                
-                Button("Manage AI Models") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
                 }
             } label: {
                 HStack {
@@ -177,10 +129,35 @@ struct MenuBarView: View {
                         .font(.system(size: 10))
                 }
             }
-            .disabled(!enhancementService.isEnhancementEnabled)
             
             LanguageSelectionView(whisperState: whisperState, displayMode: .menuItem, whisperPrompt: whisperState.whisperPrompt)
-            
+
+            Menu {
+                ForEach(audioDeviceManager.availableDevices, id: \.id) { device in
+                    Button {
+                        audioDeviceManager.selectDeviceAndSwitchToCustomMode(id: device.id)
+                    } label: {
+                        HStack {
+                            Text(device.name)
+                            if audioDeviceManager.getCurrentDevice() == device.id {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+
+                if audioDeviceManager.availableDevices.isEmpty {
+                    Text("No devices available")
+                        .foregroundColor(.secondary)
+                }
+            } label: {
+                HStack {
+                    Text("Audio Input")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 10))
+                }
+            }
+
             Menu("Additional") {
                 Button {
                     enhancementService.useClipboardContext.toggle()
@@ -194,8 +171,7 @@ struct MenuBarView: View {
                         }
                     }
                 }
-                .disabled(!enhancementService.isEnhancementEnabled)
-                
+
                 Button {
                     enhancementService.useScreenCaptureContext.toggle()
                     menuRefreshTrigger.toggle()
@@ -208,12 +184,11 @@ struct MenuBarView: View {
                         }
                     }
                 }
-                .disabled(!enhancementService.isEnhancementEnabled)
             }
             .id("additional-menu-\(menuRefreshTrigger)")
             
             Divider()
-            
+
             Button("Retry Last Transcription") {
                 LastTranscriptionService.retryLastTranscription(from: whisperState.modelContext, whisperState: whisperState)
             }
@@ -221,19 +196,42 @@ struct MenuBarView: View {
             Button("Copy Last Transcription") {
                 LastTranscriptionService.copyLastTranscription(from: whisperState.modelContext)
             }
-
-            Button("Open App") {
+            .keyboardShortcut("c", modifiers: [.command, .shift])
+            
+            Button("History") {
+                menuBarManager.openHistoryWindow()
+            }
+            .keyboardShortcut("h", modifiers: [.command, .shift])
+            
+            Button("Settings") {
                 menuBarManager.openMainWindowAndNavigate(to: "Settings")
             }
             .keyboardShortcut(",", modifiers: .command)
-
+            
+            Button(menuBarManager.isMenuBarOnly ? "Show Dock Icon" : "Hide Dock Icon") {
+                menuBarManager.toggleMenuBarOnly()
+            }
+            .keyboardShortcut("d", modifiers: [.command, .shift])
+            
+            Toggle("Launch at Login", isOn: $launchAtLoginEnabled)
+                .onChange(of: launchAtLoginEnabled) { oldValue, newValue in
+                    LaunchAtLogin.isEnabled = newValue
+                }
+            
+            Divider()
+            
+            Button("Check for Updates") {
+                updaterViewModel.checkForUpdates()
+            }
+            .disabled(!updaterViewModel.canCheckForUpdates)
+            
             Button("Help and Support") {
                 EmailSupport.openSupportEmail()
             }
             
             Divider()
-            
-            Button("Quit Echo") {
+
+            Button("Quit VoiceInk") {
                 NSApplication.shared.terminate(nil)
             }
         }

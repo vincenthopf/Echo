@@ -9,7 +9,7 @@ struct EnhancementPromptPopover: View {
         VStack(alignment: .leading, spacing: 8) {
             // Enhancement Toggle at the top
             HStack(spacing: 8) {
-                Toggle("Transformation Prompt", isOn: $enhancementService.isEnhancementEnabled)
+                Toggle("AI Enhancement", isOn: $enhancementService.isEnhancementEnabled)
                     .foregroundColor(.white.opacity(0.9))
                     .font(.headline)
                     .lineLimit(1)
@@ -24,7 +24,7 @@ struct EnhancementPromptPopover: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
-                    // Available Transformation Prompts
+                    // Available Enhancement Prompts
                     ForEach(enhancementService.allPrompts) { prompt in
                         EnhancementPromptRow(
                             prompt: prompt,
@@ -70,7 +70,7 @@ struct EnhancementPromptRow: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 // Use the icon from the prompt
-                Image(systemName: prompt.icon.rawValue)
+                Image(systemName: prompt.icon)
                     .font(.system(size: 14))
                     .foregroundColor(isDisabled ? .white.opacity(0.4) : .white.opacity(0.7))
 

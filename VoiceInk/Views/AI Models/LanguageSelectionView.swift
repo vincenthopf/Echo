@@ -7,7 +7,6 @@ enum LanguageDisplayMode {
 }
 
 struct LanguageSelectionView: View {
-    @Environment(\.colorScheme) private var colorScheme
     @ObservedObject var whisperState: WhisperState
     @AppStorage("SelectedLanguage") private var selectedLanguage: String = "en"
     // Add display mode parameter with full as the default
@@ -65,32 +64,35 @@ struct LanguageSelectionView: View {
 
     // The original full view layout for settings page
     private var fullView: some View {
-        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+        VStack(alignment: .leading, spacing: 16) {
             languageSelectionSection
         }
     }
-
+    
     private var languageSelectionSection: some View {
-        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
-            Text("Language")
-                .font(Tokens.Typography.label)
-                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Transcription Language")
+                .font(.headline)
 
             if let currentModel = whisperState.currentTranscriptionModel
             {
                 if languageSelectionDisabled() {
-                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Language: Autodetected")
-                            .font(Tokens.Typography.body)
-                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+
+                        Text("Current model: \(currentModel.displayName)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
 
                         Text("The transcription language is automatically detected by the model.")
-                            .font(Tokens.Typography.caption)
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                     .disabled(true)
                 } else if isMultilingualModel() {
-                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Picker("Select Language", selection: $selectedLanguage) {
                             ForEach(
                                 currentModel.supportedLanguages.sorted(by: {
@@ -103,29 +105,36 @@ struct LanguageSelectionView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .tint(Tokens.Colors.orange)
                         .onChange(of: selectedLanguage) { oldValue, newValue in
                             updateLanguage(newValue)
                         }
 
+                        Text("Current model: \(currentModel.displayName)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
                         Text(
-                            "This model supports multiple languages. Select a specific language or auto-detect (if available)."
+                            "This model supports multiple languages. Select a specific language or auto-detect(if available)"
                         )
-                        .font(Tokens.Typography.caption)
-                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
                 } else {
                     // For English-only models, force set language to English
-                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("Language: English")
-                            .font(Tokens.Typography.body)
-                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+
+                        Text("Current model: \(currentModel.displayName)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
 
                         Text(
                             "This is an English-optimized model and only supports English transcription."
                         )
-                        .font(Tokens.Typography.caption)
-                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
                     .onAppear {
                         // Ensure English is set when viewing English-only model
@@ -134,11 +143,14 @@ struct LanguageSelectionView: View {
                 }
             } else {
                 Text("No model selected")
-                    .font(Tokens.Typography.body)
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
             }
         }
+        .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(10)
     }
 
     // New compact view for menu bar

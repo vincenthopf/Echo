@@ -2,108 +2,101 @@ import SwiftUI
 import AppKit
 // MARK: - Local Model Card View
 struct LocalModelCardView: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     let model: LocalModel
     let isDownloaded: Bool
     let isCurrent: Bool
     let downloadProgress: [String: Double]
     let modelURL: URL?
     let isWarming: Bool
-
+    
     // Actions
     var deleteAction: () -> Void
     var setDefaultAction: () -> Void
     var downloadAction: () -> Void
     private var isDownloading: Bool {
-        downloadProgress.keys.contains(model.name + "_main") ||
+        downloadProgress.keys.contains(model.name + "_main") || 
         downloadProgress.keys.contains(model.name + "_coreml")
     }
-
+    
     var body: some View {
-        HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
+        HStack(alignment: .top, spacing: 16) {
             // Main Content
-            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+            VStack(alignment: .leading, spacing: 6) {
                 headerSection
                 metadataSection
                 descriptionSection
                 progressSection
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             // Action Controls
             actionSection
         }
-        .padding(Tokens.Spacing.lg)
-        .background(isCurrent ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
-                .stroke(isCurrent ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
-        )
+        .padding(16)
+        .background(CardBackground(isSelected: isCurrent, useAccentGradientWhenSelected: isCurrent))
     }
     
     private var headerSection: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(model.displayName)
-                .font(Tokens.Typography.bodyMedium)
-                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
-
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(Color(.labelColor))
+            
             statusBadge
-
+            
             Spacer()
         }
     }
-
+    
     private var statusBadge: some View {
         Group {
             if isCurrent {
                 Text("Default")
-                    .font(Tokens.Typography.labelSmall)
-                    .padding(.horizontal, Tokens.Spacing.sm)
+                    .font(.system(size: 11, weight: .medium))
+                    .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Tokens.Colors.orange))
+                    .background(Capsule().fill(Color.accentColor))
                     .foregroundColor(.white)
             } else if isDownloaded {
                 Text("Downloaded")
-                    .font(Tokens.Typography.labelSmall)
-                    .padding(.horizontal, Tokens.Spacing.sm)
+                    .font(.system(size: 11, weight: .medium))
+                    .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Capsule().fill(Tokens.Colors.border(for: colorScheme)))
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .background(Capsule().fill(Color(.quaternaryLabelColor)))
+                    .foregroundColor(Color(.labelColor))
             }
         }
     }
     
     private var metadataSection: some View {
-        HStack(spacing: Tokens.Spacing.md) {
+        HStack(spacing: 12) {
             // Language
             Label(model.language, systemImage: "globe")
-                .font(Tokens.Typography.caption)
-                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                .font(.system(size: 11))
+                .foregroundColor(Color(.secondaryLabelColor))
                 .lineLimit(1)
-
+            
             // Size
             Label(model.size, systemImage: "internaldrive")
-                .font(Tokens.Typography.caption)
-                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                .font(.system(size: 11))
+                .foregroundColor(Color(.secondaryLabelColor))
                 .lineLimit(1)
-
+            
             // Speed
             HStack(spacing: 3) {
                 Text("Speed")
-                    .font(Tokens.Typography.caption)
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Color(.secondaryLabelColor))
                 progressDotsWithNumber(value: model.speed * 10)
             }
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
-
+            
             // Accuracy
             HStack(spacing: 3) {
                 Text("Accuracy")
-                    .font(Tokens.Typography.caption)
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Color(.secondaryLabelColor))
                 progressDotsWithNumber(value: model.accuracy * 10)
             }
             .lineLimit(1)
@@ -111,14 +104,14 @@ struct LocalModelCardView: View {
         }
         .lineLimit(1)
     }
-
+    
     private var descriptionSection: some View {
         Text(model.description)
-            .font(Tokens.Typography.caption)
-            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+            .font(.system(size: 11))
+            .foregroundColor(Color(.secondaryLabelColor))
             .lineLimit(2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, Tokens.Spacing.xs)
+            .padding(.top, 4)
     }
     
     private var progressSection: some View {
@@ -128,62 +121,62 @@ struct LocalModelCardView: View {
                     modelName: model.name,
                     downloadProgress: downloadProgress
                 )
-                .padding(.top, Tokens.Spacing.sm)
+                .padding(.top, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
-
+    
     private var actionSection: some View {
-        HStack(spacing: Tokens.Spacing.sm) {
+        HStack(spacing: 8) {
             if isCurrent {
                 Text("Default Model")
-                    .font(Tokens.Typography.label)
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(.secondaryLabelColor))
             } else if isDownloaded {
                 if isWarming {
-                    HStack(spacing: Tokens.Spacing.sm) {
+                    HStack(spacing: 6) {
                         ProgressView()
                             .controlSize(.small)
                         Text("Optimizing model for your device...")
-                            .font(Tokens.Typography.label)
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(.secondaryLabelColor))
                     }
                 } else {
                     Button(action: setDefaultAction) {
                         Text("Set as Default")
-                            .font(Tokens.Typography.label)
+                            .font(.system(size: 12))
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                    .tint(Tokens.Colors.orange)
                 }
             } else {
                 Button(action: downloadAction) {
-                    HStack(spacing: Tokens.Spacing.xs) {
+                    HStack(spacing: 4) {
                         Text(isDownloading ? "Downloading..." : "Download")
-                            .font(Tokens.Typography.label)
+                            .font(.system(size: 12, weight: .medium))
                         Image(systemName: "arrow.down.circle")
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundColor(.white)
-                    .padding(.horizontal, Tokens.Spacing.md)
-                    .padding(.vertical, Tokens.Spacing.sm)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(
                         Capsule()
-                            .fill(Tokens.Colors.orange)
+                            .fill(Color(.controlAccentColor))
+                            .shadow(color: Color(.controlAccentColor).opacity(0.2), radius: 2, x: 0, y: 1)
                     )
                 }
                 .buttonStyle(.plain)
                 .disabled(isDownloading)
             }
-
+            
             if isDownloaded {
                 Menu {
                     Button(action: deleteAction) {
                         Label("Delete Model", systemImage: "trash")
                     }
-
+                    
                     Button {
                         if let modelURL = modelURL {
                             NSWorkspace.shared.selectFile(modelURL.path, inFileViewerRootedAtPath: "")
@@ -194,7 +187,6 @@ struct LocalModelCardView: View {
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 14))
-                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
@@ -206,8 +198,6 @@ struct LocalModelCardView: View {
 
 // MARK: - Imported Local Model (minimal UI)
 struct ImportedLocalModelCardView: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     let model: ImportedLocalModel
     let isDownloaded: Bool
     let isCurrent: Bool
@@ -217,52 +207,51 @@ struct ImportedLocalModelCardView: View {
     var setDefaultAction: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
-            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(model.displayName)
-                        .font(Tokens.Typography.bodyMedium)
-                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(.labelColor))
                     if isCurrent {
                         Text("Default")
-                            .font(Tokens.Typography.labelSmall)
-                            .padding(.horizontal, Tokens.Spacing.sm)
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Capsule().fill(Tokens.Colors.orange))
+                            .background(Capsule().fill(Color.accentColor))
                             .foregroundColor(.white)
                     } else if isDownloaded {
                         Text("Imported")
-                            .font(Tokens.Typography.labelSmall)
-                            .padding(.horizontal, Tokens.Spacing.sm)
+                            .font(.system(size: 11, weight: .medium))
+                            .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(Capsule().fill(Tokens.Colors.border(for: colorScheme)))
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                            .background(Capsule().fill(Color(.quaternaryLabelColor)))
+                            .foregroundColor(Color(.labelColor))
                     }
                     Spacer()
                 }
 
                 Text("Imported local model")
-                    .font(Tokens.Typography.caption)
-                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(.secondaryLabelColor))
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, Tokens.Spacing.xs)
+                    .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            HStack(spacing: Tokens.Spacing.sm) {
+            HStack(spacing: 8) {
                 if isCurrent {
                     Text("Default Model")
-                        .font(Tokens.Typography.label)
-                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(.secondaryLabelColor))
                 } else if isDownloaded {
                     Button(action: setDefaultAction) {
                         Text("Set as Default")
-                            .font(Tokens.Typography.label)
+                            .font(.system(size: 12))
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                    .tint(Tokens.Colors.orange)
                 }
 
                 if isDownloaded {
@@ -280,7 +269,6 @@ struct ImportedLocalModelCardView: View {
                     } label: {
                         Image(systemName: "ellipsis.circle")
                             .font(.system(size: 14))
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     }
                     .menuStyle(.borderlessButton)
                     .menuIndicator(.hidden)
@@ -288,13 +276,8 @@ struct ImportedLocalModelCardView: View {
                 }
             }
         }
-        .padding(Tokens.Spacing.lg)
-        .background(isCurrent ? Tokens.Colors.orangeSoft(for: colorScheme) : Tokens.Colors.elevated(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
-                .stroke(isCurrent ? Tokens.Colors.orange.opacity(0.5) : Tokens.Colors.border(for: colorScheme), lineWidth: 1)
-        )
+        .padding(16)
+        .background(CardBackground(isSelected: isCurrent, useAccentGradientWhenSelected: isCurrent))
     }
 }
 
@@ -302,11 +285,11 @@ struct ImportedLocalModelCardView: View {
 // MARK: - Helper Views and Functions
 
 func progressDotsWithNumber(value: Double) -> some View {
-    HStack(spacing: Tokens.Spacing.xs) {
+    HStack(spacing: 4) {
         progressDots(value: value)
         Text(String(format: "%.1f", value))
-            .font(Tokens.Typography.labelMono)
-            .foregroundColor(Tokens.Colors.textSecondaryLight)
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .foregroundColor(Color(.secondaryLabelColor))
     }
 }
 
@@ -314,7 +297,7 @@ func progressDots(value: Double) -> some View {
     HStack(spacing: 2) {
         ForEach(0..<5) { index in
             Circle()
-                .fill(index < Int(value / 2) ? performanceColor(value: value / 10) : Tokens.Colors.borderLight)
+                .fill(index < Int(value / 2) ? performanceColor(value: value / 10) : Color(.quaternaryLabelColor))
                 .frame(width: 6, height: 6)
         }
     }
@@ -322,9 +305,9 @@ func progressDots(value: Double) -> some View {
 
 func performanceColor(value: Double) -> Color {
     switch value {
-    case 0.8...1.0: return Tokens.Colors.success
+    case 0.8...1.0: return Color(.systemGreen)
     case 0.6..<0.8: return Color(.systemYellow)
-    case 0.4..<0.6: return Tokens.Colors.orange
-    default: return Tokens.Colors.error
+    case 0.4..<0.6: return Color(.systemOrange)
+    default: return Color(.systemRed)
     }
 }

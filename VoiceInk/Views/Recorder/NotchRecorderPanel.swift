@@ -69,9 +69,7 @@ class NotchRecorderPanel: KeyablePanel {
         // Make window transparent to mouse events except for the content
         self.ignoresMouseEvents = false
         self.isMovable = false
-        
-        print("NotchRecorderPanel initialized")
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleScreenParametersChange),
@@ -147,28 +145,25 @@ class NotchRecorderPanel: KeyablePanel {
 class NotchRecorderHostingController<Content: View>: NSHostingController<Content> {
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.wantsLayer = true
         view.layer?.backgroundColor = NSColor.clear.cgColor
-
-        // Solid dark background using ParallelDesignTokens.Colors.darkBg (#1c1c1f)
-        let backgroundView = NSView()
-        backgroundView.wantsLayer = true
-        // darkBg: rgb(0.11, 0.11, 0.12) = #1c1c1f
-        backgroundView.layer?.backgroundColor = NSColor(
-            red: 0.11,
-            green: 0.11,
-            blue: 0.12,
-            alpha: 1.0
-        ).cgColor
-
-        // Create a mask layer for the notched shape with design token corner radius (12pt)
+        
+        // Add visual effect view as background
+        let visualEffect = NSVisualEffectView()
+        visualEffect.material = .dark
+        visualEffect.state = .active
+        visualEffect.blendingMode = .withinWindow
+        visualEffect.wantsLayer = true
+        visualEffect.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.95).cgColor
+        
+        // Create a mask layer for the notched shape
         let maskLayer = CAShapeLayer()
         let path = CGMutablePath()
         let bounds = view.bounds
-        let cornerRadius: CGFloat = 12 // ParallelDesignTokens.Radius.large
-
-        // Create the notched path with rounded bottom corners
+        let cornerRadius: CGFloat = 10
+        
+        // Create the notched path
         path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
         path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.minY))
         path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY - cornerRadius))
@@ -178,43 +173,18 @@ class NotchRecorderHostingController<Content: View>: NSHostingController<Content
         path.addQuadCurve(to: CGPoint(x: bounds.minX, y: bounds.maxY - cornerRadius),
                          control: CGPoint(x: bounds.minX, y: bounds.maxY))
         path.closeSubpath()
-
+        
         maskLayer.path = path
-        backgroundView.layer?.mask = maskLayer
-
-        view.addSubview(backgroundView, positioned: .below, relativeTo: nil)
-        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        visualEffect.layer?.mask = maskLayer
+        
+        view.addSubview(visualEffect, positioned: .below, relativeTo: nil)
+        visualEffect.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            visualEffect.topAnchor.constraint(equalTo: view.topAnchor),
+            visualEffect.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            visualEffect.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            visualEffect.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-
-    override func viewDidLayout() {
-        super.viewDidLayout()
-
-        // Update mask when view resizes
-        if let backgroundView = view.subviews.first(where: { $0.layer?.mask is CAShapeLayer }) {
-            let maskLayer = CAShapeLayer()
-            let path = CGMutablePath()
-            let bounds = view.bounds
-            let cornerRadius: CGFloat = 12 // ParallelDesignTokens.Radius.large
-
-            path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
-            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.minY))
-            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY - cornerRadius))
-            path.addQuadCurve(to: CGPoint(x: bounds.maxX - cornerRadius, y: bounds.maxY),
-                             control: CGPoint(x: bounds.maxX, y: bounds.maxY))
-            path.addLine(to: CGPoint(x: bounds.minX + cornerRadius, y: bounds.maxY))
-            path.addQuadCurve(to: CGPoint(x: bounds.minX, y: bounds.maxY - cornerRadius),
-                             control: CGPoint(x: bounds.minX, y: bounds.maxY))
-            path.closeSubpath()
-
-            maskLayer.path = path
-            backgroundView.layer?.mask = maskLayer
-        }
     }
 } 
 

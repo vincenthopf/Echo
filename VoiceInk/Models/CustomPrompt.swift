@@ -1,78 +1,78 @@
 import Foundation
 import SwiftUI
 
-enum PromptIcon: String, Codable, CaseIterable {
-    // Document & Text
-    case documentFill = "doc.text.fill"
-    case textbox = "textbox"
-    case sealedFill = "checkmark.seal.fill"
-    
-    // Communication
-    case chatFill = "bubble.left.and.bubble.right.fill"
-    case messageFill = "message.fill"
-    case emailFill = "envelope.fill"
-    
-    // Professional
-    case meetingFill = "person.2.fill"
-    case presentationFill = "person.wave.2.fill"
-    case briefcaseFill = "briefcase.fill"
-    
-    // Technical
-    case codeFill = "curlybraces"
-    case terminalFill = "terminal.fill"
-    case gearFill = "gearshape.fill"
-    
-    // Content
-    case blogFill = "doc.text.image.fill"
-    case notesFill = "note"
-    case bookFill = "book.fill"
-    case bookmarkFill = "bookmark.fill"
-    case pencilFill = "pencil.circle.fill"
-    
-    // Media & Creative
-    case videoFill = "video.fill"
-    case micFill = "mic.fill"
-    case musicFill = "music.note"
-    case photoFill = "photo.fill"
-    case brushFill = "paintbrush.fill"
-    
-    var title: String {
-        switch self {
+typealias PromptIcon = String
+
+extension PromptIcon {
+    static let allCases: [PromptIcon] = [
         // Document & Text
-        case .documentFill: return "Document"
-        case .textbox: return "Textbox"
-        case .sealedFill: return "Sealed"
-            
+        "doc.text.fill",
+        "textbox",
+        "checkmark.seal.fill",
+        
         // Communication
-        case .chatFill: return "Chat"
-        case .messageFill: return "Message"
-        case .emailFill: return "Email"
-            
+        "bubble.left.and.bubble.right.fill",
+        "message.fill",
+        "envelope.fill",
+        
         // Professional
-        case .meetingFill: return "Meeting"
-        case .presentationFill: return "Presentation"
-        case .briefcaseFill: return "Briefcase"
-            
+        "person.2.fill",
+        "person.wave.2.fill",
+        "briefcase.fill",
+        
         // Technical
-        case .codeFill: return "Code"
-        case .terminalFill: return "Terminal"
-        case .gearFill: return "Settings"
-            
+        "curlybraces",
+        "terminal.fill",
+        "gearshape.fill",
+        
         // Content
-        case .blogFill: return "Blog"
-        case .notesFill: return "Notes"
-        case .bookFill: return "Book"
-        case .bookmarkFill: return "Bookmark"
-        case .pencilFill: return "Edit"
-            
+        "doc.text.image.fill",
+        "note",
+        "book.fill",
+        "bookmark.fill",
+        "pencil.circle.fill",
+        
         // Media & Creative
-        case .videoFill: return "Video"
-        case .micFill: return "Audio"
-        case .musicFill: return "Music"
-        case .photoFill: return "Photo"
-        case .brushFill: return "Design"
-        }
-    }
+        "video.fill",
+        "mic.fill",
+        "music.note",
+        "photo.fill",
+        "paintbrush.fill",
+        
+        // Productivity & Time
+        "clock.fill",
+        "calendar",
+        "list.bullet",
+        "checkmark.circle.fill",
+        "timer",
+        "hourglass",
+        "star.fill",
+        "flag.fill",
+        "tag.fill",
+        "folder.fill",
+        "paperclip",
+        "tray.fill",
+        "chart.bar.fill",
+        "flame.fill",
+        "target",
+        "list.clipboard.fill",
+        "brain.head.profile",
+        "lightbulb.fill",
+        "megaphone.fill",
+        "heart.fill",
+        "map.fill",
+        "house.fill",
+        "camera.fill",
+        "figure.walk",
+        "dumbbell.fill",
+        "cart.fill",
+        "creditcard.fill",
+        "graduationcap.fill",
+        "airplane",
+        "leaf.fill",
+        "hand.raised.fill",
+        "hand.thumbsup.fill"
+    ]
 }
 
 struct CustomPrompt: Identifiable, Codable, Equatable {
@@ -91,7 +91,7 @@ struct CustomPrompt: Identifiable, Codable, Equatable {
         title: String,
         promptText: String,
         isActive: Bool = false,
-        icon: PromptIcon = .documentFill,
+        icon: PromptIcon = "doc.text.fill",
         description: String? = nil,
         isPredefined: Bool = false,
         triggerWords: [String] = [],
@@ -130,24 +130,6 @@ struct CustomPrompt: Identifiable, Codable, Equatable {
             return String(format: AIPrompts.customPromptTemplate, self.promptText)
         } else {
             return self.promptText
-        }
-    }
-
-    // MARK: - Adaptive Awareness Relationship Tracking
-
-    /// Returns the number of PowerModeConfigs that reference this prompt
-    var usageCount: Int {
-        let idString = self.id.uuidString
-        return PowerModeManager.shared.configurations.filter { config in
-            config.selectedPrompt == idString
-        }.count
-    }
-
-    /// Returns all PowerModeConfigs that use this prompt
-    func usedByConfigs() -> [PowerModeConfig] {
-        let idString = self.id.uuidString
-        return PowerModeManager.shared.configurations.filter { config in
-            config.selectedPrompt == idString
         }
     }
 }
@@ -217,7 +199,7 @@ extension CustomPrompt {
                     .blur(radius: 2)
                 
                 // Icon with enhanced effects
-                Image(systemName: icon.rawValue)
+                Image(systemName: icon)
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(
                         LinearGradient(
@@ -241,13 +223,40 @@ extension CustomPrompt {
             }
             .frame(width: 48, height: 48)
             
-            // Title
-            Text(title)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(isSelected ?
-                    .primary : .secondary)
-                .lineLimit(1)
-                .frame(maxWidth: 70)
+            // Enhanced title styling
+            VStack(spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(isSelected ?
+                        .primary : .secondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: 70)
+                
+                // Trigger word section with consistent height
+                ZStack(alignment: .center) {
+                    if !triggerWords.isEmpty {
+                        HStack(spacing: 2) {
+                            Image(systemName: "mic.fill")
+                                .font(.system(size: 7))
+                                .foregroundColor(isSelected ? .accentColor.opacity(0.9) : .secondary.opacity(0.7))
+                            
+                            if triggerWords.count == 1 {
+                                Text("\"\(triggerWords[0])...\"")
+                                    .font(.system(size: 8, weight: .regular))
+                                    .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.7))
+                                    .lineLimit(1)
+                            } else {
+                                Text("\"\(triggerWords[0])...\" +\(triggerWords.count - 1)")
+                                    .font(.system(size: 8, weight: .regular))
+                                    .foregroundColor(isSelected ? .primary.opacity(0.8) : .secondary.opacity(0.7))
+                                    .lineLimit(1)
+                            }
+                        }
+                        .frame(maxWidth: 70)
+                    }
+                }
+                .frame(height: 16)
+            }
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
@@ -272,33 +281,19 @@ extension CustomPrompt {
                         Label("Edit", systemImage: "pencil")
                     }
                 }
-
+                
                 if let onDelete = onDelete, !isPredefined {
                     Button(role: .destructive) {
-                        // Stage 4: Check if prompt is in use before deletion
-                        let configs = self.usedByConfigs()
-
-                        if !configs.isEmpty {
-                            // Show warning alert - cannot delete in-use prompt
-                            let alert = NSAlert()
-                            alert.messageText = "Cannot Delete Prompt"
-                            alert.informativeText = "This prompt is used by \(configs.count) profile\(configs.count == 1 ? "" : "s"): \(configs.map { $0.name }.joined(separator: ", ")). Remove it from these profiles first."
-                            alert.alertStyle = .warning
-                            alert.addButton(withTitle: "OK")
-                            alert.runModal()
-                        } else {
-                            // Not in use - show standard deletion confirmation
-                            let alert = NSAlert()
-                            alert.messageText = "Delete Prompt?"
-                            alert.informativeText = "Are you sure you want to delete '\(self.title)' prompt? This action cannot be undone."
-                            alert.alertStyle = .warning
-                            alert.addButton(withTitle: "Delete")
-                            alert.addButton(withTitle: "Cancel")
-
-                            let response = alert.runModal()
-                            if response == .alertFirstButtonReturn {
-                                onDelete(self)
-                            }
+                        let alert = NSAlert()
+                        alert.messageText = "Delete Prompt?"
+                        alert.informativeText = "Are you sure you want to delete '\(self.title)' prompt? This action cannot be undone."
+                        alert.alertStyle = .warning
+                        alert.addButton(withTitle: "Delete")
+                        alert.addButton(withTitle: "Cancel")
+                        
+                        let response = alert.runModal()
+                        if response == .alertFirstButtonReturn {
+                            onDelete(self)
                         }
                     } label: {
                         Label("Delete", systemImage: "trash")
