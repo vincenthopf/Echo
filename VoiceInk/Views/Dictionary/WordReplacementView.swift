@@ -1,6 +1,7 @@
 import SwiftUI
+import SwiftData
 
-extension String: Identifiable {
+extension String: @retroactive Identifiable {
     public var id: String { self }
 }
 
@@ -16,35 +17,42 @@ enum SortColumn {
     case replacement
 }
 
+// Legacy WordReplacementManager kept for EditReplacementSheet compatibility
+// This will be deprecated once SwiftData migration is complete
 class WordReplacementManager: ObservableObject {
     @Published var replacements: [String: String] {
         didSet {
             UserDefaults.standard.set(replacements, forKey: "wordReplacements")
         }
     }
-    
+
     @Published var isEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isEnabled, forKey: "IsWordReplacementEnabled")
         }
     }
-    
+
     init() {
         self.replacements = UserDefaults.standard.dictionary(forKey: "wordReplacements") as? [String: String] ?? [:]
-        self.isEnabled = UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled")
+        // Default to true if not previously set
+        if UserDefaults.standard.object(forKey: "IsWordReplacementEnabled") == nil {
+            self.isEnabled = true
+        } else {
+            self.isEnabled = UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled")
+        }
     }
-    
+
     func addReplacement(original: String, replacement: String) {
         // Preserve comma-separated originals as a single entry
         let trimmed = original.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         replacements[trimmed] = replacement
     }
-    
+
     func removeReplacement(original: String) {
         replacements.removeValue(forKey: original)
     }
-    
+
     func updateReplacement(oldOriginal: String, newOriginal: String, newReplacement: String) {
         // Replace old key with the new comma-preserved key
         replacements.removeValue(forKey: oldOriginal)
@@ -56,10 +64,12 @@ class WordReplacementManager: ObservableObject {
 
 struct WordReplacementView: View {
     @Environment(\.colorScheme) private var colorScheme
-    @StateObject private var manager = WordReplacementManager()
+    @Environment(\.modelContext) private var modelContext
+    @Query private var wordReplacements: [WordReplacementModel]
+    @AppStorage("IsWordReplacementEnabled") private var isEnabled = true
     @State private var showAddReplacementModal = false
     @State private var showAlert = false
-    @State private var editingOriginal: String? = nil
+    @State private var editingReplacement: WordReplacementModel? = nil
 
     @State private var alertMessage = ""
     @State private var sortMode: SortMode = .originalAsc
@@ -71,18 +81,16 @@ struct WordReplacementView: View {
         }
     }
 
-    private var sortedReplacements: [(key: String, value: String)] {
-        let pairs = Array(manager.replacements)
-
+    private var sortedReplacements: [WordReplacementModel] {
         switch sortMode {
         case .originalAsc:
-            return pairs.sorted { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedAscending }
+            return wordReplacements.sorted { $0.originalText.localizedCaseInsensitiveCompare($1.originalText) == .orderedAscending }
         case .originalDesc:
-            return pairs.sorted { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedDescending }
+            return wordReplacements.sorted { $0.originalText.localizedCaseInsensitiveCompare($1.originalText) == .orderedDescending }
         case .replacementAsc:
-            return pairs.sorted { $0.value.localizedCaseInsensitiveCompare($1.value) == .orderedAscending }
+            return wordReplacements.sorted { $0.replacementText.localizedCaseInsensitiveCompare($1.replacementText) == .orderedAscending }
         case .replacementDesc:
-            return pairs.sorted { $0.value.localizedCaseInsensitiveCompare($1.value) == .orderedDescending }
+            return wordReplacements.sorted { $0.replacementText.localizedCaseInsensitiveCompare($1.replacementText) == .orderedDescending }
         }
     }
 
@@ -109,7 +117,7 @@ struct WordReplacementView: View {
 
                 Spacer()
 
-                Toggle("Enable", isOn: $manager.isEnabled)
+                Toggle("Enable", isOn: $isEnabled)
                     .toggleStyle(.switch)
                     .tint(Tokens.Colors.orange)
                     .labelsHidden()
@@ -182,17 +190,16 @@ struct WordReplacementView: View {
                     .frame(height: 1)
 
                 // Content
-                if manager.replacements.isEmpty {
+                if wordReplacements.isEmpty {
                     WordReplacementEmptyStateView(showAddModal: $showAddReplacementModal)
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 0) {
-                            ForEach(Array(sortedReplacements.enumerated()), id: \.offset) { index, pair in
-                                ReplacementRow(
-                                    original: pair.key,
-                                    replacement: pair.value,
-                                    onDelete: { manager.removeReplacement(original: pair.key) },
-                                    onEdit: { editingOriginal = pair.key }
+                            ForEach(Array(sortedReplacements.enumerated()), id: \.element.id) { index, replacement in
+                                SwiftDataReplacementRow(
+                                    replacement: replacement,
+                                    onDelete: { deleteReplacement(replacement) },
+                                    onEdit: { editingReplacement = replacement }
                                 )
 
                                 if index != sortedReplacements.count - 1 {
@@ -215,12 +222,17 @@ struct WordReplacementView: View {
         }
         .padding(Tokens.Spacing.lg)
         .sheet(isPresented: $showAddReplacementModal) {
-            AddReplacementSheet(manager: manager)
+            SwiftDataAddReplacementSheet(modelContext: modelContext)
         }
         // Edit existing replacement
-        .sheet(item: $editingOriginal) { original in
-            EditReplacementSheet(manager: manager, originalKey: original)
+        .sheet(item: $editingReplacement) { replacement in
+            SwiftDataEditReplacementSheet(replacement: replacement, modelContext: modelContext)
         }
+    }
+
+    private func deleteReplacement(_ replacement: WordReplacementModel) {
+        modelContext.delete(replacement)
+        try? modelContext.save()
     }
 }
 
@@ -258,10 +270,10 @@ struct WordReplacementEmptyStateView: View {
     }
 }
 
-struct AddReplacementSheet: View {
+struct SwiftDataAddReplacementSheet: View {
     @Environment(\.colorScheme) private var colorScheme
-    @ObservedObject var manager: WordReplacementManager
     @Environment(\.dismiss) private var dismiss
+    let modelContext: ModelContext
     @State private var originalWord = ""
     @State private var replacementWord = ""
 
@@ -449,6 +461,356 @@ struct AddReplacementSheet: View {
     }
 
     private func addReplacement() {
+        let original = originalWord.trimmingCharacters(in: .whitespacesAndNewlines)
+        let replacement = replacementWord
+
+        // Validate that at least one non-empty token exists
+        let tokens = original
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !tokens.isEmpty && !replacement.isEmpty else { return }
+
+        let newReplacement = WordReplacementModel(originalText: original, replacementText: replacement)
+        modelContext.insert(newReplacement)
+        try? modelContext.save()
+        dismiss()
+    }
+}
+
+struct SwiftDataEditReplacementSheet: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var replacement: WordReplacementModel
+    let modelContext: ModelContext
+
+    @State private var originalWord: String
+    @State private var replacementWord: String
+
+    init(replacement: WordReplacementModel, modelContext: ModelContext) {
+        self.replacement = replacement
+        self.modelContext = modelContext
+        _originalWord = State(initialValue: replacement.originalText)
+        _replacementWord = State(initialValue: replacement.replacementText)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            header
+            Rectangle()
+                .fill(Tokens.Colors.border(for: colorScheme))
+                .frame(height: 1)
+            formContent
+        }
+        .frame(width: 460, height: 560)
+    }
+
+    private var header: some View {
+        HStack {
+            Button("Cancel", role: .cancel) { dismiss() }
+                .buttonStyle(.borderless)
+                .keyboardShortcut(.escape, modifiers: [])
+
+            Spacer()
+
+            Text("Edit Word Replacement")
+                .font(Tokens.Typography.heading3)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+            Spacer()
+
+            Button("Save") { saveChanges() }
+                .buttonStyle(.borderedProminent)
+                .tint(Tokens.Colors.orange)
+                .controlSize(.small)
+                .disabled(originalWord.isEmpty || replacementWord.isEmpty)
+                .keyboardShortcut(.return, modifiers: [])
+        }
+        .padding(.horizontal, Tokens.Spacing.lg)
+        .padding(.vertical, Tokens.Spacing.md)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+    }
+
+    private var formContent: some View {
+        ScrollView {
+            VStack(spacing: Tokens.Spacing.lg) {
+                descriptionSection
+                inputSection
+            }
+            .padding(.vertical, Tokens.Spacing.lg)
+        }
+        .background(Tokens.Colors.background(for: colorScheme))
+    }
+
+    private var descriptionSection: some View {
+        Text("Update the word or phrase that should be automatically replaced.")
+            .font(Tokens.Typography.bodySmall)
+            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, Tokens.Spacing.lg)
+            .padding(.top, Tokens.Spacing.sm)
+    }
+
+    private var inputSection: some View {
+        VStack(spacing: Tokens.Spacing.lg) {
+            // Original Text Field
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                HStack {
+                    Text("Original Text")
+                        .font(Tokens.Typography.bodyMedium)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                    Text("Required")
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                }
+                TextField("Enter word or phrase to replace (use commas for multiple)", text: $originalWord)
+                    .textFieldStyle(.plain)
+                    .font(Tokens.Typography.body)
+                    .padding(Tokens.Spacing.sm)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+            }
+            .padding(.horizontal, Tokens.Spacing.lg)
+
+            // Replacement Text Field
+            VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                HStack {
+                    Text("Replacement Text")
+                        .font(Tokens.Typography.bodyMedium)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                    Text("Required")
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                }
+                TextEditor(text: $replacementWord)
+                    .font(Tokens.Typography.body)
+                    .frame(height: 100)
+                    .padding(Tokens.Spacing.sm)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+            }
+            .padding(.horizontal, Tokens.Spacing.lg)
+        }
+    }
+
+    private func saveChanges() {
+        let newOriginal = originalWord.trimmingCharacters(in: .whitespacesAndNewlines)
+        let newReplacement = replacementWord
+        // Ensure at least one non-empty token
+        let tokens = newOriginal
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !tokens.isEmpty, !newReplacement.isEmpty else { return }
+
+        replacement.originalText = newOriginal
+        replacement.replacementText = newReplacement
+        try? modelContext.save()
+        dismiss()
+    }
+}
+
+struct SwiftDataReplacementRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let replacement: WordReplacementModel
+    let onDelete: () -> Void
+    let onEdit: () -> Void
+
+    var body: some View {
+        HStack(spacing: Tokens.Spacing.lg) {
+            // Original Text Container
+            HStack {
+                Text(replacement.originalText)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
+                    .background(Tokens.Colors.background(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+            }
+            .frame(maxWidth: .infinity)
+
+            // Arrow
+            Image(systemName: "arrow.right")
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                .font(.system(size: 12))
+
+            // Replacement Text Container
+            HStack {
+                Text(replacement.replacementText)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Tokens.Spacing.md)
+                    .padding(.vertical, Tokens.Spacing.sm)
+                    .background(Tokens.Colors.background(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+            }
+            .frame(maxWidth: .infinity)
+
+            // Edit Button
+            Button(action: onEdit) {
+                Image(systemName: "pencil.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundColor(Tokens.Colors.orange)
+                    .font(.system(size: 16))
+            }
+            .buttonStyle(.borderless)
+            .help("Edit replacement")
+
+            // Delete Button
+            Button(action: onDelete) {
+                Image(systemName: "xmark.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(Tokens.Colors.error)
+                    .font(.system(size: 16))
+            }
+            .buttonStyle(.borderless)
+            .help("Remove replacement")
+        }
+        .padding(.horizontal, Tokens.Spacing.lg)
+        .padding(.vertical, Tokens.Spacing.sm)
+        .contentShape(Rectangle())
+        .background(Tokens.Colors.elevated(for: colorScheme))
+    }
+}
+
+// Keep legacy views for backward compatibility
+struct AddReplacementSheet: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @ObservedObject var manager: WordReplacementManager
+    @Environment(\.dismiss) private var dismiss
+    @State private var originalWord = ""
+    @State private var replacementWord = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Button("Cancel", role: .cancel) {
+                    dismiss()
+                }
+                .buttonStyle(.borderless)
+                .keyboardShortcut(.escape, modifiers: [])
+
+                Spacer()
+
+                Text("Add Word Replacement")
+                    .font(Tokens.Typography.heading3)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                Spacer()
+
+                Button("Add") {
+                    addReplacement()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Tokens.Colors.orange)
+                .controlSize(.small)
+                .disabled(originalWord.isEmpty || replacementWord.isEmpty)
+                .keyboardShortcut(.return, modifiers: [])
+            }
+            .padding(.horizontal, Tokens.Spacing.lg)
+            .padding(.vertical, Tokens.Spacing.md)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+
+            Rectangle()
+                .fill(Tokens.Colors.border(for: colorScheme))
+                .frame(height: 1)
+
+            ScrollView {
+                VStack(spacing: Tokens.Spacing.lg) {
+                    // Description
+                    Text("Define a word or phrase to be automatically replaced.")
+                        .font(Tokens.Typography.bodySmall)
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, Tokens.Spacing.lg)
+                        .padding(.top, Tokens.Spacing.sm)
+
+                    // Form Content
+                    VStack(spacing: Tokens.Spacing.lg) {
+                        // Original Text Section
+                        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                            HStack {
+                                Text("Original Text")
+                                    .font(Tokens.Typography.bodyMedium)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                                Text("Required")
+                                    .font(Tokens.Typography.caption)
+                                    .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                            }
+
+                            TextField("Enter word or phrase to replace (use commas for multiple)", text: $originalWord)
+                                .textFieldStyle(.plain)
+                                .font(Tokens.Typography.body)
+                                .padding(Tokens.Spacing.sm)
+                                .background(Tokens.Colors.elevated(for: colorScheme))
+                                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                                )
+                            Text("Separate multiple originals with commas, e.g. Voicing, Voice ink, Voiceing")
+                                .font(Tokens.Typography.caption)
+                                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                        }
+                        .padding(.horizontal, Tokens.Spacing.lg)
+
+                        // Replacement Text Section
+                        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                            HStack {
+                                Text("Replacement Text")
+                                    .font(Tokens.Typography.bodyMedium)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                                Text("Required")
+                                    .font(Tokens.Typography.caption)
+                                    .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                            }
+
+                            TextEditor(text: $replacementWord)
+                                .font(Tokens.Typography.body)
+                                .frame(height: 100)
+                                .padding(Tokens.Spacing.sm)
+                                .background(Tokens.Colors.elevated(for: colorScheme))
+                                .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                                )
+                        }
+                        .padding(.horizontal, Tokens.Spacing.lg)
+                    }
+                }
+                .padding(.vertical, Tokens.Spacing.lg)
+            }
+            .background(Tokens.Colors.background(for: colorScheme))
+        }
+        .frame(width: 460, height: 520)
+    }
+
+    private func addReplacement() {
         let original = originalWord
         let replacement = replacementWord
 
@@ -539,4 +901,4 @@ struct ReplacementRow: View {
         .contentShape(Rectangle())
         .background(Tokens.Colors.elevated(for: colorScheme))
     }
-} 
+}

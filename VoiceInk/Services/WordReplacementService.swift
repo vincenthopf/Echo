@@ -1,18 +1,63 @@
 import Foundation
+import SwiftData
 
 class WordReplacementService {
     static let shared = WordReplacementService()
-    
+
     private init() {}
-    
+
+    /// Apply word replacements using SwiftData
+    func applyReplacements(to text: String, using context: ModelContext) -> String {
+        let descriptor = FetchDescriptor<WordReplacementModel>()
+        guard let replacements = try? context.fetch(descriptor),
+              !replacements.isEmpty else {
+            return text // No replacements to apply
+        }
+
+        var modifiedText = text
+
+        // Apply replacements (case-insensitive)
+        for replacement in replacements where replacement.isEnabled {
+            // Split comma-separated originals at apply time only
+            let variants = replacement.originalText
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+
+            for original in variants {
+                let usesBoundaries = usesWordBoundaries(for: original)
+
+                if usesBoundaries {
+                    // Word-boundary regex for full original string
+                    let pattern = "\\b\(NSRegularExpression.escapedPattern(for: original))\\b"
+                    if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                        let range = NSRange(modifiedText.startIndex..., in: modifiedText)
+                        modifiedText = regex.stringByReplacingMatches(
+                            in: modifiedText,
+                            options: [],
+                            range: range,
+                            withTemplate: replacement.replacementText
+                        )
+                    }
+                } else {
+                    // Fallback substring replace for non-spaced scripts
+                    modifiedText = modifiedText.replacingOccurrences(of: original, with: replacement.replacementText, options: .caseInsensitive)
+                }
+            }
+        }
+
+        return modifiedText
+    }
+
+    /// Legacy method for backward compatibility - uses UserDefaults
     func applyReplacements(to text: String) -> String {
         guard let replacements = UserDefaults.standard.dictionary(forKey: "wordReplacements") as? [String: String],
               !replacements.isEmpty else {
             return text // No replacements to apply
         }
-        
+
         var modifiedText = text
-        
+
         // Apply replacements (case-insensitive)
         for (originalGroup, replacement) in replacements {
             // Split comma-separated originals at apply time only
@@ -42,7 +87,7 @@ class WordReplacementService {
                 }
             }
         }
-        
+
         return modifiedText
     }
 

@@ -26,7 +26,10 @@ struct VoiceInkApp: App {
     
     // Transcription auto-cleanup service for zero data retention
     private let transcriptionAutoCleanupService = TranscriptionAutoCleanupService.shared
-    
+
+    // Model prewarm service for optimizing model on wake from sleep
+    @StateObject private var prewarmService: ModelPrewarmService
+
     init() {
         // Configure FluidAudio logging subsystem
         AppLogger.defaultSubsystem = "com.VincentHopf.embrvoice.parakeet"
@@ -41,7 +44,9 @@ struct VoiceInkApp: App {
 
         do {
             let schema = Schema([
-                Transcription.self
+                Transcription.self,
+                VocabularyWord.self,
+                WordReplacementModel.self
             ])
             
             // Create app-specific Application Support directory URL
@@ -61,7 +66,10 @@ struct VoiceInkApp: App {
             if let url = container.mainContext.container.configurations.first?.url {
                 print("💾 SwiftData storage location: \(url.path)")
             }
-            
+
+            // Perform dictionary migration from UserDefaults to SwiftData (one-time)
+            DictionaryMigrationService.shared.migrateIfNeeded(context: container.mainContext)
+
         } catch {
             fatalError("Failed to create ModelContainer for Transcription: \(error.localizedDescription)")
         }
@@ -96,6 +104,10 @@ struct VoiceInkApp: App {
         activeWindowService.configure(with: enhancementService)
         activeWindowService.configureWhisperState(whisperState)
         _activeWindowService = StateObject(wrappedValue: activeWindowService)
+
+        // Initialize model prewarm service for optimizing transcription on wake
+        let prewarmService = ModelPrewarmService(whisperState: whisperState)
+        _prewarmService = StateObject(wrappedValue: prewarmService)
 
         // Perform Adaptive Awareness migration (runs once)
         AdaptiveAwarenessMigration.performMigration()
@@ -179,6 +191,13 @@ struct VoiceInkApp: App {
                 CheckForUpdatesView(updaterViewModel: updaterViewModel)
             }
 
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings...") {
+                    menuBarManager.navigateTo("Settings")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+
             CommandGroup(after: .sidebar) {
                 Button("Toggle Sidebar") {
                     NotificationCenter.default.post(name: .toggleSidebar, object: nil)
@@ -193,17 +212,6 @@ struct VoiceInkApp: App {
                     }
                 }
             }
-        }
-
-        Settings {
-            SettingsWindowView()
-                .environmentObject(whisperState)
-                .environmentObject(hotkeyManager)
-                .environmentObject(updaterViewModel)
-                .environmentObject(menuBarManager)
-                .environmentObject(aiService)
-                .environmentObject(enhancementService)
-                .modelContainer(container)
         }
 
         MenuBarExtra {

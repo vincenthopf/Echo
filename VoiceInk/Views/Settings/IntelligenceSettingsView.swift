@@ -12,35 +12,8 @@ struct IntelligenceSettingsView: View {
     @AppStorage(PowerModeDefaults.autoRestoreKey) private var powerModeAutoRestoreEnabled = true
     @State private var showDisableAlert = false
 
-    // Smart Corrections
-    @StateObject private var whisperPrompt = WhisperPrompt()
-    @State private var selectedDictionarySection: DictionarySection = .replacements
-
     // Design system
     @Environment(\.colorScheme) private var colorScheme
-
-    enum DictionarySection: String, CaseIterable {
-        case replacements = "Smart Corrections"
-        case spellings = "Personal Vocabulary"
-
-        var description: String {
-            switch self {
-            case .spellings:
-                return "Add words to help Echo recognize them properly"
-            case .replacements:
-                return "Automatically replace specific words/phrases with custom formatted text"
-            }
-        }
-
-        var icon: String {
-            switch self {
-            case .spellings:
-                return "character.book.closed.fill"
-            case .replacements:
-                return "arrow.2.squarepath"
-            }
-        }
-    }
 
     var body: some View {
         ScrollView {
@@ -53,9 +26,6 @@ struct IntelligenceSettingsView: View {
 
                 // MARK: - AI Enhancement Section
                 aiEnhancementSection
-
-                // MARK: - Smart Corrections Section
-                smartCorrectionsSection
             }
             .padding(.horizontal, Tokens.Spacing.xl)
             .padding(.vertical, Tokens.Spacing.sm)
@@ -230,6 +200,12 @@ struct IntelligenceSettingsView: View {
                                 : Tokens.Colors.textSecondary(for: colorScheme).opacity(0.5))
 
                         Spacer()
+
+                        // Vision/OCR mode indicator
+                        if enhancementService.useScreenCaptureContext,
+                           let aiService = enhancementService.getAIService() {
+                            ScreenCaptureModeIndicator(aiService: aiService, colorScheme: colorScheme)
+                        }
                     }
                 }
 
@@ -238,54 +214,6 @@ struct IntelligenceSettingsView: View {
                 // Enhancement shortcuts
                 VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                     EnhancementShortcutsSection()
-                }
-                .padding(.horizontal, Tokens.Spacing.lg)
-                .padding(.vertical, 14)
-            }
-            .background(Tokens.Colors.elevated(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
-            .overlay(
-                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
-                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
-            )
-        }
-    }
-
-    // MARK: - Smart Corrections Section
-
-    private var smartCorrectionsSection: some View {
-        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
-            SectionHeader(
-                title: "Smart Corrections",
-                subtitle: "Customize your personal vocabulary and replacements",
-                icon: "character.book.closed.fill"
-            )
-
-            VStack(spacing: 0) {
-                // Section Selector row
-                HStack(spacing: Tokens.Spacing.xl) {
-                    ForEach(DictionarySection.allCases, id: \.self) { section in
-                        DictionarySectionCard(
-                            section: section,
-                            isSelected: selectedDictionarySection == section,
-                            colorScheme: colorScheme,
-                            action: { selectedDictionarySection = section }
-                        )
-                    }
-                }
-                .padding(.horizontal, Tokens.Spacing.lg)
-                .padding(.vertical, 14)
-
-                FormDivider()
-
-                // Selected Section Content
-                VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
-                    switch selectedDictionarySection {
-                    case .spellings:
-                        DictionaryView(whisperPrompt: whisperPrompt)
-                    case .replacements:
-                        WordReplacementView()
-                    }
                 }
                 .padding(.horizontal, Tokens.Spacing.lg)
                 .padding(.vertical, 14)
@@ -318,53 +246,5 @@ struct IntelligenceSettingsView: View {
 private extension Array where Element == PowerModeConfig {
     var noneEnabled: Bool {
         allSatisfy { !$0.isEnabled }
-    }
-}
-
-// MARK: - Dictionary Section Card
-private struct DictionarySectionCard: View {
-    let section: IntelligenceSettingsView.DictionarySection
-    let isSelected: Bool
-    let colorScheme: ColorScheme
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
-                Image(systemName: section.icon)
-                    .font(.system(size: 28))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(isSelected ? Tokens.Colors.orange : Tokens.Colors.textSecondary(for: colorScheme))
-
-                VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
-                    Text(section.rawValue)
-                        .font(Tokens.Typography.heading3)
-                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
-
-                    Text(section.description)
-                        .font(Tokens.Typography.bodySmall)
-                        .foregroundStyle(Tokens.Colors.textSecondary(for: colorScheme))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(Tokens.Spacing.lg)
-            .background(
-                isSelected
-                    ? Tokens.Colors.orangeSoft(for: colorScheme)
-                    : Tokens.Colors.background(for: colorScheme)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.md))
-            .overlay(
-                RoundedRectangle(cornerRadius: Tokens.Radius.md)
-                    .stroke(
-                        isSelected
-                            ? Tokens.Colors.orange.opacity(0.5)
-                            : Tokens.Colors.border(for: colorScheme),
-                        lineWidth: 1
-                    )
-            )
-        }
-        .buttonStyle(.plain)
     }
 }

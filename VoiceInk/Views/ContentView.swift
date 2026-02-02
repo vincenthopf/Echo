@@ -7,7 +7,9 @@ enum ViewType: String, CaseIterable {
     case metrics = "Dashboard"
     case transcribeAudio = "Transcribe Files"
     case powerMode = "Adaptive Awareness"
+    case vocabulary = "Vocabulary"
     case history = "History"
+    case settings = "Settings"
     case about = "About"
 
     var icon: String {
@@ -15,7 +17,9 @@ enum ViewType: String, CaseIterable {
         case .metrics: return "gauge.medium"
         case .transcribeAudio: return "waveform.circle.fill"
         case .powerMode: return "sparkles.square.fill.on.square"
+        case .vocabulary: return "text.book.closed.fill"
         case .history: return "doc.text.fill"
+        case .settings: return "gear"
         case .about: return "info.circle.fill"
         }
     }
@@ -187,6 +191,10 @@ struct ContentView: View {
                     selectedView = .transcribeAudio
                 case "Power Mode", "Adaptive Awareness":
                     selectedView = .powerMode
+                case "Vocabulary", "Dictionary", "Smart Corrections":
+                    selectedView = .vocabulary
+                case "Settings":
+                    selectedView = .settings
                 default:
                     break
                 }
@@ -210,6 +218,10 @@ struct ContentView: View {
             TranscriptionHistoryView()
         case .powerMode:
             AdaptiveAwarenessView()
+        case .vocabulary:
+            VocabularyPane()
+        case .settings:
+            SettingsWindowView()
         case .about:
             AboutView()
         }

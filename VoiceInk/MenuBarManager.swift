@@ -39,6 +39,17 @@ class MenuBarManager: ObservableObject {
     func toggleMenuBarOnly() {
         isMenuBarOnly.toggle()
     }
+
+    /// Navigate to a destination in the existing window without creating a new one
+    func navigateTo(_ destination: String) {
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(
+                name: .navigateToDestination,
+                object: nil,
+                userInfo: ["destination": destination]
+            )
+        }
+    }
     
     private func updateAppActivationPolicy() {
         DispatchQueue.main.async { [weak self] in
@@ -62,40 +73,44 @@ class MenuBarManager: ObservableObject {
     
     func openMainWindowAndNavigate(to destination: String) {
         print("MenuBarManager: Navigating to \(destination)")
-        
+
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            
-            if self.isMenuBarOnly {
-                NSApp.setActivationPolicy(.accessory)
-            } else {
-                NSApp.setActivationPolicy(.regular)
-            }
-            
+
+            // Always use .regular policy when opening window
+            NSApp.setActivationPolicy(.regular)
+
             // Activate the app
             NSApp.activate(ignoringOtherApps: true)
-            
-            // Clean up existing window if it's no longer valid
-            if let existingWindow = self.mainWindow, !existingWindow.isVisible {
-                self.mainWindow = nil
-            }
-            
-            // Get or create main window
-            let isNewWindow = self.mainWindow == nil
-            if isNewWindow {
-                self.mainWindow = self.createMainWindow()
+
+            // Find the main content window (exclude menu bar extras, panels, etc.)
+            // Look for a regular window that has contentView and is sizable
+            let mainWindow = NSApp.windows.first { window in
+                window.contentView != nil &&
+                window.styleMask.contains(.titled) &&
+                window.styleMask.contains(.resizable) &&
+                !window.styleMask.contains(.utilityWindow) &&
+                window.className != "NSStatusBarWindow" &&
+                window.level == .normal
             }
 
-            guard let window = self.mainWindow else { return }
+            if let window = mainWindow {
+                // Window exists (from WindowGroup) - just bring it to front
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+            } else if self.isMenuBarOnly {
+                // Only create window in menu-bar-only mode when no window exists
+                if self.mainWindow == nil || self.mainWindow?.isVisible == false {
+                    self.mainWindow = self.createMainWindow()
+                }
 
-            // Make the window key and order front
-            window.makeKeyAndOrderFront(nil)
-
-            // Only center the window when first created, preserve user's position otherwise
-            if isNewWindow {
-                window.center()
+                if let window = self.mainWindow {
+                    window.makeKeyAndOrderFront(nil)
+                    window.orderFrontRegardless()
+                    window.center()
+                }
             }
-            
+
             // Post a notification to navigate to the desired destination
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 NotificationCenter.default.post(
@@ -129,6 +144,13 @@ class MenuBarManager: ObservableObject {
         let delegate = WindowDelegate { [weak self] in
             self?.mainWindow = nil
             self?.windowDelegate = nil
+
+            // Restore accessory policy when window closes if in menu bar mode
+            if self?.isMenuBarOnly == true {
+                DispatchQueue.main.async {
+                    NSApp.setActivationPolicy(.accessory)
+                }
+            }
         }
         window.delegate = delegate
         self.windowDelegate = delegate  // Store strong reference to prevent deallocation

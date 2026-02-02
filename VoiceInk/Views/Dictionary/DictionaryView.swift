@@ -1,5 +1,7 @@
 import SwiftUI
+import SwiftData
 
+// Legacy struct kept for DictionaryContextService compatibility
 struct DictionaryItem: Identifiable, Hashable, Codable {
     let id: UUID
     var word: String
@@ -34,54 +36,10 @@ struct DictionaryItem: Identifiable, Hashable, Codable {
     }
 }
 
-class DictionaryManager: ObservableObject {
-    @Published var items: [DictionaryItem] = []
-    private let saveKey = "CustomDictionaryItems"
-    private let whisperPrompt: WhisperPrompt
-
-    init(whisperPrompt: WhisperPrompt) {
-        self.whisperPrompt = whisperPrompt
-        loadItems()
-    }
-
-    private func loadItems() {
-        guard let data = UserDefaults.standard.data(forKey: saveKey) else { return }
-
-        if let savedItems = try? JSONDecoder().decode([DictionaryItem].self, from: data) {
-            items = savedItems.sorted(by: { $0.dateAdded > $1.dateAdded })
-        }
-    }
-
-    private func saveItems() {
-        if let encoded = try? JSONEncoder().encode(items) {
-            UserDefaults.standard.set(encoded, forKey: saveKey)
-        }
-    }
-
-    func addWord(_ word: String) {
-        let normalizedWord = word.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !items.contains(where: { $0.word.lowercased() == normalizedWord.lowercased() }) else {
-            return
-        }
-
-        let newItem = DictionaryItem(word: normalizedWord)
-        items.insert(newItem, at: 0)
-        saveItems()
-    }
-
-    func removeWord(_ word: String) {
-        items.removeAll(where: { $0.word == word })
-        saveItems()
-    }
-
-    var allWords: [String] {
-        items.map { $0.word }
-    }
-}
-
 struct DictionaryView: View {
     @Environment(\.colorScheme) private var colorScheme
-    @StateObject private var dictionaryManager: DictionaryManager
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \VocabularyWord.dateAdded, order: .reverse) private var vocabularyWords: [VocabularyWord]
     @ObservedObject var whisperPrompt: WhisperPrompt
     @State private var newWord = ""
     @State private var showAlert = false
@@ -89,7 +47,6 @@ struct DictionaryView: View {
 
     init(whisperPrompt: WhisperPrompt) {
         self.whisperPrompt = whisperPrompt
-        _dictionaryManager = StateObject(wrappedValue: DictionaryManager(whisperPrompt: whisperPrompt))
     }
 
     var body: some View {
@@ -137,9 +94,9 @@ struct DictionaryView: View {
             }
 
             // Words List
-            if !dictionaryManager.items.isEmpty {
+            if !vocabularyWords.isEmpty {
                 VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
-                    Text("Vocabulary Items (\(dictionaryManager.items.count))")
+                    Text("Vocabulary Items (\(vocabularyWords.count))")
                         .font(Tokens.Typography.label)
                         .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
@@ -149,9 +106,9 @@ struct DictionaryView: View {
                         ]
 
                         LazyVGrid(columns: columns, alignment: .leading, spacing: Tokens.Spacing.md) {
-                            ForEach(dictionaryManager.items) { item in
-                                DictionaryItemView(item: item, colorScheme: colorScheme) {
-                                    dictionaryManager.removeWord(item.word)
+                            ForEach(vocabularyWords) { word in
+                                VocabularyWordItemView(word: word, colorScheme: colorScheme) {
+                                    removeWord(word)
                                 }
                             }
                         }
@@ -169,39 +126,100 @@ struct DictionaryView: View {
             Text(alertMessage)
         }
     }
-    
+
     private func addWords() {
         let input = newWord.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return }
-        
+
         let parts = input
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-        
+
         guard !parts.isEmpty else { return }
-        
+
         if parts.count == 1, let word = parts.first {
-            if dictionaryManager.items.contains(where: { $0.word.lowercased() == word.lowercased() }) {
+            if vocabularyWords.contains(where: { $0.word.lowercased() == word.lowercased() }) {
                 alertMessage = "'\(word)' is already in the vocabulary"
                 showAlert = true
                 return
             }
-            dictionaryManager.addWord(word)
+            addWord(word)
             newWord = ""
             return
         }
-        
+
         for word in parts {
             let lower = word.lowercased()
-            if !dictionaryManager.items.contains(where: { $0.word.lowercased() == lower }) {
-                dictionaryManager.addWord(word)
+            if !vocabularyWords.contains(where: { $0.word.lowercased() == lower }) {
+                addWord(word)
             }
         }
         newWord = ""
     }
+
+    private func addWord(_ word: String) {
+        let normalizedWord = word.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !vocabularyWords.contains(where: { $0.word.lowercased() == normalizedWord.lowercased() }) else {
+            return
+        }
+
+        let newVocabularyWord = VocabularyWord(word: normalizedWord)
+        modelContext.insert(newVocabularyWord)
+        try? modelContext.save()
+    }
+
+    private func removeWord(_ word: VocabularyWord) {
+        modelContext.delete(word)
+        try? modelContext.save()
+    }
 }
 
+struct VocabularyWordItemView: View {
+    let word: VocabularyWord
+    let colorScheme: ColorScheme
+    let onDelete: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: Tokens.Spacing.sm) {
+            Text(word.word)
+                .font(Tokens.Typography.bodySmall)
+                .lineLimit(1)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+            Spacer(minLength: Tokens.Spacing.sm)
+
+            Button(action: onDelete) {
+                Image(systemName: "xmark.circle.fill")
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(isHovered ? Tokens.Colors.error : Tokens.Colors.textSecondary(for: colorScheme))
+                    .contentTransition(.symbolEffect(.replace))
+            }
+            .buttonStyle(.borderless)
+            .help("Remove word")
+            .onHover { hover in
+                withAnimation(Tokens.Animation.easing) {
+                    isHovered = hover
+                }
+            }
+        }
+        .padding(.horizontal, Tokens.Spacing.sm)
+        .padding(.vertical, Tokens.Spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                .fill(isHovered
+                      ? Tokens.Colors.orangeSoft(for: colorScheme)
+                      : Tokens.Colors.elevated(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+    }
+}
+
+// Keep the old DictionaryItemView for backward compatibility
 struct DictionaryItemView: View {
     let item: DictionaryItem
     let colorScheme: ColorScheme
@@ -244,4 +262,4 @@ struct DictionaryItemView: View {
                 .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
         )
     }
-} 
+}

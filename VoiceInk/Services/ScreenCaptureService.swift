@@ -4,10 +4,34 @@ import Vision
 import os
 import ScreenCaptureKit
 
+/// Result of a screen capture containing both OCR text and optional base64-encoded image
+struct ScreenCaptureResult {
+    let windowTitle: String
+    let appName: String
+    let ocrText: String?
+    let imageBase64: String?
+
+    /// Returns the formatted OCR context text for non-vision models
+    var formattedOCRContext: String {
+        var text = """
+        Active Window: \(windowTitle)
+        Application: \(appName)
+
+        """
+        if let ocrText = ocrText, !ocrText.isEmpty {
+            text += "Window Content:\n\(ocrText)"
+        } else {
+            text += "Window Content:\nNo text detected via OCR"
+        }
+        return text
+    }
+}
+
 @MainActor
 class ScreenCaptureService: ObservableObject {
     @Published var isCapturing = false
     @Published var lastCapturedText: String?
+    @Published var lastCapturedResult: ScreenCaptureResult?
     
     private let logger = Logger(
         subsystem: "com.VincentHopf.embrvoice",
@@ -98,14 +122,62 @@ class ScreenCaptureService: ObservableObject {
             return nil
         }
     }
-    
-    func captureAndExtractText() async -> String? {
-        guard !isCapturing else { 
-            return nil 
+
+    /// Encode an NSImage to base64 PNG string, optionally resizing if larger than maxWidth
+    private func encodeImageToBase64(_ image: NSImage, maxWidth: Int = 1536) -> String? {
+        guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
         }
-        
+
+        // Check if resizing is needed
+        let originalWidth = cgImage.width
+        let originalHeight = cgImage.height
+
+        var finalCGImage = cgImage
+        if originalWidth > maxWidth {
+            let scale = CGFloat(maxWidth) / CGFloat(originalWidth)
+            let newWidth = Int(CGFloat(originalWidth) * scale)
+            let newHeight = Int(CGFloat(originalHeight) * scale)
+
+            // Create resized image
+            if let colorSpace = cgImage.colorSpace,
+               let context = CGContext(
+                   data: nil,
+                   width: newWidth,
+                   height: newHeight,
+                   bitsPerComponent: cgImage.bitsPerComponent,
+                   bytesPerRow: 0,
+                   space: colorSpace,
+                   bitmapInfo: cgImage.bitmapInfo.rawValue
+               ) {
+                context.interpolationQuality = .high
+                context.draw(cgImage, in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+                if let resizedCGImage = context.makeImage() {
+                    finalCGImage = resizedCGImage
+                    logger.notice("📸 Resized image from \(originalWidth)x\(originalHeight) to \(newWidth)x\(newHeight)")
+                }
+            }
+        }
+
+        // Convert to PNG data
+        let bitmapRep = NSBitmapImageRep(cgImage: finalCGImage)
+        guard let pngData = bitmapRep.representation(using: .png, properties: [:]) else {
+            logger.notice("📸 Failed to convert image to PNG")
+            return nil
+        }
+
+        let base64String = pngData.base64EncodedString()
+        logger.notice("📸 Encoded image to base64 (\(base64String.count) characters)")
+        return base64String
+    }
+
+    func captureAndExtractText() async -> String? {
+        guard !isCapturing else {
+            return nil
+        }
+
         isCapturing = true
-        defer { 
+        defer {
             DispatchQueue.main.async {
                 self.isCapturing = false
             }
@@ -115,35 +187,45 @@ class ScreenCaptureService: ObservableObject {
             logger.notice("📸 No active window found")
             return nil
         }
-        
+
         logger.notice("📸 Capturing: \(windowInfo.title, privacy: .public) (\(windowInfo.ownerName, privacy: .public))")
 
-        var contextText = """
-        Active Window: \(windowInfo.title)
-        Application: \(windowInfo.ownerName)
-        
-        """
-
         if let capturedImage = await captureActiveWindow() {
-            let extractedText = await extractText(from: capturedImage)
-            
+            // Run OCR and base64 encoding in parallel
+            async let extractedTextTask = extractText(from: capturedImage)
+            let imageBase64 = encodeImageToBase64(capturedImage)
+            let extractedText = await extractedTextTask
+
             if let extractedText = extractedText, !extractedText.isEmpty {
-                contextText += "Window Content:\n\(extractedText)"
                 let preview = String(extractedText.prefix(100))
                 logger.notice("📸 Text extracted: \(preview, privacy: .public)\(extractedText.count > 100 ? "..." : "")")
             } else {
-                contextText += "Window Content:\nNo text detected via OCR"
                 logger.notice("📸 No text extracted from window")
             }
-            
+
+            // Create and store the full result
+            let result = ScreenCaptureResult(
+                windowTitle: windowInfo.title,
+                appName: windowInfo.ownerName,
+                ocrText: extractedText,
+                imageBase64: imageBase64
+            )
+
             await MainActor.run {
-                self.lastCapturedText = contextText
+                self.lastCapturedResult = result
+                self.lastCapturedText = result.formattedOCRContext
             }
-            
-            return contextText
+
+            return result.formattedOCRContext
         }
-        
+
         logger.notice("📸 Window capture failed")
         return nil
+    }
+
+    /// Clear the captured context data
+    func clearCapturedResult() {
+        lastCapturedResult = nil
+        lastCapturedText = nil
     }
 } 

@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 struct EnhancementSettingsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var enhancementService: AIEnhancementService
+    @EnvironmentObject private var aiService: AIService
     @State private var isEditingPrompt = false
     @State private var isSettingsExpanded = true
     @State private var selectedPromptForEdit: CustomPrompt?
@@ -55,10 +56,16 @@ struct EnhancementSettingsView: View {
                             }
 
                             VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
-                                Toggle("Context Awareness", isOn: $enhancementService.useScreenCaptureContext)
-                                    .toggleStyle(.switch)
-                                    .tint(Tokens.Colors.orange)
-                                    .disabled(!enhancementService.isEnhancementEnabled)
+                                HStack {
+                                    Toggle("Context Awareness", isOn: $enhancementService.useScreenCaptureContext)
+                                        .toggleStyle(.switch)
+                                        .tint(Tokens.Colors.orange)
+                                        .disabled(!enhancementService.isEnhancementEnabled)
+
+                                    if enhancementService.useScreenCaptureContext {
+                                        ScreenCaptureModeIndicator(aiService: aiService, colorScheme: colorScheme)
+                                    }
+                                }
                                 Text("Learn what is on the screen to understand the context")
                                     .font(Tokens.Typography.caption)
                                     .foregroundColor(enhancementService.isEnhancementEnabled ? Tokens.Colors.textSecondary(for: colorScheme) : Tokens.Colors.textTertiary(for: colorScheme))

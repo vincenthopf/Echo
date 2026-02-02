@@ -56,12 +56,9 @@ class WhisperState: NSObject, ObservableObject {
     private let promptDetectionService = PromptDetectionService()
     
     let modelContext: ModelContext
-    
-    // Transcription Services
-    private var localTranscriptionService: LocalTranscriptionService!
-    private lazy var cloudTranscriptionService = CloudTranscriptionService()
-    private lazy var nativeAppleTranscriptionService = NativeAppleTranscriptionService()
-    internal lazy var parakeetTranscriptionService = ParakeetTranscriptionService()
+
+    // Transcription Service Registry
+    private(set) var serviceRegistry: TranscriptionServiceRegistry!
     
     private var modelUrl: URL? {
         let possibleURLs = [
@@ -109,9 +106,9 @@ class WhisperState: NSObject, ObservableObject {
         if let enhancementService = enhancementService {
             PowerModeSessionManager.shared.configure(whisperState: self, enhancementService: enhancementService)
         }
-        
-        // Set the whisperState reference after super.init()
-        self.localTranscriptionService = LocalTranscriptionService(modelsDirectory: self.modelsDirectory, whisperState: self)
+
+        // Initialize the transcription service registry after super.init()
+        self.serviceRegistry = TranscriptionServiceRegistry(whisperState: self, modelsDirectory: self.modelsDirectory)
         
         setupNotifications()
         createModelsDirectoryIfNeeded()
@@ -199,7 +196,7 @@ class WhisperState: NSObject, ObservableObject {
                                     }
                                 }
                             } else if let parakeetModel = self.currentTranscriptionModel as? ParakeetModel {
-                                try? await self.parakeetTranscriptionService.loadModel(for: parakeetModel)
+                                try? await self.serviceRegistry.parakeetTranscriptionService.loadModel(for: parakeetModel)
                             }
         
                             if let enhancementService = self.enhancementService {
@@ -278,20 +275,8 @@ class WhisperState: NSObject, ObservableObject {
                 throw WhisperStateError.transcriptionFailed
             }
 
-            let transcriptionService: TranscriptionService
-            switch model.provider {
-            case .local:
-                transcriptionService = localTranscriptionService
-            case .parakeet:
-                transcriptionService = parakeetTranscriptionService
-            case .nativeApple:
-                transcriptionService = nativeAppleTranscriptionService
-            default:
-                transcriptionService = cloudTranscriptionService
-            }
-
             let transcriptionStart = Date()
-            var text = try await transcriptionService.transcribe(audioURL: url, model: model)
+            var text = try await serviceRegistry.transcribe(audioURL: url, model: model)
             logger.notice("📝 Raw transcript: \(text)")
             text = TranscriptionOutputFilter.filter(text)
             logger.notice("📝 Output filter result: \(text)")
@@ -314,6 +299,11 @@ class WhisperState: NSObject, ObservableObject {
             if UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled") {
                 text = WordReplacementService.shared.applyReplacements(to: text)
                 logger.notice("📝 WordReplacement: \(text)")
+            }
+
+            if FillerWordManager.shared.isEnabled {
+                text = FillerWordManager.shared.removeFillerWords(from: text)
+                logger.notice("📝 FillerWordRemoval: \(text)")
             }
 
             // MARK: - Voice Trigger Detection (Stage 2: Adaptive Awareness)
@@ -368,13 +358,21 @@ class WhisperState: NSObject, ObservableObject {
                 do {
                     let (enhancedText, enhancementDuration, promptName) = try await enhancementService.enhance(textForAI)
                     logger.notice("📝 AI enhancement: \(enhancedText)")
-                    transcription.enhancedText = enhancedText
+
+                    // Apply word replacements to AI-enhanced text as well
+                    var processedEnhancedText = enhancedText
+                    if UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled") {
+                        processedEnhancedText = WordReplacementService.shared.applyReplacements(to: processedEnhancedText)
+                        logger.notice("📝 WordReplacement (post-AI): \(processedEnhancedText)")
+                    }
+
+                    transcription.enhancedText = processedEnhancedText
                     transcription.aiEnhancementModelName = enhancementService.getAIService()?.currentModel
                     transcription.promptName = promptName
                     transcription.enhancementDuration = enhancementDuration
                     transcription.aiRequestSystemMessage = enhancementService.lastSystemMessageSent
                     transcription.aiRequestUserMessage = enhancementService.lastUserMessageSent
-                    finalPastedText = enhancedText
+                    finalPastedText = processedEnhancedText
                 } catch {
                     transcription.enhancedText = "Enhancement failed: \(error)"
                   

@@ -26,9 +26,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func updateActivationPolicy() {
         let isMenuBarOnly = UserDefaults.standard.bool(forKey: "IsMenuBarOnly")
-        if isMenuBarOnly {
+
+        // Don't switch to accessory mode if there's a visible window
+        let hasVisibleWindow = NSApp.windows.contains { window in
+            window.isVisible &&
+            window.styleMask.contains(.titled) &&
+            window.className != "NSStatusBarWindow"
+        }
+
+        if isMenuBarOnly && !hasVisibleWindow {
             NSApp.setActivationPolicy(.accessory)
-        } else {
+        } else if !isMenuBarOnly || hasVisibleWindow {
             NSApp.setActivationPolicy(.regular)
         }
     }

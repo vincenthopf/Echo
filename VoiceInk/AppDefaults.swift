@@ -36,6 +36,7 @@ enum AppDefaults {
             "IsMenuBarOnly": false,
             "powerModeAutoRestoreEnabled": false,
             "UseAppleScriptPaste": false,
+            "UseTypeOutPaste": false,
 
             // Hotkey
             "isMiddleClickToggleEnabled": false,

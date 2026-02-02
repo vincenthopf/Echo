@@ -62,9 +62,9 @@ struct TrialMessageView: View {
     
     private var iconColor: Color {
         switch type {
-        case .warning: return .orange
-        case .expired: return .red
-        case .info: return .blue
+        case .warning: return VoiceInkTokens.Colors.orange
+        case .expired: return VoiceInkTokens.Colors.error
+        case .info: return VoiceInkTokens.Colors.accentBlue
         }
     }
     
@@ -78,9 +78,9 @@ struct TrialMessageView: View {
     
     private var backgroundColor: Color {
         switch type {
-        case .warning: return Color.orange.opacity(0.1)
-        case .expired: return Color.red.opacity(0.1)
-        case .info: return Color.blue.opacity(0.1)
+        case .warning: return VoiceInkTokens.Colors.orange.opacity(0.1)
+        case .expired: return VoiceInkTokens.Colors.error.opacity(0.1)
+        case .info: return VoiceInkTokens.Colors.accentBlue.opacity(0.1)
         }
     }
 } 

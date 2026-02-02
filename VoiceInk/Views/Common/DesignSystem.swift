@@ -30,8 +30,8 @@ struct VoiceInkTokens {
         static let borderStrongLight = Color(red: 0.831, green: 0.824, blue: 0.804)
         /// Primary text - #1A1A18
         static let textPrimaryLight = Color(red: 0.102, green: 0.102, blue: 0.094)
-        /// Secondary text - #7A7A72
-        static let textSecondaryLight = Color(red: 0.478, green: 0.478, blue: 0.447)
+        /// Secondary text - #5A5A52 (darkened for WCAG AA contrast)
+        static let textSecondaryLight = Color(red: 0.353, green: 0.353, blue: 0.322)
         /// Tertiary text - #A8A8A0
         static let textTertiaryLight = Color(red: 0.659, green: 0.659, blue: 0.627)
 

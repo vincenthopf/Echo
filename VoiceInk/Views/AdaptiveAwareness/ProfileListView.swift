@@ -223,9 +223,9 @@ struct ProfileListItem: View {
                         .lineLimit(1)
 
                     if config.isDefault {
-                        Text("Fallback profile")
+                        Text("Default Fallback Profile")
                             .font(Tokens.Typography.bodySmall)
-                            .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                            .foregroundColor(Tokens.Colors.orange)
                     } else if triggerCount > 0 {
                         Text("\(triggerCount) trigger\(triggerCount == 1 ? "" : "s")")
                             .font(Tokens.Typography.bodySmall)
@@ -246,17 +246,7 @@ struct ProfileListItem: View {
                         .background(Tokens.Colors.successSoft(for: colorScheme))
                         .foregroundColor(Tokens.Colors.success)
                         .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
-                } else if config.isDefault {
-                    // Default badge - orange
-                    Text("DEFAULT")
-                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                        .tracking(0.5)
-                        .padding(.horizontal, Tokens.Spacing.sm)
-                        .padding(.vertical, 3)
-                        .background(Tokens.Colors.orangeMedium(for: colorScheme))
-                        .foregroundColor(Tokens.Colors.orange)
-                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
-                } else {
+                } else if !config.isDefault {
                     // Toggle for non-default profiles
                     Toggle("", isOn: Binding(
                         get: { config.isEnabled },

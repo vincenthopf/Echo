@@ -23,6 +23,11 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var isEnabled: Bool = true
     var isDefault: Bool = false
 
+    // Type-out mode: types text character-by-character instead of clipboard paste
+    var useTypeOutPaste: Bool = false
+    // When type-out mode is enabled, use Shift+Enter for newlines instead of Enter
+    var useShiftEnterForNewlines: Bool = false
+
     // Voice trigger support for Adaptive Awareness integration
     var triggerWords: [String] = []
 
@@ -30,7 +35,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var triggerLogicMode: TriggerLogicMode = .any
 
     enum CodingKeys: String, CodingKey {
-        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords, triggerLogicMode
+        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords, triggerLogicMode, useTypeOutPaste, useShiftEnterForNewlines
         case selectedWhisperModel
         case selectedTranscriptionModelName
     }
@@ -38,7 +43,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     init(id: UUID = UUID(), name: String, emoji: String, appConfigs: [AppConfig]? = nil,
          urlConfigs: [URLConfig]? = nil, isAIEnhancementEnabled: Bool, selectedPrompt: String? = nil,
          selectedTranscriptionModelName: String? = nil, selectedLanguage: String? = nil, useScreenCapture: Bool = false,
-         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = [], triggerLogicMode: TriggerLogicMode = .any) {
+         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = [], triggerLogicMode: TriggerLogicMode = .any, useTypeOutPaste: Bool = false, useShiftEnterForNewlines: Bool = false) {
         self.id = id
         self.name = name
         self.emoji = emoji
@@ -56,6 +61,8 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         self.isDefault = isDefault
         self.triggerWords = triggerWords
         self.triggerLogicMode = triggerLogicMode
+        self.useTypeOutPaste = useTypeOutPaste
+        self.useShiftEnterForNewlines = useShiftEnterForNewlines
     }
 
     init(from decoder: Decoder) throws {
@@ -80,6 +87,10 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
 
         // Decode triggerLogicMode with fallback to .any for backward compatibility
         triggerLogicMode = try container.decodeIfPresent(TriggerLogicMode.self, forKey: .triggerLogicMode) ?? .any
+
+        // Decode type-out paste settings with fallback for backward compatibility
+        useTypeOutPaste = try container.decodeIfPresent(Bool.self, forKey: .useTypeOutPaste) ?? false
+        useShiftEnterForNewlines = try container.decodeIfPresent(Bool.self, forKey: .useShiftEnterForNewlines) ?? false
 
         if let newModelName = try container.decodeIfPresent(String.self, forKey: .selectedTranscriptionModelName) {
             selectedTranscriptionModelName = newModelName
@@ -109,6 +120,8 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encode(isDefault, forKey: .isDefault)
         try container.encode(triggerWords, forKey: .triggerWords)
         try container.encode(triggerLogicMode, forKey: .triggerLogicMode)
+        try container.encode(useTypeOutPaste, forKey: .useTypeOutPaste)
+        try container.encode(useShiftEnterForNewlines, forKey: .useShiftEnterForNewlines)
     }
     
     

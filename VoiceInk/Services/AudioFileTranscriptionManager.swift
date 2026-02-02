@@ -127,7 +127,12 @@ class AudioTranscriptionManager: ObservableObject {
                 if UserDefaults.standard.bool(forKey: "IsWordReplacementEnabled") {
                     text = WordReplacementService.shared.applyReplacements(to: text)
                 }
-                
+
+                // Apply filler word removal if enabled
+                if FillerWordManager.shared.isEnabled {
+                    text = FillerWordManager.shared.removeFillerWords(from: text)
+                }
+
                 // Handle enhancement if enabled
                 if let enhancementService = whisperState.enhancementService,
                    enhancementService.isEnhancementEnabled,
