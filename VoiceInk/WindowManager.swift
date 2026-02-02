@@ -34,12 +34,12 @@ class WindowManager {
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.title = "Echo Onboarding"
         window.isOpaque = false
-        window.minSize = NSSize(width: 900, height: 780)
+        window.minSize = NSSize(width: 1100, height: 850)
         window.makeKeyAndOrderFront(nil)
     }
     
     func createMainWindow(contentView: NSView) -> NSWindow {
-        let defaultSize = NSSize(width: 940, height: 780)
+        let defaultSize = NSSize(width: 1100, height: 850)
         let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1200, height: 800)
         let xPosition = (screenFrame.width - defaultSize.width) / 2 + screenFrame.minX
         let yPosition = (screenFrame.height - defaultSize.height) / 2 + screenFrame.minY

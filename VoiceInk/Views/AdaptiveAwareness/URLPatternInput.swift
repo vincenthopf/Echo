@@ -1,47 +1,53 @@
 import SwiftUI
 
 /// Tag-style input for URL patterns with validation
+/// Updated to fit within the trigger grid column design
 struct URLPatternInput: View {
     @Binding var urlConfigs: [URLConfig]
 
     @State private var newURL = ""
     @State private var validationError: String?
     @FocusState private var isTextFieldFocused: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+            // Existing URLs
             if !urlConfigs.isEmpty {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150, maximum: 250))], spacing: 8) {
+                VStack(spacing: Tokens.Spacing.sm) {
                     ForEach(urlConfigs) { urlConfig in
                         URLTagView(urlConfig: urlConfig) {
                             urlConfigs.removeAll { $0.id == urlConfig.id }
                         }
                     }
                 }
-                .padding(.bottom, 4)
-            } else {
-                Text("No URL patterns added")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
 
             // Input field
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    TextField("example.com or *.example.com", text: $newURL)
+            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
+                HStack(spacing: Tokens.Spacing.sm) {
+                    TextField("example.com", text: $newURL)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 13))
+                        .font(Tokens.Typography.bodySmall)
+                        .padding(.horizontal, Tokens.Spacing.sm)
+                        .padding(.vertical, Tokens.Spacing.xs)
+                        .background(Tokens.Colors.background(for: colorScheme))
+                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.sm))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                        )
                         .focused($isTextFieldFocused)
                         .onSubmit {
                             addURL()
                         }
                         .onChange(of: newURL) { _, _ in
-                            // Clear validation error on change
                             validationError = nil
                         }
 
-                    Button("Add") {
-                        addURL()
+                    Button(action: addURL) {
+                        Text("Add")
+                            .font(.system(size: 11, weight: .medium))
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
@@ -50,14 +56,15 @@ struct URLPatternInput: View {
 
                 if let error = validationError {
                     Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
+                        .font(.system(size: 10))
+                        .foregroundColor(Tokens.Colors.error)
                 }
             }
 
-            Text("Tip: Supports wildcards like *.example.com or example.com/path")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            // Hint text
+            Text("Supports wildcards: *.example.com")
+                .font(.system(size: 10))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
         }
     }
 
@@ -65,15 +72,13 @@ struct URLPatternInput: View {
         let trimmed = newURL.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        // Basic validation
         if !isValidURLPattern(trimmed) {
             validationError = "Invalid URL pattern"
             return
         }
 
-        // Check for duplicates
         if urlConfigs.contains(where: { $0.url.lowercased() == trimmed.lowercased() }) {
-            validationError = "URL pattern already exists"
+            validationError = "Already exists"
             return
         }
 
@@ -83,15 +88,12 @@ struct URLPatternInput: View {
     }
 
     private func isValidURLPattern(_ pattern: String) -> Bool {
-        // Allow wildcards and basic URL patterns
-        // Must contain at least a domain-like structure
         let cleaned = pattern
             .replacingOccurrences(of: "https://", with: "")
             .replacingOccurrences(of: "http://", with: "")
             .replacingOccurrences(of: "www.", with: "")
             .replacingOccurrences(of: "*", with: "")
 
-        // Basic validation: must have at least one dot and some characters
         let components = cleaned.components(separatedBy: ".")
         return components.count >= 2 && components.allSatisfy { !$0.isEmpty }
     }
@@ -103,43 +105,44 @@ struct URLTagView: View {
     let onDelete: () -> Void
 
     @State private var isHovered = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Tokens.Spacing.sm) {
             Image(systemName: "globe")
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .font(.system(size: 10))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
 
             Text(urlConfig.url)
-                .font(.system(size: 13))
+                .font(Tokens.Typography.bodySmall)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 .lineLimit(1)
-                .foregroundColor(.primary)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
-            Button(action: onDelete) {
-                Image(systemName: "xmark.circle.fill")
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(isHovered ? .red : .secondary)
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .buttonStyle(.borderless)
-            .help("Remove URL pattern")
-            .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isHovered = hovering
+            if isHovered {
+                Button(action: onDelete) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Tokens.Colors.error)
                 }
+                .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color(NSColor.textBackgroundColor))
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+        .padding(.horizontal, Tokens.Spacing.sm)
+        .padding(.vertical, Tokens.Spacing.xs)
+        .background(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .fill(Tokens.Colors.background(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.15)) {
+                isHovered = hovering
+            }
         }
     }
 }

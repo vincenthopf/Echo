@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// Activation triggers section showing apps, URLs, and voice keywords
+/// Activation triggers section showing apps, URLs, and voice keywords in a 3-column grid
 struct ActivationTriggersSection: View {
     @Binding var config: PowerModeConfig
     let onSave: () -> Void
@@ -9,175 +9,175 @@ struct ActivationTriggersSection: View {
     @State private var isShowingAppPicker = false
     @State private var installedApps: [(url: URL, name: String, bundleId: String, icon: NSImage)] = []
     @State private var searchText = ""
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Activation Triggers")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            // Header with trigger logic control
+            HStack(alignment: .top) {
+                SectionHeader(
+                    title: "Activation Triggers",
+                    subtitle: subtitleText
+                )
 
-                Text(subtitleText)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+                Spacer()
 
-            // Trigger Logic Mode Selector
-            if shouldShowTriggerLogicControl {
-                HStack(spacing: 8) {
-                    Picker("Trigger Logic", selection: Binding(
-                        get: { config.triggerLogicMode },
-                        set: { newValue in
-                            config.triggerLogicMode = newValue
-                            onSave()
-                        }
-                    )) {
-                        Text("Any").tag(TriggerLogicMode.any)
-                        if config.hasMultipleTriggerCategories() {
-                            Text("All").tag(TriggerLogicMode.all)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .frame(width: 160)
-                    .disabled(!hasTriggers)
-
-                    InfoTip(
-                        title: "Trigger Matching",
-                        message: infoTipMessage
-                    )
-
-                    Spacer()
-                }
-            }
-
-            // Applications Subsection
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 4) {
-                    Text("Applications")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-
-                    if shouldShowRequiredBadge(hasItems: config.appConfigs?.isEmpty == false) {
-                        Text("(1 required)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                if let appConfigs = config.appConfigs, !appConfigs.isEmpty {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120))], spacing: 12) {
-                        ForEach(appConfigs) { appConfig in
-                            AppConfigIconView(appConfig: appConfig) {
-                                removeApp(appConfig)
-                            }
-                        }
-                    }
-                } else {
-                    Text("No applications added")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Button(action: {
-                    isShowingAppPicker = true
-                }) {
-                    Label("Add Application", systemImage: "plus.circle")
-                        .font(.system(size: 13))
-                }
-                .buttonStyle(.bordered)
-                .sheet(isPresented: $isShowingAppPicker) {
-                    AppPickerSheet(
-                        installedApps: installedApps,
-                        selectedAppConfigs: Binding(
-                            get: { config.appConfigs ?? [] },
-                            set: { newConfigs in
-                                config.appConfigs = newConfigs
+                if hasTriggers {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Picker("", selection: Binding(
+                            get: { config.triggerLogicMode },
+                            set: { newValue in
+                                config.triggerLogicMode = newValue
                                 onSave()
                             }
-                        ),
-                        searchText: $searchText,
-                        onDismiss: {
-                            isShowingAppPicker = false
+                        )) {
+                            Text("Any").tag(TriggerLogicMode.any)
+                            if config.hasMultipleTriggerCategories() {
+                                Text("All").tag(TriggerLogicMode.all)
+                            }
                         }
-                    )
-                    .onAppear {
-                        loadInstalledApps()
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 100)
+                        .tint(Tokens.Colors.orange)
+
+                        InfoTip(
+                            title: "Trigger Matching",
+                            message: infoTipMessage
+                        )
                     }
                 }
             }
 
-            Divider()
-                .padding(.vertical, 4)
-
-            // Websites Subsection
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 4) {
-                    Text("Websites")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-
-                    if shouldShowRequiredBadge(hasItems: config.urlConfigs?.isEmpty == false) {
-                        Text("(1 required)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+            // 3-column trigger grid - all columns same white background
+            HStack(spacing: 0) {
+                // Applications column
+                triggerColumn(
+                    icon: "square.grid.2x2",
+                    title: "Applications"
+                ) {
+                    if let appConfigs = config.appConfigs, !appConfigs.isEmpty {
+                        VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                            ForEach(appConfigs) { appConfig in
+                                TriggerAppItem(appConfig: appConfig) {
+                                    removeApp(appConfig)
+                                }
+                            }
+                        }
                     }
+
+                    Button(action: { isShowingAppPicker = true }) {
+                        Text("+ Add app")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(Tokens.Colors.orange)
+                    }
+                    .buttonStyle(.plain)
                 }
 
-                URLPatternInput(
-                    urlConfigs: Binding(
-                        get: { config.urlConfigs ?? [] },
-                        set: { newConfigs in
-                            config.urlConfigs = newConfigs
-                            onSave()
-                        }
+                columnDivider
+
+                // Websites column
+                triggerColumn(
+                    icon: "globe",
+                    title: "Websites"
+                ) {
+                    URLPatternInput(
+                        urlConfigs: Binding(
+                            get: { config.urlConfigs ?? [] },
+                            set: { newConfigs in
+                                config.urlConfigs = newConfigs
+                                onSave()
+                            }
+                        )
                     )
-                )
+                }
+
+                columnDivider
+
+                // Voice Keywords column
+                triggerColumn(
+                    icon: "mic",
+                    title: "Voice Keywords"
+                ) {
+                    VoiceKeywordInput(
+                        triggerWords: Binding(
+                            get: { config.triggerWords },
+                            set: { newWords in
+                                config.triggerWords = newWords
+                                onSave()
+                            }
+                        )
+                    )
+                }
             }
-
-            Divider()
-                .padding(.vertical, 4)
-
-            // Voice Keywords Subsection
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 4) {
-                    Text("Voice Keywords")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-
-                    if shouldShowRequiredBadge(hasItems: !config.triggerWords.isEmpty) {
-                        Text("(1 required)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+        .sheet(isPresented: $isShowingAppPicker) {
+            AppPickerSheet(
+                installedApps: installedApps,
+                selectedAppConfigs: Binding(
+                    get: { config.appConfigs ?? [] },
+                    set: { newConfigs in
+                        config.appConfigs = newConfigs
+                        onSave()
                     }
+                ),
+                searchText: $searchText,
+                onDismiss: {
+                    isShowingAppPicker = false
                 }
-
-                VoiceKeywordInput(
-                    triggerWords: Binding(
-                        get: { config.triggerWords },
-                        set: { newWords in
-                            config.triggerWords = newWords
-                            onSave()
-                        }
-                    )
-                )
+            )
+            .onAppear {
+                loadInstalledApps()
             }
         }
     }
 
-    // MARK: - Computed Properties
+    // MARK: - Column Builder
 
-    /// Whether the control should be shown (disabled control when no triggers)
-    private var shouldShowTriggerLogicControl: Bool {
-        return true  // Always show, disabled when empty per user choice
+    @ViewBuilder
+    private func triggerColumn<Content: View>(
+        icon: String,
+        title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
+            // Header
+            HStack(spacing: Tokens.Spacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundColor(Tokens.Colors.orange)
+
+                Text(title.uppercased())
+                    .font(.system(size: 10, weight: .medium))
+                    .tracking(0.5)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+            }
+
+            // Content
+            content()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Tokens.Spacing.lg)
     }
 
-    /// Whether any triggers are configured
+    private var columnDivider: some View {
+        Rectangle()
+            .fill(Tokens.Colors.border(for: colorScheme))
+            .frame(width: 1)
+    }
+
+    // MARK: - Computed Properties
+
     private var hasTriggers: Bool {
         return config.configuredTriggerCategories() > 0
     }
 
-    /// Dynamic subtitle text based on configuration state and logic mode
     private var subtitleText: String {
         if !hasTriggers {
             return "Add triggers to enable automatic activation"
@@ -191,18 +191,12 @@ struct ActivationTriggersSection: View {
         }
     }
 
-    /// Info tip message explaining trigger logic
     private var infoTipMessage: String {
         """
         Any: Profile activates when at least one trigger matches.
 
-        All: Profile only activates when triggers from at least two categories match simultaneously. For example, if you've set both an application and a website trigger, both must be active at the same time.
+        All: Profile only activates when triggers from at least two categories match simultaneously.
         """
-    }
-
-    /// Whether to show "(1 required)" badge on category headers
-    private func shouldShowRequiredBadge(hasItems: Bool) -> Bool {
-        return config.triggerLogicMode == .all && hasItems && config.hasMultipleTriggerCategories()
     }
 
     // MARK: - Helper Methods
@@ -221,7 +215,6 @@ struct ActivationTriggersSection: View {
                 return (url: url, name: name, bundleId: bundleId, icon: icon)
             }
 
-        // Add common applications even if not running
         let fileManager = FileManager.default
         let applicationsPaths = [
             "/Applications",
@@ -255,46 +248,54 @@ struct ActivationTriggersSection: View {
     }
 }
 
-/// App config icon view with delete button
-struct AppConfigIconView: View {
+// MARK: - Trigger App Item
+
+/// Compact app item for trigger grid
+struct TriggerAppItem: View {
     let appConfig: AppConfig
     let onDelete: () -> Void
 
     @State private var isHovered = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(spacing: 6) {
-            ZStack(alignment: .topTrailing) {
-                // App icon
-                let icon = NSWorkspace.shared.icon(forFile: getAppPath(for: appConfig.bundleIdentifier))
-                Image(nsImage: icon)
-                    .resizable()
-                    .frame(width: 48, height: 48)
-
-                // Delete button on hover
-                if isHovered {
-                    Button(action: onDelete) {
-                        Image(systemName: "xmark.circle.fill")
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(Color.white, Color.red)
-                            .font(.title3)
-                            .background(Circle().fill(Color.white.opacity(0.9)))
-                    }
-                    .buttonStyle(.plain)
-                    .offset(x: 8, y: -8)
-                }
-            }
-            .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isHovered = hovering
-                }
-            }
+        HStack(spacing: Tokens.Spacing.sm) {
+            // App icon
+            let icon = NSWorkspace.shared.icon(forFile: getAppPath(for: appConfig.bundleIdentifier))
+            Image(nsImage: icon)
+                .resizable()
+                .frame(width: 20, height: 20)
 
             Text(appConfig.appName)
-                .font(.caption)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .frame(width: 100)
+                .font(Tokens.Typography.bodySmall)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                .lineLimit(1)
+
+            Spacer(minLength: 4)
+
+            if isHovered {
+                Button(action: onDelete) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Tokens.Spacing.sm)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .fill(Tokens.Colors.background(for: colorScheme))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.md)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+        .onHover { hovering in
+            withAnimation(.easeOut(duration: 0.1)) {
+                isHovered = hovering
+            }
         }
     }
 
@@ -303,5 +304,67 @@ struct AppConfigIconView: View {
             return url.path
         }
         return ""
+    }
+}
+
+/// Legacy alias for backwards compatibility
+struct AppConfigIconView: View {
+    let appConfig: AppConfig
+    let onDelete: () -> Void
+
+    var body: some View {
+        TriggerAppItem(appConfig: appConfig, onDelete: onDelete)
+    }
+}
+
+/// Legacy component aliases
+struct TriggerColumnView<Content: View>: View {
+    let icon: String
+    let title: String
+    let isEmpty: Bool
+    let emptyText: String
+    let addText: String
+    let onAdd: (() -> Void)?
+    let showRequiredBadge: Bool
+    @ViewBuilder let content: Content
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
+            HStack(spacing: Tokens.Spacing.sm) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundColor(Tokens.Colors.orange)
+
+                Text(title.uppercased())
+                    .font(.system(size: 10, weight: .medium))
+                    .tracking(0.5)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+            }
+
+            content
+
+            if let onAdd = onAdd {
+                Button(action: onAdd) {
+                    Text(addText)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(Tokens.Colors.orange)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Tokens.Spacing.lg)
+    }
+}
+
+struct TriggerColumnDivider: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        Rectangle()
+            .fill(Tokens.Colors.border(for: colorScheme))
+            .frame(width: 1)
     }
 }

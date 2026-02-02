@@ -10,316 +10,436 @@ struct RecordingSettingsView: View {
     @StateObject private var deviceManager = AudioDeviceManager.shared
     @ObservedObject private var mediaController = MediaController.shared
     @State private var isCustomCancelEnabled = false
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Tokens.Spacing.xl) {
                 // MARK: - Echo Shortcuts Section
-                SettingsSection(
-                    icon: "command.circle",
-                    title: "Echo Shortcuts",
-                    subtitle: "Choose how you want to trigger Echo"
-                ) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        hotkeyView(
-                            title: "Hotkey 1",
-                            binding: $hotkeyManager.selectedHotkey1,
-                            shortcutName: .toggleMiniRecorder
-                        )
+                echoShortcutsSection
 
-                        if hotkeyManager.selectedHotkey2 != .none {
-                            Divider()
-                            hotkeyView(
-                                title: "Hotkey 2",
+                // MARK: - Other App Shortcuts Section
+                otherShortcutsSection
+
+                // MARK: - Audio Input Section
+                audioInputSection
+
+                // MARK: - Audio Management Section
+                audioManagementSection
+            }
+            .padding(.horizontal, Tokens.Spacing.lg)
+            .padding(.vertical, Tokens.Spacing.sm)
+        }
+        .background(Tokens.Colors.background(for: colorScheme))
+        .onAppear {
+            isCustomCancelEnabled = KeyboardShortcuts.getShortcut(for: .cancelRecorder) != nil
+        }
+    }
+
+    // MARK: - Echo Shortcuts Section
+
+    private var echoShortcutsSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Echo Shortcuts",
+                subtitle: "Choose how you want to trigger Echo"
+            )
+
+            VStack(spacing: 0) {
+                // Hotkey 1
+                FormRow(label: "Hotkey 1") {
+                    hotkeyContent(
+                        binding: $hotkeyManager.selectedHotkey1,
+                        shortcutName: .toggleMiniRecorder
+                    )
+                }
+
+                if hotkeyManager.selectedHotkey2 != .none {
+                    FormDivider()
+
+                    FormRow(label: "Hotkey 2") {
+                        HStack(spacing: Tokens.Spacing.md) {
+                            hotkeyContent(
                                 binding: $hotkeyManager.selectedHotkey2,
-                                shortcutName: .toggleMiniRecorder2,
-                                isRemovable: true,
-                                onRemove: {
-                                    withAnimation { hotkeyManager.selectedHotkey2 = .none }
-                                }
+                                shortcutName: .toggleMiniRecorder2
                             )
-                        }
 
-                        if hotkeyManager.selectedHotkey1 != .none && hotkeyManager.selectedHotkey2 == .none {
-                            HStack {
-                                Spacer()
-                                Button(action: {
-                                    withAnimation { hotkeyManager.selectedHotkey2 = .rightOption }
-                                }) {
-                                    Label("Add another hotkey", systemImage: "plus.circle.fill")
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundColor(.accentColor)
+                            Button(action: {
+                                withAnimation { hotkeyManager.selectedHotkey2 = .none }
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(Tokens.Colors.error)
                             }
+                            .buttonStyle(.plain)
                         }
-
-                        Text("Quick tap to start hands-free recording (tap again to stop). Press and hold for push-to-talk (release to stop recording).")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
 
-                // MARK: - Other App Shortcuts Section
-                SettingsSection(
-                    icon: "keyboard.badge.ellipsis",
-                    title: "Other App Shortcuts",
-                    subtitle: "Additional shortcuts for Echo"
-                ) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        // Paste Last Transcript (Original)
-                        HStack(spacing: 12) {
-                            Text("Paste Last Transcript(Original)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
+                if hotkeyManager.selectedHotkey1 != .none && hotkeyManager.selectedHotkey2 == .none {
+                    FormDivider()
 
-                            KeyboardShortcuts.Recorder(for: .pasteLastTranscription)
-                                .controlSize(.small)
-
-                            InfoTip(
-                                title: "Paste Last Transcript(Original)",
-                                message: "Shortcut for pasting the most recent transcription."
-                            )
-
-                            Spacer()
+                    FormRow(label: "") {
+                        Button(action: {
+                            withAnimation { hotkeyManager.selectedHotkey2 = .rightOption }
+                        }) {
+                            Label("Add another hotkey", systemImage: "plus.circle.fill")
                         }
+                        .buttonStyle(.plain)
+                        .foregroundColor(Tokens.Colors.orange)
+                    }
+                }
 
-                        // Paste Last Transcript (Transformed)
-                        HStack(spacing: 12) {
-                            Text("Paste Last Transcript(Transformed)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
+                FormDivider()
 
-                            KeyboardShortcuts.Recorder(for: .pasteLastEnhancement)
-                                .controlSize(.small)
+                // Help text row
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Quick tap to start hands-free recording (tap again to stop). Press and hold for push-to-talk (release to stop recording).")
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.horizontal, Tokens.Spacing.lg)
+                        .padding(.vertical, 14)
+                }
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
 
-                            InfoTip(
-                                title: "Paste Last Transcript(Transformed)",
-                                message: "Pastes the transformed transcript if available, otherwise falls back to the original."
-                            )
+    // MARK: - Other Shortcuts Section
 
-                            Spacer()
-                        }
+    private var otherShortcutsSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Other App Shortcuts",
+                subtitle: "Additional shortcuts for Echo"
+            )
 
-                        // Retry Last Transcription
-                        HStack(spacing: 12) {
-                            Text("Retry Last Transcription")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
+            VStack(spacing: 0) {
+                // Paste Last Transcript (Original)
+                FormRow(label: "Paste Original") {
+                    shortcutContent(
+                        shortcutName: .pasteLastTranscription,
+                        tipTitle: "Paste Last Transcript(Original)",
+                        tipMessage: "Shortcut for pasting the most recent transcription."
+                    )
+                }
 
-                            KeyboardShortcuts.Recorder(for: .retryLastTranscription)
-                                .controlSize(.small)
+                FormDivider()
 
-                            InfoTip(
-                                title: "Retry Last Transcription",
-                                message: "Re-transcribe the last recorded audio using the current model and copy the result."
-                            )
+                // Paste Last Transcript (Transformed)
+                FormRow(label: "Paste Transformed") {
+                    shortcutContent(
+                        shortcutName: .pasteLastEnhancement,
+                        tipTitle: "Paste Last Transcript(Transformed)",
+                        tipMessage: "Pastes the transformed transcript if available, otherwise falls back to the original."
+                    )
+                }
 
-                            Spacer()
-                        }
+                FormDivider()
 
-                        Divider()
+                // Retry Last Transcription
+                FormRow(label: "Retry") {
+                    shortcutContent(
+                        shortcutName: .retryLastTranscription,
+                        tipTitle: "Retry Last Transcription",
+                        tipMessage: "Re-transcribe the last recorded audio using the current model and copy the result."
+                    )
+                }
 
-                        // Custom Cancel Shortcut
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack(spacing: 8) {
-                                Toggle(isOn: $isCustomCancelEnabled.animation()) {
-                                    Text("Custom Cancel Shortcut")
-                                }
+                FormDivider()
+
+                // Custom Cancel Shortcut
+                FormRow(label: "Cancel") {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Toggle("", isOn: $isCustomCancelEnabled.animation())
                                 .toggleStyle(.switch)
+                                .tint(Tokens.Colors.orange)
+                                .labelsHidden()
                                 .onChange(of: isCustomCancelEnabled) { _, newValue in
                                     if !newValue {
                                         KeyboardShortcuts.setShortcut(nil, for: .cancelRecorder)
                                     }
                                 }
 
-                                InfoTip(
-                                    title: "Dismiss Recording",
-                                    message: "Shortcut for cancelling the current recording session. Default: double-tap Escape."
-                                )
-                            }
-
-                            if isCustomCancelEnabled {
-                                HStack(spacing: 12) {
-                                    Text("Cancel Shortcut")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.secondary)
-
-                                    KeyboardShortcuts.Recorder(for: .cancelRecorder)
-                                        .controlSize(.small)
-
-                                    Spacer()
-                                }
-                                .padding(.leading, 16)
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                            }
-                        }
-
-                        Divider()
-
-                        // Mouse Activation
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack(spacing: 8) {
-                                Toggle("Enable Mouse Activation", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
-                                    .toggleStyle(.switch)
-
-                                InfoTip(
-                                    title: "Mouse Activation",
-                                    message: "Use middle mouse button to toggle Echo recording."
-                                )
-                            }
-
-                            if hotkeyManager.isMiddleClickToggleEnabled {
-                                HStack(spacing: 8) {
-                                    Text("Activation Delay")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(.secondary)
-
-                                    TextField("", value: $hotkeyManager.middleClickActivationDelay, formatter: {
-                                        let formatter = NumberFormatter()
-                                        formatter.numberStyle = .none
-                                        formatter.minimum = 0
-                                        return formatter
-                                    }())
-                                    .textFieldStyle(PlainTextFieldStyle())
-                                    .padding(EdgeInsets(top: 3, leading: 6, bottom: 3, trailing: 6))
-                                    .background(Color(NSColor.textBackgroundColor))
-                                    .cornerRadius(5)
-                                    .frame(width: 70)
-
-                                    Text("ms")
-                                        .foregroundColor(.secondary)
-
-                                    Spacer()
-                                }
-                                .padding(.leading, 16)
-                                .transition(.opacity.combined(with: .move(edge: .top)))
-                            }
-                        }
-                    }
-                }
-
-                // MARK: - Audio Input Section
-                SettingsSection(
-                    icon: "mic.fill",
-                    title: "Audio Input",
-                    subtitle: "Select your microphone"
-                ) {
-                    audioInputContent
-                }
-
-                // MARK: - Audio Management Section
-                SettingsSection(
-                    icon: "speaker.wave.2.bubble.left.fill",
-                    title: "Audio Management",
-                    subtitle: "Customize app & system feedback"
-                ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Toggle(isOn: .init(
-                            get: { SoundManager.shared.isEnabled },
-                            set: { SoundManager.shared.isEnabled = $0 }
-                        )) {
-                            Text("Sound feedback")
-                        }
-                        .toggleStyle(.switch)
-
-                        Toggle(isOn: $mediaController.isSystemMuteEnabled) {
-                            Text("Mute system audio during recording")
-                        }
-                        .toggleStyle(.switch)
-                        .help("Automatically mute system audio when recording starts and restore when recording stops")
-
-                        Toggle(isOn: Binding(
-                            get: { UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard") },
-                            set: { UserDefaults.standard.set($0, forKey: "preserveTranscriptInClipboard") }
-                        )) {
-                            Text("Preserve transcript in clipboard")
-                        }
-                        .toggleStyle(.switch)
-                        .help("Keep the transcribed text in clipboard instead of restoring the original clipboard content")
-
-                        Divider()
-                            .padding(.vertical, 4)
-
-                        // Microphone Sensitivity Slider
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(spacing: 8) {
-                                Text("Microphone Sensitivity")
-                                    .font(.system(size: 13, weight: .medium))
-                                
-                                InfoTip(
-                                    title: "Microphone Sensitivity",
-                                    message: "Adjust how sensitive the voice detection is. Higher values make it easier to trigger recording with quieter sounds, while lower values require louder input."
-                                )
-                                
-                                Spacer()
-                            }
-                            
-                            HStack(spacing: 12) {
-                                Text("Low")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                
-                                Slider(
-                                    value: Binding(
-                                        get: { UserDefaults.standard.double(forKey: "microphoneSensitivity") == 0 ? 0.5 : UserDefaults.standard.double(forKey: "microphoneSensitivity") },
-                                        set: { UserDefaults.standard.set($0, forKey: "microphoneSensitivity") }
-                                    ),
-                                    in: 0.1...1.0,
-                                    step: 0.1
-                                )
-                                
-                                Text("High")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
-                        Divider()
-                            .padding(.vertical, 4)
-
-                        // Universal Paste Compatibility
-                        HStack(spacing: 8) {
-                            Toggle("Universal Paste Compatibility", isOn: Binding(
-                                get: { UserDefaults.standard.bool(forKey: "UseAppleScriptPaste") },
-                                set: { UserDefaults.standard.set($0, forKey: "UseAppleScriptPaste") }
-                            ))
-                            .toggleStyle(.switch)
+                            Text("Custom Cancel Shortcut")
+                                .font(Tokens.Typography.body)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             InfoTip(
-                                title: "Universal Paste Compatibility",
-                                message: "Turn this on if you're using non-standard keyboard layouts (like AZERTY, Dvorak, or Colemak) or notice pasted text appearing incorrectly in certain apps.\n\nWhen to use:\n• You have a non-standard keyboard layout\n• Pasted text shows as \"pasted text\" instead of your actual transcription in tools like Claude AI\n• Text doesn't paste correctly in specific applications\n\nThis uses a different pasting method that works across more keyboard layouts and apps, though it may be slightly slower."
+                                title: "Dismiss Recording",
+                                message: "Shortcut for cancelling the current recording session. Default: double-tap Escape."
                             )
+
+                            Spacer()
+                        }
+
+                        if isCustomCancelEnabled {
+                            HStack(spacing: Tokens.Spacing.md) {
+                                Text("Cancel Shortcut")
+                                    .font(Tokens.Typography.bodySmall)
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                                KeyboardShortcuts.Recorder(for: .cancelRecorder)
+                                    .controlSize(.small)
+
+                                Spacer()
+                            }
+                            .padding(.leading, Tokens.Spacing.lg)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                     }
                 }
 
+                FormDivider()
+
+                // Mouse Activation
+                FormRow(label: "Mouse") {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Toggle("", isOn: $hotkeyManager.isMiddleClickToggleEnabled.animation())
+                                .toggleStyle(.switch)
+                                .tint(Tokens.Colors.orange)
+                                .labelsHidden()
+
+                            Text("Enable Mouse Activation")
+                                .font(Tokens.Typography.body)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                            InfoTip(
+                                title: "Mouse Activation",
+                                message: "Use middle mouse button to toggle Echo recording."
+                            )
+
+                            Spacer()
+                        }
+
+                        if hotkeyManager.isMiddleClickToggleEnabled {
+                            HStack(spacing: Tokens.Spacing.sm) {
+                                Text("Activation Delay")
+                                    .font(Tokens.Typography.bodySmall)
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                                TextField("", value: $hotkeyManager.middleClickActivationDelay, formatter: {
+                                    let formatter = NumberFormatter()
+                                    formatter.numberStyle = .none
+                                    formatter.minimum = 0
+                                    return formatter
+                                }())
+                                .textFieldStyle(PlainTextFieldStyle())
+                                .padding(EdgeInsets(top: 3, leading: 6, bottom: 3, trailing: 6))
+                                .background(Tokens.Colors.background(for: colorScheme))
+                                .cornerRadius(Tokens.Radius.sm)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                                )
+                                .frame(width: 70)
+
+                                Text("ms")
+                                    .font(Tokens.Typography.bodySmall)
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                                Spacer()
+                            }
+                            .padding(.leading, Tokens.Spacing.lg)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+                    }
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 6)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
         }
-        .background(Color(NSColor.controlBackgroundColor))
-        .onAppear {
-            isCustomCancelEnabled = KeyboardShortcuts.getShortcut(for: .cancelRecorder) != nil
+    }
+
+    // MARK: - Audio Input Section
+
+    private var audioInputSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Audio Input",
+                subtitle: "Select your microphone"
+            )
+
+            VStack(spacing: Tokens.Spacing.lg) {
+                inputModeSection
+
+                if deviceManager.inputMode == .custom {
+                    customDeviceSection
+                } else if deviceManager.inputMode == .prioritized {
+                    prioritizedDevicesSection
+                }
+            }
+            .padding(Tokens.Spacing.lg)
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
+        }
+    }
+
+    // MARK: - Audio Management Section
+
+    private var audioManagementSection: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Audio Management",
+                subtitle: "Customize app & system feedback"
+            )
+
+            VStack(spacing: 0) {
+                // Sound feedback
+                FormRow(label: "Sound") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: .init(
+                            get: { SoundManager.shared.isEnabled },
+                            set: { SoundManager.shared.isEnabled = $0 }
+                        ))
+                        .toggleStyle(.switch)
+                        .tint(Tokens.Colors.orange)
+                        .labelsHidden()
+
+                        Text("Sound feedback")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+
+                FormDivider()
+
+                // Mute system audio
+                FormRow(label: "Mute") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: $mediaController.isSystemMuteEnabled)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+                            .help("Automatically mute system audio when recording starts and restore when recording stops")
+
+                        Text("Mute system audio during recording")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+
+                FormDivider()
+
+                // Preserve transcript
+                FormRow(label: "Clipboard") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: Binding(
+                            get: { UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard") },
+                            set: { UserDefaults.standard.set($0, forKey: "preserveTranscriptInClipboard") }
+                        ))
+                        .toggleStyle(.switch)
+                        .tint(Tokens.Colors.orange)
+                        .labelsHidden()
+                        .help("Keep the transcribed text in clipboard instead of restoring the original clipboard content")
+
+                        Text("Preserve transcript in clipboard")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        Spacer()
+                    }
+                }
+
+                FormDivider()
+
+                // Microphone Sensitivity Slider
+                FormRow(label: "Sensitivity") {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.sm) {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Text("Microphone Sensitivity")
+                                .font(Tokens.Typography.body)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                            InfoTip(
+                                title: "Microphone Sensitivity",
+                                message: "Adjust how sensitive the voice detection is. Higher values make it easier to trigger recording with quieter sounds, while lower values require louder input."
+                            )
+
+                            Spacer()
+                        }
+
+                        HStack(spacing: Tokens.Spacing.md) {
+                            Text("Low")
+                                .font(Tokens.Typography.caption)
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                            Slider(
+                                value: Binding(
+                                    get: { UserDefaults.standard.double(forKey: "microphoneSensitivity") == 0 ? 0.5 : UserDefaults.standard.double(forKey: "microphoneSensitivity") },
+                                    set: { UserDefaults.standard.set($0, forKey: "microphoneSensitivity") }
+                                ),
+                                in: 0.1...1.0,
+                                step: 0.1
+                            )
+                            .tint(Tokens.Colors.orange)
+
+                            Text("High")
+                                .font(Tokens.Typography.caption)
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+
+                FormDivider()
+
+                // Universal Paste Compatibility
+                FormRow(label: "Paste") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: Binding(
+                            get: { UserDefaults.standard.bool(forKey: "UseAppleScriptPaste") },
+                            set: { UserDefaults.standard.set($0, forKey: "UseAppleScriptPaste") }
+                        ))
+                        .toggleStyle(.switch)
+                        .tint(Tokens.Colors.orange)
+                        .labelsHidden()
+
+                        Text("Universal Paste Compatibility")
+                            .font(Tokens.Typography.body)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+                        InfoTip(
+                            title: "Universal Paste Compatibility",
+                            message: "Turn this on if you're using non-standard keyboard layouts (like AZERTY, Dvorak, or Colemak) or notice pasted text appearing incorrectly in certain apps.\n\nWhen to use:\n- You have a non-standard keyboard layout\n- Pasted text shows as \"pasted text\" instead of your actual transcription in tools like Claude AI\n- Text doesn't paste correctly in specific applications\n\nThis uses a different pasting method that works across more keyboard layouts and apps, though it may be slightly slower."
+                        )
+
+                        Spacer()
+                    }
+                }
+            }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
         }
     }
 
     // MARK: - Audio Input Content
-    private var audioInputContent: some View {
-        VStack(spacing: 20) {
-            inputModeSection
-
-            if deviceManager.inputMode == .custom {
-                customDeviceSection
-            } else if deviceManager.inputMode == .prioritized {
-                prioritizedDevicesSection
-            }
-        }
-    }
 
     private var inputModeSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            HStack(spacing: Tokens.Spacing.lg) {
                 ForEach(AudioInputMode.allCases, id: \.self) { mode in
                     InputModeCard(
                         mode: mode,
@@ -332,10 +452,11 @@ struct RecordingSettingsView: View {
     }
 
     private var customDeviceSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             HStack {
                 Text("Available Devices")
-                    .font(.headline)
+                    .font(Tokens.Typography.heading3)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 Spacer()
 
@@ -343,14 +464,15 @@ struct RecordingSettingsView: View {
                     Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .buttonStyle(.borderless)
+                .foregroundColor(Tokens.Colors.orange)
             }
 
             Text("Note: Selecting a device here will override your Mac's system-wide default microphone.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 8)
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                .padding(.bottom, Tokens.Spacing.sm)
 
-            VStack(spacing: 12) {
+            VStack(spacing: Tokens.Spacing.md) {
                 ForEach(deviceManager.availableDevices, id: \.id) { device in
                     DeviceSelectionCard(
                         name: device.name,
@@ -365,36 +487,43 @@ struct RecordingSettingsView: View {
     }
 
     private var prioritizedDevicesSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             if deviceManager.availableDevices.isEmpty {
                 emptyDevicesState
             } else {
                 prioritizedDevicesContent
-                Divider().padding(.vertical, 8)
+
+                Rectangle()
+                    .fill(Tokens.Colors.border(for: colorScheme))
+                    .frame(height: 1)
+                    .padding(.vertical, Tokens.Spacing.sm)
+
                 availableDevicesContent
             }
         }
     }
 
     private var prioritizedDevicesContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
+            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
                 Text("Prioritized Devices")
-                    .font(.headline)
+                    .font(Tokens.Typography.heading3)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 Text("Devices will be used in order of priority. If a device is unavailable, the next one will be tried. If no prioritized device is available, the system default microphone will be used.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(Tokens.Typography.bodySmall)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Warning: Using a prioritized device will override your Mac's system-wide default microphone if it becomes active.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.top, 4)
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .padding(.top, Tokens.Spacing.xs)
             }
 
             if deviceManager.prioritizedDevices.isEmpty {
                 Text("No prioritized devices")
-                    .foregroundStyle(.secondary)
-                    .padding(.vertical, 8)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .padding(.vertical, Tokens.Spacing.sm)
             } else {
                 prioritizedDevicesList
             }
@@ -402,36 +531,43 @@ struct RecordingSettingsView: View {
     }
 
     private var availableDevicesContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
             Text("Available Devices")
-                .font(.headline)
+                .font(Tokens.Typography.heading3)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
             availableDevicesList
         }
     }
 
     private var emptyDevicesState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Tokens.Spacing.lg) {
             Image(systemName: "mic.slash.circle.fill")
                 .font(.system(size: 48))
                 .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Tokens.Colors.textSecondary(for: colorScheme))
 
-            VStack(spacing: 8) {
+            VStack(spacing: Tokens.Spacing.sm) {
                 Text("No Audio Devices")
-                    .font(.headline)
+                    .font(Tokens.Typography.heading3)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 Text("Connect an audio input device to get started")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(Tokens.Typography.bodySmall)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             }
         }
         .frame(maxWidth: .infinity)
         .padding(40)
-        .background(CardBackground(isSelected: false))
+        .background(Tokens.Colors.background(for: colorScheme))
+        .cornerRadius(Tokens.Radius.lg)
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
     }
 
     private var prioritizedDevicesList: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Tokens.Spacing.md) {
             ForEach(deviceManager.prioritizedDevices.sorted(by: { $0.priority < $1.priority })) { device in
                 devicePriorityCard(for: device)
             }
@@ -462,8 +598,9 @@ struct RecordingSettingsView: View {
         return Group {
             if unprioritizedDevices.isEmpty {
                 Text("No additional devices available")
-                    .foregroundStyle(.secondary)
-                    .padding(.vertical, 8)
+                    .font(Tokens.Typography.body)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .padding(.vertical, Tokens.Spacing.sm)
             } else {
                 ForEach(unprioritizedDevices, id: \.id) { device in
                     DevicePriorityCard(
@@ -510,20 +647,33 @@ struct RecordingSettingsView: View {
         deviceManager.updatePriorities(devices: updatedDevices)
     }
 
-    // MARK: - Hotkey View Builder
-    @ViewBuilder
-    private func hotkeyView(
-        title: String,
-        binding: Binding<HotkeyManager.HotkeyOption>,
-        shortcutName: KeyboardShortcuts.Name,
-        isRemovable: Bool = false,
-        onRemove: (() -> Void)? = nil
-    ) -> some View {
-        HStack(spacing: 12) {
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.secondary)
+    // MARK: - Helper Views
 
+    @ViewBuilder
+    private func shortcutContent(
+        shortcutName: KeyboardShortcuts.Name,
+        tipTitle: String,
+        tipMessage: String
+    ) -> some View {
+        HStack(spacing: Tokens.Spacing.md) {
+            KeyboardShortcuts.Recorder(for: shortcutName)
+                .controlSize(.small)
+
+            InfoTip(
+                title: tipTitle,
+                message: tipMessage
+            )
+
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private func hotkeyContent(
+        binding: Binding<HotkeyManager.HotkeyOption>,
+        shortcutName: KeyboardShortcuts.Name
+    ) -> some View {
+        HStack(spacing: Tokens.Spacing.md) {
             Menu {
                 ForEach(HotkeyManager.HotkeyOption.allCases, id: \.self) { option in
                     Button(action: {
@@ -539,20 +689,20 @@ struct RecordingSettingsView: View {
                     }
                 }
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: Tokens.Spacing.sm) {
                     Text(binding.wrappedValue.displayName)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(6)
+                .padding(.horizontal, Tokens.Spacing.md)
+                .padding(.vertical, Tokens.Spacing.sm)
+                .background(Tokens.Colors.background(for: colorScheme))
+                .cornerRadius(Tokens.Radius.sm)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Tokens.Radius.sm)
+                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                 )
             }
             .menuStyle(.borderlessButton)
@@ -563,16 +713,6 @@ struct RecordingSettingsView: View {
             }
 
             Spacer()
-
-            if isRemovable {
-                Button(action: {
-                    onRemove?()
-                }) {
-                    Image(systemName: "minus.circle.fill")
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(.plain)
-            }
         }
     }
 }

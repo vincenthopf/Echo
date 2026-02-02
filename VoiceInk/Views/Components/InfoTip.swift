@@ -7,57 +7,65 @@ struct InfoTip: View {
     var message: String
     var learnMoreLink: URL?
     var learnMoreText: String = "Learn More"
-    
+
     // Appearance customization
     var iconName: String = "info.circle.fill"
     var iconSize: Image.Scale = .medium
-    var iconColor: Color = .primary
+    var iconColor: Color? = nil
     var width: CGFloat = 300
-    
+
+    // Environment
+    @Environment(\.colorScheme) private var colorScheme
+
     // State
     @State private var isShowingTip: Bool = false
-    
+
+    private var resolvedIconColor: Color {
+        iconColor ?? ParallelDesignTokens.Colors.secondaryText(for: colorScheme)
+    }
+
     var body: some View {
         Image(systemName: iconName)
             .imageScale(iconSize)
-            .foregroundColor(iconColor)
+            .foregroundColor(resolvedIconColor)
             .fontWeight(.semibold)
             .padding(5)
             .contentShape(Rectangle())
             .popover(isPresented: $isShowingTip) {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: ParallelDesignTokens.Spacing.md) {
                     Text(title)
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
+                        .font(ParallelDesignTokens.Typography.heading3)
+                        .foregroundColor(ParallelDesignTokens.Colors.primaryText(for: colorScheme))
+
                     Text(message)
-                        .font(.body)
-                        .foregroundColor(.secondary)
+                        .font(ParallelDesignTokens.Typography.body)
+                        .foregroundColor(ParallelDesignTokens.Colors.secondaryText(for: colorScheme))
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(width: width, alignment: .leading)
-                    
+
                     if let url = learnMoreLink {
                         Link(destination: url) {
-                            HStack(spacing: 4) {
+                            HStack(spacing: ParallelDesignTokens.Spacing.xs) {
                                 Text(learnMoreText)
-                                    .font(.caption)
+                                    .font(ParallelDesignTokens.Typography.caption)
                                     .fontWeight(.medium)
                                 Image(systemName: "arrow.up.forward")
-                                    .font(.caption2)
+                                    .font(.system(size: 10))
                             }
                             .foregroundColor(.white)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.accentColor)
+                                RoundedRectangle(cornerRadius: ParallelDesignTokens.Radius.small)
+                                    .fill(ParallelDesignTokens.Colors.primaryOrange)
                             )
                         }
                         .buttonStyle(.plain)
-                        .padding(.top, 8)
+                        .padding(.top, ParallelDesignTokens.Spacing.sm)
                     }
                 }
-                .padding(16)
+                .padding(ParallelDesignTokens.Spacing.lg)
+                .background(ParallelDesignTokens.Colors.cardBackground(for: colorScheme))
             }
             .onTapGesture {
                 isShowingTip.toggle()

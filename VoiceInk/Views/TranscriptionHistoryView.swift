@@ -3,6 +3,7 @@ import SwiftData
 
 struct TranscriptionHistoryView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @State private var searchText = ""
     @State private var expandedTranscription: Transcription?
     @State private var selectedTranscriptions: Set<Transcription> = []
@@ -66,13 +67,13 @@ struct TranscriptionHistoryView: View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
                 searchBar
-                
+
                 if displayedTranscriptions.isEmpty && !isLoading {
                     emptyStateView
                 } else {
                     ScrollViewReader { proxy in
                         ScrollView {
-                            LazyVStack(spacing: 10) {
+                            LazyVStack(spacing: Tokens.Spacing.md) {
                                 ForEach(displayedTranscriptions) { transcription in
                                     TranscriptionCard(
                                         transcription: transcription,
@@ -83,7 +84,7 @@ struct TranscriptionHistoryView: View {
                                     )
                                     .id(transcription) // Using the object as its own ID
                                     .onTapGesture {
-                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                        withAnimation(Tokens.Animation.easing) {
                                             if expandedTranscription == transcription {
                                                 expandedTranscription = nil
                                             } else {
@@ -92,36 +93,42 @@ struct TranscriptionHistoryView: View {
                                         }
                                     }
                                 }
-                                
+
                                 if hasMoreContent {
                                     Button(action: {
                                         Task {
                                             await loadMoreContent()
                                         }
                                     }) {
-                                        HStack(spacing: 8) {
+                                        HStack(spacing: Tokens.Spacing.sm) {
                                             if isLoading {
                                                 ProgressView()
                                                     .controlSize(.small)
                                             }
                                             Text(isLoading ? "Loading..." : "Load More")
-                                                .font(.system(size: 14, weight: .medium))
+                                                .font(Tokens.Typography.body)
+                                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                                         }
                                         .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(CardBackground(isSelected: false))
+                                        .padding(.vertical, Tokens.Spacing.md)
+                                        .background(Tokens.Colors.elevated(for: colorScheme))
+                                        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                                        )
                                     }
                                     .buttonStyle(.plain)
                                     .disabled(isLoading)
-                                    .padding(.top, 12)
+                                    .padding(.top, Tokens.Spacing.md)
                                 }
                             }
                             .animation(.easeInOut(duration: 0.3), value: expandedTranscription)
-                            .padding(24)
+                            .padding(Tokens.Spacing.xl)
                             // Add bottom padding to ensure content is not hidden by the toolbar when visible
                             .padding(.bottom, !selectedTranscriptions.isEmpty ? 60 : 0)
                         }
-                        .padding(.vertical, 16)
+                        .padding(.vertical, Tokens.Spacing.lg)
                         .onChange(of: expandedTranscription) { old, new in
                             if let transcription = new {
                                 proxy.scrollTo(transcription, anchor: nil)
@@ -130,7 +137,7 @@ struct TranscriptionHistoryView: View {
                     }
                 }
             }
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Tokens.Colors.background(for: colorScheme))
             
             // Selection toolbar as an overlay
             if !selectedTranscriptions.isEmpty {
@@ -192,73 +199,88 @@ struct TranscriptionHistoryView: View {
     }
     
     private var searchBar: some View {
-        HStack {
+        HStack(spacing: Tokens.Spacing.sm) {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             TextField("Search transcriptions", text: $searchText)
-                .font(.system(size: 16, weight: .regular, design: .default))
+                .font(Tokens.Typography.bodyLarge)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 .textFieldStyle(PlainTextFieldStyle())
         }
-        .padding(12)
-        .background(CardBackground(isSelected: false))
-        .padding(.horizontal, 24)
-        .padding(.vertical, 16)
+        .padding(Tokens.Spacing.md)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+        .padding(.horizontal, Tokens.Spacing.xl)
+        .padding(.vertical, Tokens.Spacing.lg)
     }
-    
+
     private var emptyStateView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Tokens.Spacing.lg) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 50))
-                .foregroundColor(.secondary)
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
             Text("No transcriptions found")
-                .font(.system(size: 24, weight: .semibold, design: .default))
+                .font(Tokens.Typography.heading1)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
             Text("Your history will appear here")
-                .font(.system(size: 18, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
+                .font(Tokens.Typography.heading2)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(CardBackground(isSelected: false))
-        .padding(24)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+        )
+        .padding(Tokens.Spacing.xl)
     }
-    
+
     private var selectionToolbar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Tokens.Spacing.md) {
             Text("\(selectedTranscriptions.count) selected")
-                .foregroundColor(.secondary)
-                .font(.system(size: 14))
-            
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                .font(Tokens.Typography.body)
+
             Spacer()
-            
+
             Button(action: {
                 showAnalysisView = true
             }) {
-                HStack(spacing: 4) {
+                HStack(spacing: Tokens.Spacing.xs) {
                     Image(systemName: "chart.bar.xaxis")
                     Text("Analyze")
                 }
+                .foregroundColor(Tokens.Colors.orange)
             }
             .buttonStyle(.borderless)
-            
+
             Button(action: {
                 exportService.exportTranscriptionsToCSV(transcriptions: Array(selectedTranscriptions))
             }) {
-                HStack(spacing: 4) {
+                HStack(spacing: Tokens.Spacing.xs) {
                     Image(systemName: "square.and.arrow.up")
                     Text("Export")
                 }
+                .foregroundColor(Tokens.Colors.orange)
             }
             .buttonStyle(.borderless)
-            
+
             Button(action: {
                 showDeleteConfirmation = true
             }) {
-                HStack(spacing: 4) {
+                HStack(spacing: Tokens.Spacing.xs) {
                     Image(systemName: "trash")
                     Text("Delete")
                 }
+                .foregroundColor(Tokens.Colors.error)
             }
             .buttonStyle(.borderless)
-            
+
             if selectedTranscriptions.count < displayedTranscriptions.count {
                 Button("Select All") {
                     Task {
@@ -266,18 +288,23 @@ struct TranscriptionHistoryView: View {
                     }
                 }
                 .buttonStyle(.borderless)
+                .foregroundColor(Tokens.Colors.orange)
             } else {
                 Button("Deselect All") {
                     selectedTranscriptions.removeAll()
                 }
                 .buttonStyle(.borderless)
+                .foregroundColor(Tokens.Colors.orange)
             }
         }
-        .padding(16)
+        .padding(Tokens.Spacing.lg)
         .frame(maxWidth: .infinity)
-        .background(
-            Color(.windowBackgroundColor)
-                .shadow(color: Color.black.opacity(0.1), radius: 3, y: -2)
+        .background(Tokens.Colors.elevated(for: colorScheme))
+        .overlay(
+            Rectangle()
+                .fill(Tokens.Colors.border(for: colorScheme))
+                .frame(height: 1),
+            alignment: .top
         )
     }
     
@@ -428,13 +455,15 @@ struct TranscriptionHistoryView: View {
 }
 
 struct CircularCheckboxStyle: ToggleStyle {
+    @Environment(\.colorScheme) private var colorScheme
+
     func makeBody(configuration: Configuration) -> some View {
         Button(action: {
             configuration.isOn.toggle()
         }) {
             Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
                 .symbolRenderingMode(.hierarchical)
-                .foregroundColor(configuration.isOn ? .accentColor : .gray)
+                .foregroundColor(configuration.isOn ? Tokens.Colors.orange : Tokens.Colors.textSecondary(for: colorScheme))
                 .font(.system(size: 18))
         }
         .buttonStyle(.plain)

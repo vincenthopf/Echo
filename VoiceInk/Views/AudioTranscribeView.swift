@@ -14,63 +14,24 @@ struct AudioTranscribeView: View {
     @State private var selectedPromptId: UUID?
     
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             Color(NSColor.controlBackgroundColor)
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
-                // Header Card
-                HStack(alignment: .top, spacing: 16) {
-                    // Icon
-                    Image(systemName: "waveform.circle.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.white, .accent)
-                        .symbolRenderingMode(.palette)
-
-                    // Title and Description
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
-                            Text("Transcribe Files")
-                                .font(.system(size: 24, weight: .bold, design: .default))
-                                .foregroundColor(.primary)
-
-                            InfoTip(
-                                title: "Transcribe Audio Files",
-                                message: "Turn any audio or video file into text. Drop a file, choose your settings, and get accurate transcriptions in seconds."
-                            )
-                        }
-
-                        Text("Convert recordings and videos to text instantly.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-                }
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(NSColor.controlBackgroundColor))
-                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.15), lineWidth: 1)
-                )
-                .padding(20)
-
                 if transcriptionManager.isProcessing {
                     processingView
                 } else {
                     dropZoneView
                 }
-
+                
+                Divider()
+                    .padding(.vertical)
+                
                 // Show current transcription result
                 if let transcription = transcriptionManager.currentTranscription {
                     TranscriptionResultView(transcription: transcription)
                 }
-
-                Spacer()
             }
         }
         .onDrop(of: [.fileURL, .data, .audio, .movie], isTargeted: $isDropTargeted) { providers in
@@ -104,12 +65,12 @@ struct AudioTranscribeView: View {
                     Text("Audio file selected: \(selectedAudioURL?.lastPathComponent ?? "")")
                         .font(.headline)
                     
-                    // AI Transformation Settings
+                    // AI Enhancement Settings
                     if let enhancementService = whisperState.getEnhancementService() {
                         VStack(spacing: 16) {
-                            // Intelligent Transformation and Prompt in the same row
+                            // AI Enhancement and Prompt in the same row
                             HStack(spacing: 16) {
-                                Toggle("Intelligent Transformation", isOn: $isEnhancementEnabled)
+                                Toggle("AI Enhancement", isOn: $isEnhancementEnabled)
                                     .toggleStyle(.switch)
                                     .onChange(of: isEnhancementEnabled) { oldValue, newValue in
                                         enhancementService.isEnhancementEnabled = newValue
@@ -196,13 +157,13 @@ struct AudioTranscribeView: View {
                                         dash: [8]
                                     )
                                 )
-                                .foregroundColor(isDropTargeted ? .accentColor : .gray.opacity(0.5))
+                                .foregroundColor(isDropTargeted ? .blue : .gray.opacity(0.5))
                         )
-
+                    
                     VStack(spacing: 16) {
                         Image(systemName: "arrow.down.doc")
                             .font(.system(size: 32))
-                            .foregroundColor(isDropTargeted ? .accentColor : .gray)
+                            .foregroundColor(isDropTargeted ? .blue : .gray)
                         
                         Text("Drop audio or video file here")
                             .font(.headline)

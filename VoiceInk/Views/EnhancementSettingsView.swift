@@ -2,23 +2,25 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct EnhancementSettingsView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @State private var isEditingPrompt = false
     @State private var isSettingsExpanded = true
     @State private var selectedPromptForEdit: CustomPrompt?
-    
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 32) {
+            VStack(spacing: Tokens.Spacing.xxl) {
                 // Main Settings Sections
-                VStack(spacing: 24) {
+                VStack(spacing: Tokens.Spacing.xl) {
                     // Enable/Disable Toggle Section
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
                         HStack {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
                                 HStack {
                                     Text("Enable Transformation")
-                                        .font(.headline)
+                                        .font(Tokens.Typography.heading3)
+                                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                                     InfoTip(
                                         title: "Intelligent Transformation",
@@ -26,58 +28,73 @@ struct EnhancementSettingsView: View {
                                         learnMoreURL: "https://vjh.io/embr-echo-docs"
                                     )
                                 }
-                                
+
                                 Text("Turn on AI-powered transformation features")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .font(Tokens.Typography.caption)
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                             }
-                            
+
                             Spacer()
-                            
+
                             Toggle("", isOn: $enhancementService.isEnhancementEnabled)
-                                .toggleStyle(SwitchToggleStyle(tint: .accentColor))
+                                .toggleStyle(SwitchToggleStyle())
+                                .tint(Tokens.Colors.orange)
                                 .labelsHidden()
                                 .scaleEffect(1.2)
                         }
-                        
-                        HStack(spacing: 20) {
-                            VStack(alignment: .leading, spacing: 4) {
+
+                        HStack(spacing: Tokens.Spacing.xl) {
+                            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
                                 Toggle("Clipboard Context", isOn: $enhancementService.useClipboardContext)
                                     .toggleStyle(.switch)
+                                    .tint(Tokens.Colors.orange)
                                     .disabled(!enhancementService.isEnhancementEnabled)
                                 Text("Use text from clipboard to understand the context")
-                                    .font(.caption)
-                                    .foregroundColor(enhancementService.isEnhancementEnabled ? .secondary : .secondary.opacity(0.5))
+                                    .font(Tokens.Typography.caption)
+                                    .foregroundColor(enhancementService.isEnhancementEnabled ? Tokens.Colors.textSecondary(for: colorScheme) : Tokens.Colors.textTertiary(for: colorScheme))
                             }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
+
+                            VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
                                 Toggle("Context Awareness", isOn: $enhancementService.useScreenCaptureContext)
                                     .toggleStyle(.switch)
+                                    .tint(Tokens.Colors.orange)
                                     .disabled(!enhancementService.isEnhancementEnabled)
                                 Text("Learn what is on the screen to understand the context")
-                                    .font(.caption)
-                                    .foregroundColor(enhancementService.isEnhancementEnabled ? .secondary : .secondary.opacity(0.5))
+                                    .font(Tokens.Typography.caption)
+                                    .foregroundColor(enhancementService.isEnhancementEnabled ? Tokens.Colors.textSecondary(for: colorScheme) : Tokens.Colors.textTertiary(for: colorScheme))
                             }
                         }
                     }
-                    .padding()
-                    .background(CardBackground(isSelected: false))
-                    
+                    .padding(Tokens.Spacing.lg)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+
                     // 1. AI Provider Integration Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                         Text("AI Provider Integration")
-                            .font(.headline)
-                        
+                            .font(Tokens.Typography.heading3)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                         APIKeyManagementView()
                     }
-                    .padding()
-                    .background(CardBackground(isSelected: false))
-                    
+                    .padding(Tokens.Spacing.lg)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+
                     // 3. Enhancement Modes & Assistant Section
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                         Text("Transformation Prompts")
-                            .font(.headline)
-                        
+                            .font(Tokens.Typography.heading3)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                         // Reorderable prompts grid with drag-and-drop
                         ReorderablePromptGrid(
                             selectedPromptId: enhancementService.selectedPromptId,
@@ -95,16 +112,21 @@ struct EnhancementSettingsView: View {
                             }
                         )
                     }
-                    .padding()
-                    .background(CardBackground(isSelected: false))
-                    
+                    .padding(Tokens.Spacing.lg)
+                    .background(Tokens.Colors.elevated(for: colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                            .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+                    )
+
                     EnhancementShortcutsSection()
                 }
             }
-            .padding(24)
+            .padding(Tokens.Spacing.xl)
         }
         .frame(minWidth: 600, minHeight: 500)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Tokens.Colors.background(for: colorScheme))
         .sheet(isPresented: $isEditingPrompt) {
             PromptEditorView(mode: .add)
         }
@@ -116,28 +138,29 @@ struct EnhancementSettingsView: View {
 
 // MARK: - Drag & Drop Reorderable Grid
 private struct ReorderablePromptGrid: View {
+    @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var enhancementService: AIEnhancementService
-    
+
     let selectedPromptId: UUID?
     let onPromptSelected: (CustomPrompt) -> Void
     let onEditPrompt: ((CustomPrompt) -> Void)?
     let onDeletePrompt: ((CustomPrompt) -> Void)?
     let onAddNewPrompt: (() -> Void)?
-    
+
     @State private var draggingItem: CustomPrompt?
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
             if enhancementService.customPrompts.isEmpty {
                 Text("No prompts available")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                    .font(Tokens.Typography.caption)
             } else {
                 let columns = [
                     GridItem(.adaptive(minimum: 80, maximum: 100), spacing: 36)
                 ]
-                
-                LazyVGrid(columns: columns, spacing: 16) {
+
+                LazyVGrid(columns: columns, spacing: Tokens.Spacing.lg) {
                     ForEach(enhancementService.customPrompts) { prompt in
                         prompt.promptIcon(
                             isSelected: selectedPromptId == prompt.id,
@@ -155,7 +178,7 @@ private struct ReorderablePromptGrid: View {
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(
                                     draggingItem != nil && draggingItem?.id != prompt.id
-                                    ? Color.accentColor.opacity(0.25)
+                                    ? Tokens.Colors.orange.opacity(0.25)
                                     : Color.clear,
                                     lineWidth: 1
                                 )
@@ -174,7 +197,7 @@ private struct ReorderablePromptGrid: View {
                             )
                         )
                     }
-                    
+
                     if let onAddNewPrompt = onAddNewPrompt {
                         CustomPrompt.addNewButton {
                             onAddNewPrompt()
@@ -189,20 +212,20 @@ private struct ReorderablePromptGrid: View {
                         )
                     }
                 }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-                
+                .padding(.vertical, Tokens.Spacing.md)
+                .padding(.horizontal, Tokens.Spacing.lg)
+
                 HStack {
                     Image(systemName: "info.circle")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("Double-click to edit • Right-click for more options")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                    Text("Double-click to edit - Right-click for more options")
+                        .font(Tokens.Typography.caption)
+                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 }
-                .padding(.top, 8)
-                .padding(.horizontal, 16)
+                .padding(.top, Tokens.Spacing.sm)
+                .padding(.horizontal, Tokens.Spacing.lg)
             }
         }
     }
@@ -213,12 +236,12 @@ private struct PromptDropDelegate: DropDelegate {
     let item: CustomPrompt
     @Binding var prompts: [CustomPrompt]
     @Binding var draggingItem: CustomPrompt?
-    
+
     func dropEntered(info: DropInfo) {
         guard let draggingItem = draggingItem, draggingItem != item else { return }
         guard let fromIndex = prompts.firstIndex(of: draggingItem),
               let toIndex = prompts.firstIndex(of: item) else { return }
-        
+
         // Move item as you hover for immediate visual update
         if prompts[toIndex].id != draggingItem.id {
             withAnimation(.easeInOut(duration: 0.12)) {
@@ -228,11 +251,11 @@ private struct PromptDropDelegate: DropDelegate {
             }
         }
     }
-    
+
     func dropUpdated(info: DropInfo) -> DropProposal? {
         DropProposal(operation: .move)
     }
-    
+
     func performDrop(info: DropInfo) -> Bool {
         draggingItem = nil
         return true
@@ -242,17 +265,17 @@ private struct PromptDropDelegate: DropDelegate {
 private struct PromptEndDropDelegate: DropDelegate {
     @Binding var prompts: [CustomPrompt]
     @Binding var draggingItem: CustomPrompt?
-    
+
     func validateDrop(info: DropInfo) -> Bool { true }
     func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .move) }
-    
+
     func performDrop(info: DropInfo) -> Bool {
         guard let draggingItem = draggingItem,
               let currentIndex = prompts.firstIndex(of: draggingItem) else {
             self.draggingItem = nil
             return false
         }
-        
+
         // Move to end if dropped on the trailing "Add New" tile
         withAnimation(.easeInOut(duration: 0.12)) {
             prompts.move(fromOffsets: IndexSet(integer: currentIndex), toOffset: prompts.endIndex)

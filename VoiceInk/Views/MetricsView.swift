@@ -5,16 +5,17 @@ import KeyboardShortcuts
 
 struct MetricsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     @Query(sort: \Transcription.timestamp) private var transcriptions: [Transcription]
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @State private var hasLoadedData = false
     let skipSetupCheck: Bool
-    
+
     init(skipSetupCheck: Bool = false) {
         self.skipSetupCheck = skipSetupCheck
     }
-    
+
     var body: some View {
         VStack {
             Group {
@@ -27,13 +28,13 @@ struct MetricsView: View {
                 }
             }
         }
-        .background(Color(.controlBackgroundColor))
+        .background(ParallelDesignTokens.Colors.background(for: colorScheme))
         .task {
             // Ensure the model context is ready
             hasLoadedData = true
         }
     }
-    
+
     private var isSetupComplete: Bool {
         hasLoadedData &&
         whisperState.currentTranscriptionModel != nil &&

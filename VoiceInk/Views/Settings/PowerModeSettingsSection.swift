@@ -5,60 +5,78 @@ struct PowerModeSettingsSection: View {
     @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @AppStorage(PowerModeDefaults.autoRestoreKey) private var powerModeAutoRestoreEnabled = true
     @State private var showDisableAlert = false
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                Image(systemName: "sparkles.square.fill.on.square")
-                    .font(.system(size: 20))
-                    .foregroundColor(.accentColor)
-                    .frame(width: 24, height: 24)
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Adaptive Awareness")
-                        .font(.headline)
-                    Text("Enable to automatically apply custom configurations based on the app or website you are using.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
-                
-                Toggle("Enable Adaptive Awareness", isOn: toggleBinding)
-                    .labelsHidden()
-                    .toggleStyle(.switch)
-            }
+    @Environment(\.colorScheme) private var colorScheme
 
-            if powerModeUIFlag {
-                Divider()
-                    .padding(.vertical, 4)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-                
-                HStack(spacing: 8) {
-                    Toggle(isOn: $powerModeAutoRestoreEnabled) {
-                        Text("Auto-Restore Preferences")
+    var body: some View {
+        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
+            SectionHeader(
+                title: "Adaptive Awareness",
+                subtitle: "Automatically apply custom configurations based on the app or website you are using"
+            )
+
+            VStack(spacing: 0) {
+                // Enable adaptive awareness row
+                FormRow(label: "Enable") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: toggleBinding)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+
+                        Text("Enable Adaptive Awareness")
+                            .font(Tokens.Typography.bodySmall)
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                        Spacer()
+
+                        Image(systemName: "sparkles.square.fill.on.square")
+                            .font(.system(size: 16))
+                            .foregroundColor(Tokens.Colors.orange)
                     }
-                    .toggleStyle(.switch)
-                    
-                    InfoTip(
-                        title: "Auto-Restore Preferences",
-                        message: "After each recording session, revert enhancement and transcription preferences to whatever was configured before Adaptive Awareness was activated."
-                    )
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+
+                if powerModeUIFlag {
+                    FormDivider()
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+
+                    // Auto-restore row
+                    FormRow(label: "Restore") {
+                        HStack(spacing: Tokens.Spacing.sm) {
+                            Toggle("", isOn: $powerModeAutoRestoreEnabled)
+                                .toggleStyle(.switch)
+                                .tint(Tokens.Colors.orange)
+                                .labelsHidden()
+
+                            Text("Auto-restore preferences")
+                                .font(Tokens.Typography.bodySmall)
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                            InfoTip(
+                                title: "Auto-Restore Preferences",
+                                message: "After each recording session, revert enhancement and transcription preferences to whatever was configured before Adaptive Awareness was activated."
+                            )
+
+                            Spacer()
+                        }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                }
             }
+            .background(Tokens.Colors.elevated(for: colorScheme))
+            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
+                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
+            )
         }
         .animation(.easeInOut(duration: 0.25), value: powerModeUIFlag)
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(CardBackground(isSelected: false, useAccentGradientWhenSelected: true))
         .alert("Adaptive Awareness Still Active", isPresented: $showDisableAlert) {
             Button("Got it", role: .cancel) { }
         } message: {
             Text("Adaptive Awareness can't be disabled while any configuration is still enabled. Disable or remove your configurations first.")
         }
     }
-    
+
     private var toggleBinding: Binding<Bool> {
         Binding(
             get: { powerModeUIFlag },
@@ -73,7 +91,7 @@ struct PowerModeSettingsSection: View {
             }
         )
     }
-    
+
 }
 
 private extension Array where Element == PowerModeConfig {

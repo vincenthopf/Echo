@@ -13,8 +13,8 @@ struct AudioVisualizer: View {
     private var hardThreshold: Double {
         let sensitivity = UserDefaults.standard.double(forKey: "microphoneSensitivity")
         let defaultSensitivity = sensitivity == 0 ? 0.5 : sensitivity
-        // Convert 0.1-1.0 range to 0.05-0.4 threshold range (inverted - higher sensitivity = lower threshold)
-        return 0.45 - (defaultSensitivity * 0.4)
+        // Convert 0.1-1.0 range to 0.05-0.35 threshold range (inverted - higher sensitivity = lower threshold)
+        return 0.35 - (defaultSensitivity * 0.3)
     }
 
     private let sensitivityMultipliers: [Double]
@@ -29,7 +29,7 @@ struct AudioVisualizer: View {
 
         let sensitivity = UserDefaults.standard.double(forKey: "microphoneSensitivity")
         let baseSensitivity = sensitivity == 0 ? 0.5 : sensitivity
-        let multiplierRange = 0.5 + (baseSensitivity * 1.5) // Range from 0.65-2.0 based on sensitivity
+        let multiplierRange = 0.8 + (baseSensitivity * 2.0) // Range from 1.0-2.8 based on sensitivity
         
         self.sensitivityMultipliers = (0..<barCount).map { _ in
             Double.random(in: (multiplierRange * 0.7)...(multiplierRange * 1.3))
