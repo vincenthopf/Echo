@@ -39,8 +39,12 @@ struct MiniRecorderView: View {
     }
 
     private var backgroundView: some View {
-        Design.bgColor
-            .clipShape(Capsule())
+        ZStack {
+            Design.bgColor
+            VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
+                .opacity(0.05)
+        }
+        .clipShape(Capsule())
     }
 
     private var statusView: some View {
