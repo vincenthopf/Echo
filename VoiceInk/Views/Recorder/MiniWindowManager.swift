@@ -62,7 +62,21 @@ class MiniWindowManager: ObservableObject {
         
         let hostingController = NSHostingController(rootView: miniRecorderView)
         panel.contentView = hostingController.view
-        
+
+        // Mask the entire window content to capsule shape
+        if let contentView = panel.contentView {
+            contentView.wantsLayer = true
+
+            let maskLayer = CAShapeLayer()
+            let bounds = contentView.bounds
+            let path = CGPath(roundedRect: bounds,
+                              cornerWidth: bounds.height / 2,
+                              cornerHeight: bounds.height / 2,
+                              transform: nil)
+            maskLayer.path = path
+            contentView.layer?.mask = maskLayer
+        }
+
         self.miniPanel = panel
         self.windowController = NSWindowController(window: panel)
         

@@ -28,7 +28,7 @@ struct AnimatedSaveButton: View {
             .padding(.vertical, 4)
             .background(
                 Capsule()
-                    .fill(isSaved ? Color.green.opacity(0.8) : Color.orange)
+                    .fill(isSaved ? VoiceInkTokens.Colors.success : VoiceInkTokens.Colors.orange)
             )
         }
         .buttonStyle(.plain)

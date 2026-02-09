@@ -31,4 +31,10 @@ extension UserDefaults {
         get { data(forKey: Keys.prioritizedDevices) }
         set { setValue(newValue, forKey: Keys.prioritizedDevices) }
     }
+
+    // MARK: - Affiliate Promotion
+    var affiliatePromotionDismissed: Bool {
+        get { bool(forKey: "affiliatePromotionDismissed") }
+        set { setValue(newValue, forKey: "affiliatePromotionDismissed") }
+    }
 } 

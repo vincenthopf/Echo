@@ -139,7 +139,19 @@ class AIEnhancementService: ObservableObject {
         lastRequestTime = Date()
     }
 
-    private func getSystemMessage(for mode: EnhancementPrompt) async -> String {
+    /// Determines if vision mode should be used (OpenRouter + vision model + screen capture enabled + image available)
+    private func shouldUseVisionMode() -> Bool {
+        guard aiService.selectedProvider == .openRouter,
+              aiService.currentModelSupportsVision(),
+              useScreenCaptureContext,
+              let capturedResult = screenCaptureService.lastCapturedResult,
+              capturedResult.imageBase64 != nil else {
+            return false
+        }
+        return true
+    }
+
+    private func getSystemMessage(for mode: EnhancementPrompt, excludeScreenCapture: Bool = false) async -> String {
         let selectedText = await SelectedTextService.fetchSelectedText()
 
         let selectedTextContext = if let selectedText = selectedText, !selectedText.isEmpty {
@@ -156,7 +168,8 @@ class AIEnhancementService: ObservableObject {
             ""
         }
 
-        let screenCaptureContext = if useScreenCaptureContext,
+        // When using vision mode, exclude OCR text since the image will be sent directly
+        let screenCaptureContext = if !excludeScreenCapture && useScreenCaptureContext,
                                    let capturedText = screenCaptureService.lastCapturedText,
                                    !capturedText.isEmpty {
             "\n\n<CURRENT_WINDOW_CONTEXT>\n\(capturedText)\n</CURRENT_WINDOW_CONTEXT>"
@@ -198,7 +211,9 @@ class AIEnhancementService: ObservableObject {
         }
 
         let formattedText = "\n<TRANSCRIPT>\n\(text)\n</TRANSCRIPT>"
-        let systemMessage = await getSystemMessage(for: mode)
+        let useVisionMode = shouldUseVisionMode()
+        // Exclude screen capture from system message when using vision mode (image sent separately)
+        let systemMessage = await getSystemMessage(for: mode, excludeScreenCapture: useVisionMode)
         
         // Persist the exact payload being sent (also used for UI)
         await MainActor.run {
@@ -287,10 +302,30 @@ class AIEnhancementService: ObservableObject {
             request.addValue("Bearer \(aiService.apiKey)", forHTTPHeaderField: "Authorization")
             request.timeoutInterval = baseTimeout
 
-            let messages: [[String: Any]] = [
-                ["role": "system", "content": systemMessage],
-                ["role": "user", "content": formattedText]
-            ]
+            let messages: [[String: Any]]
+
+            // Build multimodal message for OpenRouter vision models
+            if useVisionMode,
+               let capturedResult = screenCaptureService.lastCapturedResult,
+               let imageBase64 = capturedResult.imageBase64 {
+                // Vision mode: send image with text in multimodal format
+                let userContent: [[String: Any]] = [
+                    ["type": "text", "text": systemMessage + formattedText],
+                    ["type": "image_url", "image_url": [
+                        "url": "data:image/png;base64,\(imageBase64)"
+                    ]]
+                ]
+                messages = [
+                    ["role": "user", "content": userContent]
+                ]
+                logger.notice("AI Enhancement - Using vision mode with image (\(imageBase64.count) base64 chars)")
+            } else {
+                // Standard text mode
+                messages = [
+                    ["role": "system", "content": systemMessage],
+                    ["role": "user", "content": formattedText]
+                ]
+            }
 
             let requestBody: [String: Any] = [
                 "model": aiService.currentModel,
@@ -412,7 +447,7 @@ class AIEnhancementService: ObservableObject {
     
     func clearCapturedContexts() {
         lastCapturedClipboard = nil
-        screenCaptureService.lastCapturedText = nil
+        screenCaptureService.clearCapturedResult()
     }
 
     func addPrompt(title: String, promptText: String, icon: PromptIcon = .documentFill, description: String? = nil, triggerWords: [String] = [], useSystemInstructions: Bool = true) {

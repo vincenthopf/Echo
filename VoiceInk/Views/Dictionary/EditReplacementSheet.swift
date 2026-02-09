@@ -10,7 +10,7 @@ struct EditReplacementSheet: View {
     @State private var originalWord: String
     @State private var replacementWord: String
 
-    // MARK: - Initialiser
+    // MARK: - Initializer
     init(manager: WordReplacementManager, originalKey: String) {
         self.manager = manager
         self.originalKey = originalKey

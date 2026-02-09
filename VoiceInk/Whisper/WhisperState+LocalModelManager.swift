@@ -315,7 +315,7 @@ extension WhisperState {
         whisperContext = nil
         isModelLoaded = false
 
-        parakeetTranscriptionService.cleanup()
+        serviceRegistry.cleanup()
     }
     
     // MARK: - Helper Methods

@@ -26,22 +26,24 @@ struct VoiceInkApp: App {
     
     // Transcription auto-cleanup service for zero data retention
     private let transcriptionAutoCleanupService = TranscriptionAutoCleanupService.shared
-    
+
+    // Model prewarm service for optimizing model on wake from sleep
+    @StateObject private var prewarmService: ModelPrewarmService
+
     init() {
         // Configure FluidAudio logging subsystem
         AppLogger.defaultSubsystem = "com.VincentHopf.embrvoice.parakeet"
 
         // Set default values for Adaptive Awareness settings if not already set
-        if UserDefaults.standard.object(forKey: "powerModeUIFlag") == nil {
-            UserDefaults.standard.set(true, forKey: "powerModeUIFlag")
-        }
         if UserDefaults.standard.object(forKey: PowerModeDefaults.autoRestoreKey) == nil {
             UserDefaults.standard.set(true, forKey: PowerModeDefaults.autoRestoreKey)
         }
 
         do {
             let schema = Schema([
-                Transcription.self
+                Transcription.self,
+                VocabularyWord.self,
+                WordReplacementModel.self
             ])
             
             // Create app-specific Application Support directory URL
@@ -61,7 +63,10 @@ struct VoiceInkApp: App {
             if let url = container.mainContext.container.configurations.first?.url {
                 print("💾 SwiftData storage location: \(url.path)")
             }
-            
+
+            // Perform dictionary migration from UserDefaults to SwiftData (one-time)
+            DictionaryMigrationService.shared.migrateIfNeeded(context: container.mainContext)
+
         } catch {
             fatalError("Failed to create ModelContainer for Transcription: \(error.localizedDescription)")
         }
@@ -96,6 +101,10 @@ struct VoiceInkApp: App {
         activeWindowService.configure(with: enhancementService)
         activeWindowService.configureWhisperState(whisperState)
         _activeWindowService = StateObject(wrappedValue: activeWindowService)
+
+        // Initialize model prewarm service for optimizing transcription on wake
+        let prewarmService = ModelPrewarmService(whisperState: whisperState)
+        _prewarmService = StateObject(wrappedValue: prewarmService)
 
         // Perform Adaptive Awareness migration (runs once)
         AdaptiveAwarenessMigration.performMigration()
@@ -136,7 +145,11 @@ struct VoiceInkApp: App {
 
                         // Process any pending open-file request now that the main ContentView is ready.
                         if let pendingURL = appDelegate.pendingOpenFileURL {
-                            NotificationCenter.default.post(name: .navigateToDestination, object: nil, userInfo: ["destination": "Transcribe Audio"])
+                            NotificationCenter.default.post(
+                                name: .navigateToDestination,
+                                object: nil,
+                                userInfo: Notification.destinationUserInfo(.transcribeFiles)
+                            )
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 NotificationCenter.default.post(name: .openFileForTranscription, object: nil, userInfo: ["url": pendingURL])
                             }
@@ -179,6 +192,13 @@ struct VoiceInkApp: App {
                 CheckForUpdatesView(updaterViewModel: updaterViewModel)
             }
 
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings...") {
+                    menuBarManager.navigateTo(.settings)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+
             CommandGroup(after: .sidebar) {
                 Button("Toggle Sidebar") {
                     NotificationCenter.default.post(name: .toggleSidebar, object: nil)
@@ -193,17 +213,6 @@ struct VoiceInkApp: App {
                     }
                 }
             }
-        }
-
-        Settings {
-            SettingsWindowView()
-                .environmentObject(whisperState)
-                .environmentObject(hotkeyManager)
-                .environmentObject(updaterViewModel)
-                .environmentObject(menuBarManager)
-                .environmentObject(aiService)
-                .environmentObject(enhancementService)
-                .modelContainer(container)
         }
 
         MenuBarExtra {

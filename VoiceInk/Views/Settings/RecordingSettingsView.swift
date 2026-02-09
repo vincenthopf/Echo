@@ -425,6 +425,7 @@ struct RecordingSettingsView: View {
                         Spacer()
                     }
                 }
+
             }
             .background(Tokens.Colors.elevated(for: colorScheme))
             .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))

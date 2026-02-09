@@ -8,7 +8,6 @@ struct MenuBarView: View {
     @EnvironmentObject var aiService: AIService
     @State private var menuRefreshTrigger = false  // Added to force menu updates
     @State private var isHovered = false
-    @Environment(\.openSettings) private var openSettings
 
     @ObservedObject private var powerModeManager = PowerModeManager.shared
     @ObservedObject private var sessionManager = PowerModeSessionManager.shared
@@ -72,9 +71,9 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage Models") {
-                    // Set the selected tab to Transcription before opening Settings window
+                    // Set the selected tab to Transcription before opening Settings
                     UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
-                    openSettings()
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -135,7 +134,8 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Providers") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
+                    UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -168,7 +168,8 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Models") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
+                    UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -202,6 +203,12 @@ struct MenuBarView: View {
                 } label: {
                     HStack {
                         Text("Context Awareness")
+                        if enhancementService.useScreenCaptureContext {
+                            // Show Vision/OCR mode indicator
+                            Text(aiService.selectedProvider == .openRouter && aiService.currentModelSupportsVision() ? "(Vision)" : "(OCR)")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
                         Spacer()
                         if enhancementService.useScreenCaptureContext {
                             Image(systemName: "checkmark")
@@ -223,9 +230,8 @@ struct MenuBarView: View {
             }
 
             Button("Open App") {
-                menuBarManager.openMainWindowAndNavigate(to: "Settings")
+                menuBarManager.openMainWindowAndNavigate(to: .dashboard)
             }
-            .keyboardShortcut(",", modifiers: .command)
 
             Button("Help and Support") {
                 EmailSupport.openSupportEmail()

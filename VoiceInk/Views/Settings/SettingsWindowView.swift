@@ -18,6 +18,7 @@ struct SettingsWindowView: View {
                 .environmentObject(hotkeyManager)
                 .environmentObject(whisperState)
                 .environmentObject(enhancementService)
+                .accessibilityIdentifier("settings.tab.general")
                 .tabItem {
                     Label("General", systemImage: "gear")
                 }
@@ -26,6 +27,7 @@ struct SettingsWindowView: View {
             RecordingSettingsView()
                 .environmentObject(hotkeyManager)
                 .environmentObject(whisperState)
+                .accessibilityIdentifier("settings.tab.recording")
                 .tabItem {
                     Label("Recording", systemImage: "mic.circle")
                 }
@@ -33,6 +35,7 @@ struct SettingsWindowView: View {
 
             TranscriptionSettingsView(whisperState: whisperState)
                 .environmentObject(enhancementService)
+                .accessibilityIdentifier("settings.tab.transcription")
                 .tabItem {
                     Label("Transcription", systemImage: "waveform")
                 }
@@ -40,11 +43,13 @@ struct SettingsWindowView: View {
 
             IntelligenceSettingsView()
                 .environmentObject(enhancementService)
+                .accessibilityIdentifier("settings.tab.intelligence")
                 .tabItem {
                     Label("Intelligence", systemImage: "wand.and.stars")
                 }
                 .tag(SettingsTab.intelligence)
         }
+        .accessibilityIdentifier("settings.tabs")
         .frame(minWidth: 700, minHeight: 500)
         .background(Tokens.Colors.elevated(for: colorScheme))
     }

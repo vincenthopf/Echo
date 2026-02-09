@@ -1,5 +1,5 @@
 import XCTest
-@testable import VoiceInk
+@testable import Echo
 
 final class ServiceTests: XCTestCase {
 
@@ -65,7 +65,7 @@ final class ServiceTests: XCTestCase {
 
     func testAllProvidersHaveModels() {
         let models = PredefinedModels.models
-        let providers = ModelProvider.allCases
+        let providers = ModelProvider.allCases.filter { $0 != .custom }
 
         for provider in providers {
             let providerModels = models.filter { $0.provider == provider }

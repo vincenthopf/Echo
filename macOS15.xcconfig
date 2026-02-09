@@ -1,0 +1,3 @@
+// Force macOS 15.0 deployment target for all targets including SPM packages
+MACOSX_DEPLOYMENT_TARGET = 15.0
+IPHONEOS_DEPLOYMENT_TARGET = 18.0

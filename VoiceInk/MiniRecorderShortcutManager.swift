@@ -212,8 +212,7 @@ class MiniRecorderShortcutManager: ObservableObject {
                     if index < availableConfigurations.count {
                         let selectedConfig = availableConfigurations[index]
                         powerModeManager.setActiveConfiguration(selectedConfig)
-                        // Manual selection via keyboard shortcut
-                        await PowerModeSessionManager.shared.beginSession(with: selectedConfig, activationSource: .manual)
+                        await PowerModeSessionManager.shared.beginSession(with: selectedConfig)
                     }
                 }
             }

@@ -26,9 +26,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     private func updateActivationPolicy() {
         let isMenuBarOnly = UserDefaults.standard.bool(forKey: "IsMenuBarOnly")
-        if isMenuBarOnly {
+
+        // Don't switch to accessory mode if there's a visible window
+        let hasVisibleWindow = NSApp.windows.contains { window in
+            window.isVisible &&
+            window.styleMask.contains(.titled) &&
+            window.className != "NSStatusBarWindow"
+        }
+
+        if isMenuBarOnly && !hasVisibleWindow {
             NSApp.setActivationPolicy(.accessory)
-        } else {
+        } else if !isMenuBarOnly || hasVisibleWindow {
             NSApp.setActivationPolicy(.regular)
         }
     }
@@ -61,7 +69,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             // Running: focus current window and route in-place to Transcribe Audio
             NSApp.windows.first?.makeKeyAndOrderFront(nil)
-            NotificationCenter.default.post(name: .navigateToDestination, object: nil, userInfo: ["destination": "Transcribe Audio"])
+            NotificationCenter.default.post(
+                name: .navigateToDestination,
+                object: nil,
+                userInfo: Notification.destinationUserInfo(.transcribeFiles)
+            )
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .openFileForTranscription, object: nil, userInfo: ["url": url])
             }

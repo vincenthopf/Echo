@@ -141,6 +141,31 @@ enum AIProvider: String, CaseIterable {
     }
 }
 
+/// Represents an OpenRouter model with its capabilities
+struct OpenRouterModel: Codable {
+    let id: String
+    let supportsVision: Bool
+
+    init(id: String, supportsVision: Bool) {
+        self.id = id
+        self.supportsVision = supportsVision
+    }
+
+    /// Initialize from API response dictionary
+    init?(from dictionary: [String: Any]) {
+        guard let id = dictionary["id"] as? String else { return nil }
+        self.id = id
+
+        // Check architecture.input_modalities for "image" support
+        if let architecture = dictionary["architecture"] as? [String: Any],
+           let inputModalities = architecture["input_modalities"] as? [String] {
+            self.supportsVision = inputModalities.contains("image")
+        } else {
+            self.supportsVision = false
+        }
+    }
+}
+
 class AIService: ObservableObject {
     private let logger = Logger(subsystem: "com.VincentHopf.embrvoice", category: "AIService")
     
@@ -185,7 +210,7 @@ class AIService: ObservableObject {
     private let userDefaults = UserDefaults.standard
     private lazy var ollamaService = OllamaService()
     
-    @Published private var openRouterModels: [String] = []
+    @Published private var openRouterModels: [OpenRouterModel] = []
     
     var connectedProviders: [AIProvider] {
         AIProvider.allCases.filter { provider in
@@ -229,9 +254,16 @@ class AIService: ObservableObject {
         if selectedProvider == .ollama {
             return ollamaService.availableModels.map { $0.name }
         } else if selectedProvider == .openRouter {
-            return openRouterModels
+            return openRouterModels.map { $0.id }
         }
         return selectedProvider.availableModels
+    }
+
+    /// Check if the current model supports vision/image input
+    /// Only applicable for OpenRouter models
+    func currentModelSupportsVision() -> Bool {
+        guard selectedProvider == .openRouter else { return false }
+        return openRouterModels.first { $0.id == currentModel }?.supportsVision ?? false
     }
     
     init() {
@@ -265,13 +297,26 @@ class AIService: ObservableObject {
     }
     
     private func loadSavedOpenRouterModels() {
+        // Try to load new format (OpenRouterModel array)
+        if let savedData = userDefaults.data(forKey: "openRouterModelsV2"),
+           let decodedModels = try? JSONDecoder().decode([OpenRouterModel].self, from: savedData) {
+            openRouterModels = decodedModels
+            return
+        }
+
+        // Migration: load old format (string array) and convert
         if let savedModels = userDefaults.array(forKey: "openRouterModels") as? [String] {
-            openRouterModels = savedModels
+            // Convert old format to new format (assume no vision support for migrated models)
+            openRouterModels = savedModels.map { OpenRouterModel(id: $0, supportsVision: false) }
+            // Save in new format
+            saveOpenRouterModels()
         }
     }
     
     private func saveOpenRouterModels() {
-        userDefaults.set(openRouterModels, forKey: "openRouterModels")
+        if let encodedData = try? JSONEncoder().encode(openRouterModels) {
+            userDefaults.set(encodedData, forKey: "openRouterModelsV2")
+        }
     }
     
     func selectModel(_ model: String) {
@@ -531,51 +576,54 @@ class AIService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
-            
+
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 logger.error("Failed to fetch OpenRouter models: Invalid HTTP response")
-                await MainActor.run { 
+                await MainActor.run {
                     self.openRouterModels = []
                     self.saveOpenRouterModels()
                     self.objectWillChange.send()
                 }
                 return
             }
-            
-            guard let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any], 
+
+            guard let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let dataArray = jsonResponse["data"] as? [[String: Any]] else {
                 logger.error("Failed to parse OpenRouter models JSON")
-                await MainActor.run { 
+                await MainActor.run {
                     self.openRouterModels = []
                     self.saveOpenRouterModels()
                     self.objectWillChange.send()
                 }
                 return
             }
-            
-            let models = dataArray.compactMap { $0["id"] as? String }
-            await MainActor.run { 
-                self.openRouterModels = models.sorted()
-                self.saveOpenRouterModels() // Save to UserDefaults
-                if self.selectedProvider == .openRouter && self.currentModel == self.selectedProvider.defaultModel && !models.isEmpty {
-                    self.selectModel(models.sorted().first!)
+
+            // Parse models with vision capability detection
+            let models = dataArray.compactMap { OpenRouterModel(from: $0) }
+            let sortedModels = models.sorted { $0.id < $1.id }
+            let visionCount = sortedModels.filter { $0.supportsVision }.count
+
+            await MainActor.run {
+                self.openRouterModels = sortedModels
+                self.saveOpenRouterModels()
+                if self.selectedProvider == .openRouter && self.currentModel == self.selectedProvider.defaultModel && !sortedModels.isEmpty {
+                    self.selectModel(sortedModels.first!.id)
                 }
                 self.objectWillChange.send()
             }
-            logger.info("Successfully fetched \(models.count) OpenRouter models.")
-            
+            logger.info("Successfully fetched \(models.count) OpenRouter models (\(visionCount) with vision support).")
+
         } catch {
             logger.error("Error fetching OpenRouter models: \(error.localizedDescription)")
-            await MainActor.run { 
+            await MainActor.run {
                 self.openRouterModels = []
                 self.saveOpenRouterModels()
                 self.objectWillChange.send()
             }
         }
-
     }
 }
 

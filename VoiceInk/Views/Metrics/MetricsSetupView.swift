@@ -4,9 +4,9 @@ import KeyboardShortcuts
 struct MetricsSetupView: View {
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
+    @EnvironmentObject private var menuBarManager: MenuBarManager
     @State private var isAccessibilityEnabled = false
     @State private var isScreenRecordingEnabled = false
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         ScrollView {
@@ -200,13 +200,13 @@ struct MetricsSetupView: View {
     }
     
     private func openSettingsWindow() {
-        openSettings()
+        menuBarManager.navigateTo(.settings)
     }
 
     private func openModelManagement() {
         // Set the selected tab to Transcription before opening Settings window
         UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
-        openSettings()
+        menuBarManager.navigateTo(.settings)
     }
 
     // MARK: - Permission Monitoring
@@ -244,4 +244,3 @@ struct MetricsSetupView: View {
         DistributedNotificationCenter.default().removeObserver(self, name: NSNotification.Name("com.apple.accessibility.api"), object: nil)
     }
 }
-

@@ -107,7 +107,7 @@ Test schemes are shared in `xcshareddata/xcschemes/` for continuous integration:
 
 ### Tests Won't Run
 - Verify test target has correct dependencies
-- Check `@testable import VoiceInk` is present
+- Check `@testable import Echo` is present
 - Ensure host application is set correctly
 - Clean build folder: ⇧⌘K
 
