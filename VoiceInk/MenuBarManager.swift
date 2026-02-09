@@ -41,12 +41,12 @@ class MenuBarManager: ObservableObject {
     }
 
     /// Navigate to a destination in the existing window without creating a new one
-    func navigateTo(_ destination: String) {
+    func navigateTo(_ destination: AppDestination) {
         DispatchQueue.main.async {
             NotificationCenter.default.post(
                 name: .navigateToDestination,
                 object: nil,
-                userInfo: ["destination": destination]
+                userInfo: Notification.destinationUserInfo(destination)
             )
         }
     }
@@ -71,7 +71,7 @@ class MenuBarManager: ObservableObject {
         }
     }
     
-    func openMainWindowAndNavigate(to destination: String) {
+    func openMainWindowAndNavigate(to destination: AppDestination) {
         print("MenuBarManager: Navigating to \(destination)")
 
         DispatchQueue.main.async { [weak self] in
@@ -116,7 +116,7 @@ class MenuBarManager: ObservableObject {
                 NotificationCenter.default.post(
                     name: .navigateToDestination,
                     object: nil,
-                    userInfo: ["destination": destination]
+                    userInfo: Notification.destinationUserInfo(destination)
                 )
                 print("MenuBarManager: Posted navigation notification for \(destination)")
             }
@@ -174,4 +174,3 @@ class WindowDelegate: NSObject, NSWindowDelegate {
         onClose()
     }
 }
-

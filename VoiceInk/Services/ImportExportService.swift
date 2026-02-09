@@ -178,8 +178,7 @@ class ImportExportService {
                     enhancementService.customPrompts = predefinedPrompts + importedSettings.customPrompts
                     
                     let powerModeManager = PowerModeManager.shared
-                    powerModeManager.configurations = importedSettings.powerModeConfigs
-                    powerModeManager.saveConfigurations()
+                    powerModeManager.replaceConfigurations(importedSettings.powerModeConfigs)
 
                     // Import Custom Models
                     if let modelsToImport = importedSettings.customCloudModels {
@@ -303,17 +302,18 @@ class ImportExportService {
         DispatchQueue.main.async {
             let alert = NSAlert()
             alert.messageText = "Import Successful"
-            alert.informativeText = message + "\n\nIMPORTANT: If you were using AI enhancement features, please make sure to reconfigure your API keys in the Enhancement section.\n\nIt is recommended to restart VoiceInk for all changes to take full effect."
+            alert.informativeText = message + "\n\nIMPORTANT: If you were using Intelligent Transformation features, please make sure to reconfigure your API keys in the Intelligence tab.\n\nIt is recommended to restart VoiceInk for all changes to take full effect."
             alert.alertStyle = .informational
             alert.addButton(withTitle: "OK")
             alert.addButton(withTitle: "Configure API Keys")
             
             let response = alert.runModal()
             if response == .alertSecondButtonReturn {
+                UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
                 NotificationCenter.default.post(
                     name: .navigateToDestination,
                     object: nil,
-                    userInfo: ["destination": "Enhancement"]
+                    userInfo: Notification.destinationUserInfo(.settings)
                 )
             }
         }

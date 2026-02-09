@@ -91,24 +91,21 @@ struct GeneralSection: View {
                 // Default toggle row
                 FormRow(label: "Default") {
                     HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: Binding(
-                            get: { config.isDefault },
-                            set: { newValue in
-                                config.isDefault = newValue
-                                onSave()
+                        if config.isDefault {
+                            Text("Default profile")
+                                .font(Tokens.Typography.bodySmall.weight(.semibold))
+                                .foregroundColor(Tokens.Colors.orange)
+                        } else {
+                            Button("Set as default") {
+                                PowerModeManager.shared.setAsDefault(configId: config.id)
                             }
-                        ))
-                        .toggleStyle(.switch)
-                        .tint(Tokens.Colors.orange)
-                        .labelsHidden()
-
-                        Text("Make default profile")
-                            .font(Tokens.Typography.bodySmall)
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
 
                         InfoTip(
                             title: "Default Profile",
-                            message: "The default profile activates when no other triggers match. Only one profile can be set as default."
+                            message: "The default profile activates when no other triggers match. Exactly one profile is always default while profiles exist."
                         )
 
                         Spacer()

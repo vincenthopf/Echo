@@ -73,7 +73,7 @@ struct MenuBarView: View {
                 Button("Manage Models") {
                     // Set the selected tab to Transcription before opening Settings
                     UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
-                    menuBarManager.openMainWindowAndNavigate(to: "Settings")
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -134,7 +134,8 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Providers") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
+                    UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -167,7 +168,8 @@ struct MenuBarView: View {
                 Divider()
                 
                 Button("Manage AI Models") {
-                    menuBarManager.openMainWindowAndNavigate(to: "Transformation")
+                    UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                    menuBarManager.openMainWindowAndNavigate(to: .settings)
                 }
             } label: {
                 HStack {
@@ -228,7 +230,7 @@ struct MenuBarView: View {
             }
 
             Button("Open App") {
-                menuBarManager.openMainWindowAndNavigate(to: "Dashboard")
+                menuBarManager.openMainWindowAndNavigate(to: .dashboard)
             }
 
             Button("Help and Support") {

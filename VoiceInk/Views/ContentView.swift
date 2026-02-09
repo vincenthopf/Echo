@@ -23,13 +23,31 @@ enum ViewType: String, CaseIterable {
         case .about: return "info.circle.fill"
         }
     }
+
+    static func from(destination: AppDestination) -> ViewType {
+        switch destination {
+        case .dashboard:
+            return .metrics
+        case .transcribeFiles:
+            return .transcribeAudio
+        case .adaptiveAwareness:
+            return .powerMode
+        case .vocabulary:
+            return .vocabulary
+        case .history:
+            return .history
+        case .settings:
+            return .settings
+        case .about:
+            return .about
+        }
+    }
 }
 
 struct DynamicSidebar: View {
     @Binding var selectedView: ViewType
     @Binding var hoveredView: ViewType?
     @Environment(\.colorScheme) private var colorScheme
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @Namespace private var buttonAnimation
     
     private var visibleViewTypes: [ViewType] {
@@ -68,6 +86,7 @@ struct DynamicSidebar: View {
                 ) {
                     selectedView = viewType
                 }
+                .accessibilityIdentifier("sidebar.\(viewType.rawValue)")
                 .onHover { isHovered in
                     hoveredView = isHovered ? viewType : nil
                 }
@@ -144,7 +163,6 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @State private var selectedView: ViewType = .metrics
     @State private var hoveredView: ViewType?
     @State private var hasLoadedData = false
@@ -183,21 +201,8 @@ struct ContentView: View {
             columnVisibility = columnVisibility == .all ? .detailOnly : .all
         }
         .onReceive(NotificationCenter.default.publisher(for: .navigateToDestination)) { notification in
-            if let destination = notification.userInfo?["destination"] as? String {
-                switch destination {
-                case "History":
-                    selectedView = .history
-                case "Transcribe Files", "Transcribe Audio":
-                    selectedView = .transcribeAudio
-                case "Power Mode", "Adaptive Awareness":
-                    selectedView = .powerMode
-                case "Vocabulary", "Dictionary", "Smart Corrections":
-                    selectedView = .vocabulary
-                case "Settings":
-                    selectedView = .settings
-                default:
-                    break
-                }
+            if let destination = notification.userInfo?.appDestination {
+                selectedView = ViewType.from(destination: destination)
             }
         }
     }
@@ -208,22 +213,30 @@ struct ContentView: View {
         case .metrics:
             if isSetupComplete {
                 MetricsView(skipSetupCheck: true)
+                    .accessibilityIdentifier("detail.metrics")
             } else {
                 MetricsSetupView()
                     .environmentObject(hotkeyManager)
+                    .accessibilityIdentifier("detail.metricsSetup")
             }
         case .transcribeAudio:
             AudioTranscribeView()
+                .accessibilityIdentifier("detail.transcribeFiles")
         case .history:
             TranscriptionHistoryView()
+                .accessibilityIdentifier("detail.history")
         case .powerMode:
             AdaptiveAwarenessView()
+                .accessibilityIdentifier("detail.adaptiveAwareness")
         case .vocabulary:
             VocabularyPane()
+                .accessibilityIdentifier("detail.vocabulary")
         case .settings:
             SettingsWindowView()
+                .accessibilityIdentifier("detail.settings")
         case .about:
             AboutView()
+                .accessibilityIdentifier("detail.about")
         }
     }
 }

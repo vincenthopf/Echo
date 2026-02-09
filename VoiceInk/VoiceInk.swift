@@ -35,9 +35,6 @@ struct VoiceInkApp: App {
         AppLogger.defaultSubsystem = "com.VincentHopf.embrvoice.parakeet"
 
         // Set default values for Adaptive Awareness settings if not already set
-        if UserDefaults.standard.object(forKey: "powerModeUIFlag") == nil {
-            UserDefaults.standard.set(true, forKey: "powerModeUIFlag")
-        }
         if UserDefaults.standard.object(forKey: PowerModeDefaults.autoRestoreKey) == nil {
             UserDefaults.standard.set(true, forKey: PowerModeDefaults.autoRestoreKey)
         }
@@ -148,7 +145,11 @@ struct VoiceInkApp: App {
 
                         // Process any pending open-file request now that the main ContentView is ready.
                         if let pendingURL = appDelegate.pendingOpenFileURL {
-                            NotificationCenter.default.post(name: .navigateToDestination, object: nil, userInfo: ["destination": "Transcribe Audio"])
+                            NotificationCenter.default.post(
+                                name: .navigateToDestination,
+                                object: nil,
+                                userInfo: Notification.destinationUserInfo(.transcribeFiles)
+                            )
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                 NotificationCenter.default.post(name: .openFileForTranscription, object: nil, userInfo: ["url": pendingURL])
                             }
@@ -193,7 +194,7 @@ struct VoiceInkApp: App {
 
             CommandGroup(replacing: .appSettings) {
                 Button("Settings...") {
-                    menuBarManager.navigateTo("Settings")
+                    menuBarManager.navigateTo(.settings)
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }

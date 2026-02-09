@@ -5,12 +5,10 @@ import UniformTypeIdentifiers
 struct IntelligenceSettingsView: View {
     // AI Enhancement
     @EnvironmentObject private var enhancementService: AIEnhancementService
+    @EnvironmentObject private var menuBarManager: MenuBarManager
 
     // Adaptive Awareness
-    @ObservedObject private var powerModeManager = PowerModeManager.shared
-    @AppStorage("powerModeUIFlag") private var powerModeUIFlag = true
     @AppStorage(PowerModeDefaults.autoRestoreKey) private var powerModeAutoRestoreEnabled = true
-    @State private var showDisableAlert = false
 
     // Design system
     @Environment(\.colorScheme) private var colorScheme
@@ -31,11 +29,6 @@ struct IntelligenceSettingsView: View {
             .padding(.vertical, Tokens.Spacing.sm)
         }
         .background(Tokens.Colors.background(for: colorScheme))
-        .alert("Adaptive Awareness Still Active", isPresented: $showDisableAlert) {
-            Button("Got it", role: .cancel) { }
-        } message: {
-            Text("Adaptive Awareness can't be disabled while any configuration is still enabled. Disable or remove your configurations first.")
-        }
     }
 
     // MARK: - AI Provider Section
@@ -71,51 +64,49 @@ struct IntelligenceSettingsView: View {
             )
 
             VStack(spacing: 0) {
-                // Main toggle row
-                FormRow(label: "Enabled") {
+                FormRow(label: "Profiles") {
                     HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: toggleBinding)
-                            .toggleStyle(.switch)
-                            .tint(Tokens.Colors.orange)
-                            .labelsHidden()
-
-                        Text("Automatically apply custom configurations based on context")
+                        Text("Adaptive Awareness is active while profiles exist.")
                             .font(Tokens.Typography.bodySmall)
                             .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                             .fixedSize(horizontal: false, vertical: true)
 
                         InfoTip(
                             title: "Adaptive Awareness",
-                            message: "Automatically applies custom configurations based on your active app or website. Create rules to customize transcription models, AI prompts, and other preferences for different contexts."
+                            message: "Automatically applies custom profiles based on your active app or website. Create rules to customize transcription models, AI prompts, and other preferences for different contexts."
+                        )
+
+                        Spacer()
+
+                        Button("Manage Profiles") {
+                            menuBarManager.navigateTo(.adaptiveAwareness)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .accessibilityIdentifier("intelligence.manageProfiles")
+                    }
+                }
+
+                FormDivider()
+
+                FormRow(label: "Restore") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: $powerModeAutoRestoreEnabled)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+
+                        Text("Restore defaults after each session")
+                            .font(Tokens.Typography.bodySmall)
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                        InfoTip(
+                            title: "Restore Defaults",
+                            message: "After each recording session, revert enhancement and transcription preferences to whatever was configured before Adaptive Awareness was activated."
                         )
 
                         Spacer()
                     }
-                }
-
-                if powerModeUIFlag {
-                    FormDivider()
-
-                    FormRow(label: "Restore") {
-                        HStack(spacing: Tokens.Spacing.sm) {
-                            Toggle("", isOn: $powerModeAutoRestoreEnabled)
-                                .toggleStyle(.switch)
-                                .tint(Tokens.Colors.orange)
-                                .labelsHidden()
-
-                            Text("Restore defaults after each session")
-                                .font(Tokens.Typography.bodySmall)
-                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
-
-                            InfoTip(
-                                title: "Restore Defaults",
-                                message: "After each recording session, revert enhancement and transcription preferences to whatever was configured before Adaptive Awareness was activated."
-                            )
-
-                            Spacer()
-                        }
-                    }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
             .background(Tokens.Colors.elevated(for: colorScheme))
@@ -124,7 +115,6 @@ struct IntelligenceSettingsView: View {
                 RoundedRectangle(cornerRadius: Tokens.Radius.lg)
                     .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
             )
-            .animation(.easeInOut(duration: Tokens.Animation.duration), value: powerModeUIFlag)
         }
     }
 
@@ -133,7 +123,7 @@ struct IntelligenceSettingsView: View {
     private var aiEnhancementSection: some View {
         VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             SectionHeader(
-                title: "AI Enhancement",
+                title: "Intelligent Transformation",
                 subtitle: "Transform your transcriptions with AI",
                 icon: "wand.and.stars"
             )
@@ -227,24 +217,4 @@ struct IntelligenceSettingsView: View {
         }
     }
 
-    private var toggleBinding: Binding<Bool> {
-        Binding(
-            get: { powerModeUIFlag },
-            set: { newValue in
-                if newValue {
-                    powerModeUIFlag = true
-                } else if powerModeManager.configurations.noneEnabled {
-                    powerModeUIFlag = false
-                } else {
-                    showDisableAlert = true
-                }
-            }
-        )
-    }
-}
-
-private extension Array where Element == PowerModeConfig {
-    var noneEnabled: Bool {
-        allSatisfy { !$0.isEnabled }
-    }
 }

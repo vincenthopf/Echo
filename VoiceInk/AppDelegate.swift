@@ -69,7 +69,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             // Running: focus current window and route in-place to Transcribe Audio
             NSApp.windows.first?.makeKeyAndOrderFront(nil)
-            NotificationCenter.default.post(name: .navigateToDestination, object: nil, userInfo: ["destination": "Transcribe Audio"])
+            NotificationCenter.default.post(
+                name: .navigateToDestination,
+                object: nil,
+                userInfo: Notification.destinationUserInfo(.transcribeFiles)
+            )
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .openFileForTranscription, object: nil, userInfo: ["url": url])
             }

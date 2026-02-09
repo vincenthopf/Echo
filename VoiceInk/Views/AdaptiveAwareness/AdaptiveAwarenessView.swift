@@ -6,6 +6,7 @@ struct AdaptiveAwarenessView: View {
     @ObservedObject private var powerModeManager = PowerModeManager.shared
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @EnvironmentObject private var aiService: AIService
+    @EnvironmentObject private var menuBarManager: MenuBarManager
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var selectedProfileId: UUID?
@@ -34,9 +35,24 @@ struct AdaptiveAwarenessView: View {
             // Right Panel: Detail Editor
             if let selectedId = selectedProfileId,
                let config = powerModeManager.getConfiguration(with: selectedId) {
-                ProfileDetailView(config: config)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(ParallelDesignTokens.Colors.background(for: colorScheme))
+                VStack(spacing: 0) {
+                    HStack {
+                        Spacer()
+                        Button("Global Intelligence Settings") {
+                            UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
+                            menuBarManager.navigateTo(.settings)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .accessibilityIdentifier("adaptive.openIntelligenceSettings")
+                    }
+                    .padding(.horizontal, Tokens.Spacing.xl)
+                    .padding(.top, Tokens.Spacing.lg)
+
+                    ProfileDetailView(config: config)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .background(ParallelDesignTokens.Colors.background(for: colorScheme))
             } else {
                 // Empty state
                 VStack(spacing: ParallelDesignTokens.Spacing.lg) {

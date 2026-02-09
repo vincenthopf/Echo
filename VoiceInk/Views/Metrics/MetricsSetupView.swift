@@ -200,13 +200,13 @@ struct MetricsSetupView: View {
     }
     
     private func openSettingsWindow() {
-        menuBarManager.navigateTo("Settings")
+        menuBarManager.navigateTo(.settings)
     }
 
     private func openModelManagement() {
         // Set the selected tab to Transcription before opening Settings window
         UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
-        menuBarManager.navigateTo("Settings")
+        menuBarManager.navigateTo(.settings)
     }
 
     // MARK: - Permission Monitoring
@@ -244,4 +244,3 @@ struct MetricsSetupView: View {
         DistributedNotificationCenter.default().removeObserver(self, name: NSNotification.Name("com.apple.accessibility.api"), object: nil)
     }
 }
-

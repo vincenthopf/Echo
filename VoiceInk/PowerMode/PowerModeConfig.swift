@@ -123,12 +123,6 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encode(useTypeOutPaste, forKey: .useTypeOutPaste)
         try container.encode(useShiftEnterForNewlines, forKey: .useShiftEnterForNewlines)
     }
-    
-    
-    static func == (lhs: PowerModeConfig, rhs: PowerModeConfig) -> Bool {
-        lhs.id == rhs.id
-    }
-
     // MARK: - Trigger Logic Helpers
 
     /// Returns the number of trigger categories that have at least one configured trigger
@@ -186,43 +180,46 @@ class PowerModeManager: ObservableObject {
     @Published var configurations: [PowerModeConfig] = []
     @Published var activeConfiguration: PowerModeConfig?
 
+    private let userDefaults: UserDefaults
     private let configKey = "powerModeConfigurationsV2"
     private let activeConfigIdKey = "activeConfigurationId"
 
-    private init() {
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
         loadConfigurations()
-
-        if let activeConfigIdString = UserDefaults.standard.string(forKey: activeConfigIdKey),
-           let activeConfigId = UUID(uuidString: activeConfigIdString) {
-            activeConfiguration = configurations.first { $0.id == activeConfigId }
-        } else {
-            activeConfiguration = nil
-        }
+        reconcileActiveConfiguration()
     }
 
     private func loadConfigurations() {
-        if let data = UserDefaults.standard.data(forKey: configKey),
-           let configs = try? JSONDecoder().decode([PowerModeConfig].self, from: data) {
-            configurations = configs
+        guard let data = userDefaults.data(forKey: configKey),
+              let decodedConfigs = try? JSONDecoder().decode([PowerModeConfig].self, from: data) else {
+            applyConfigurations([], shouldPersist: false)
+            return
+        }
+
+        let normalizedConfigs = normalizeConfigurations(decodedConfigs)
+        configurations = normalizedConfigs
+        if normalizedConfigs != decodedConfigs {
+            persistConfigurations()
         }
     }
 
     func saveConfigurations() {
-        if let data = try? JSONEncoder().encode(configurations) {
-            UserDefaults.standard.set(data, forKey: configKey)
-        }
+        applyConfigurations(configurations, shouldPersist: true)
     }
 
     func addConfiguration(_ config: PowerModeConfig) {
         if !configurations.contains(where: { $0.id == config.id }) {
-            configurations.append(config)
-            saveConfigurations()
+            var updatedConfigs = configurations
+            updatedConfigs.append(config)
+            applyConfigurations(updatedConfigs)
         }
     }
 
     func removeConfiguration(with id: UUID) {
-        configurations.removeAll { $0.id == id }
-        saveConfigurations()
+        var updatedConfigs = configurations
+        updatedConfigs.removeAll { $0.id == id }
+        applyConfigurations(updatedConfigs)
     }
 
     func getConfiguration(with id: UUID) -> PowerModeConfig? {
@@ -231,14 +228,16 @@ class PowerModeManager: ObservableObject {
 
     func updateConfiguration(_ config: PowerModeConfig) {
         if let index = configurations.firstIndex(where: { $0.id == config.id }) {
-            configurations[index] = config
-            saveConfigurations()
+            var updatedConfigs = configurations
+            updatedConfigs[index] = config
+            applyConfigurations(updatedConfigs)
         }
     }
 
     func moveConfigurations(fromOffsets: IndexSet, toOffset: Int) {
-        configurations.move(fromOffsets: fromOffsets, toOffset: toOffset)
-        saveConfigurations()
+        var updatedConfigs = configurations
+        updatedConfigs.move(fromOffsets: fromOffsets, toOffset: toOffset)
+        applyConfigurations(updatedConfigs)
     }
 
     func getConfigurationForURL(_ url: String) -> PowerModeConfig? {
@@ -278,30 +277,28 @@ class PowerModeManager: ObservableObject {
     }
     
     func setAsDefault(configId: UUID) {
-        // Clear any existing default
-        for index in configurations.indices {
-            configurations[index].isDefault = false
-        }
-        
-        // Set the specified config as default
         if let index = configurations.firstIndex(where: { $0.id == configId }) {
-            configurations[index].isDefault = true
+            var updatedConfigs = configurations
+            for currentIndex in updatedConfigs.indices {
+                updatedConfigs[currentIndex].isDefault = (currentIndex == index)
+            }
+            applyConfigurations(updatedConfigs)
         }
-        
-        saveConfigurations()
     }
     
     func enableConfiguration(with id: UUID) {
         if let index = configurations.firstIndex(where: { $0.id == id }) {
-            configurations[index].isEnabled = true
-            saveConfigurations()
+            var updatedConfigs = configurations
+            updatedConfigs[index].isEnabled = true
+            applyConfigurations(updatedConfigs)
         }
     }
     
     func disableConfiguration(with id: UUID) {
         if let index = configurations.firstIndex(where: { $0.id == id }) {
-            configurations[index].isEnabled = false
-            saveConfigurations()
+            var updatedConfigs = configurations
+            updatedConfigs[index].isEnabled = false
+            applyConfigurations(updatedConfigs)
         }
     }
     
@@ -350,9 +347,20 @@ class PowerModeManager: ObservableObject {
     }
 
     func setActiveConfiguration(_ config: PowerModeConfig?) {
-        activeConfiguration = config
-        UserDefaults.standard.set(config?.id.uuidString, forKey: activeConfigIdKey)
-        self.objectWillChange.send()
+        guard let config else {
+            activeConfiguration = nil
+            userDefaults.removeObject(forKey: activeConfigIdKey)
+            return
+        }
+
+        guard let currentConfig = configurations.first(where: { $0.id == config.id }) else {
+            activeConfiguration = nil
+            userDefaults.removeObject(forKey: activeConfigIdKey)
+            return
+        }
+
+        activeConfiguration = currentConfig
+        userDefaults.set(currentConfig.id.uuidString, forKey: activeConfigIdKey)
     }
 
     var currentActiveConfiguration: PowerModeConfig? {
@@ -361,6 +369,10 @@ class PowerModeManager: ObservableObject {
 
     func getAllAvailableConfigurations() -> [PowerModeConfig] {
         return configurations
+    }
+
+    func replaceConfigurations(_ newConfigs: [PowerModeConfig]) {
+        applyConfigurations(newConfigs)
     }
 
     func isEmojiInUse(_ emoji: String) -> Bool {
@@ -505,4 +517,62 @@ class PowerModeManager: ObservableObject {
 
         return result
     }
-} 
+
+    private func applyConfigurations(_ newConfigurations: [PowerModeConfig], shouldPersist: Bool = true) {
+        configurations = normalizeConfigurations(newConfigurations)
+        reconcileActiveConfiguration()
+        if shouldPersist {
+            persistConfigurations()
+        }
+    }
+
+    private func normalizeConfigurations(_ configs: [PowerModeConfig]) -> [PowerModeConfig] {
+        guard !configs.isEmpty else {
+            return []
+        }
+
+        var normalizedConfigs = configs
+        let defaultIndex = normalizedConfigs.firstIndex(where: { $0.isDefault }) ?? 0
+
+        for index in normalizedConfigs.indices {
+            normalizedConfigs[index].isDefault = (index == defaultIndex)
+        }
+
+        normalizedConfigs[defaultIndex].isEnabled = true
+        return normalizedConfigs
+    }
+
+    private func reconcileActiveConfiguration() {
+        guard !configurations.isEmpty else {
+            activeConfiguration = nil
+            userDefaults.removeObject(forKey: activeConfigIdKey)
+            return
+        }
+
+        let preferredId: UUID?
+        if let inMemoryId = activeConfiguration?.id {
+            preferredId = inMemoryId
+        } else if let persistedId = userDefaults.string(forKey: activeConfigIdKey) {
+            preferredId = UUID(uuidString: persistedId)
+        } else {
+            preferredId = nil
+        }
+
+        guard let preferredId,
+              let updatedActive = configurations.first(where: { $0.id == preferredId }) else {
+            activeConfiguration = nil
+            userDefaults.removeObject(forKey: activeConfigIdKey)
+            return
+        }
+
+        activeConfiguration = updatedActive
+        userDefaults.set(updatedActive.id.uuidString, forKey: activeConfigIdKey)
+    }
+
+    private func persistConfigurations() {
+        guard let data = try? JSONEncoder().encode(configurations) else {
+            return
+        }
+        userDefaults.set(data, forKey: configKey)
+    }
+}

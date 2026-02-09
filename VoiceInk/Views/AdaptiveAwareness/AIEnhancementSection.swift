@@ -7,7 +7,7 @@ struct AIEnhancementSection: View {
 
     @EnvironmentObject private var aiService: AIService
     @EnvironmentObject private var enhancementService: AIEnhancementService
-    @Environment(\.openSettings) private var openSettings
+    @EnvironmentObject private var menuBarManager: MenuBarManager
     @Environment(\.colorScheme) private var colorScheme
 
     private var availableProviders: [AIProvider] {
@@ -29,7 +29,7 @@ struct AIEnhancementSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             SectionHeader(
-                title: "AI Enhancement",
+                title: "Intelligent Transformation",
                 subtitle: "Improve accuracy with AI"
             )
 
@@ -49,7 +49,7 @@ struct AIEnhancementSection: View {
                         .tint(Tokens.Colors.orange)
                         .labelsHidden()
 
-                        Text("Enable AI enhancement")
+                        Text("Enable Intelligent Transformation")
                             .font(Tokens.Typography.bodySmall)
                             .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
@@ -81,7 +81,7 @@ struct AIEnhancementSection: View {
 
                             Button("Add Key") {
                                 UserDefaults.standard.set(SettingsTab.intelligence.rawValue, forKey: "selectedSettingsTab")
-                                openSettings()
+                                menuBarManager.navigateTo(.settings)
                             }
                             .buttonStyle(.bordered)
                             .tint(Tokens.Colors.orange)

@@ -68,3 +68,34 @@ struct AppPickerSheet: View {
         }
     }
 }
+
+private struct AppGridItem: View {
+    let app: (url: URL, name: String, bundleId: String, icon: NSImage)
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(nsImage: app.icon)
+                    .resizable()
+                    .frame(width: 32, height: 32)
+
+                Text(app.name)
+                    .font(.caption)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.primary)
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity)
+            .background(isSelected ? Color.accentColor.opacity(0.18) : Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
