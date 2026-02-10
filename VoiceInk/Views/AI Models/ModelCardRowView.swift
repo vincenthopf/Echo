@@ -53,6 +53,7 @@ struct ModelCardRowView: View {
                     NativeAppleModelCardView(
                         model: nativeAppleModel,
                         isCurrent: isCurrent,
+                        isSupported: whisperState.isNativeModelSupported(nativeAppleModel),
                         setDefaultAction: setDefaultAction
                     )
                 }

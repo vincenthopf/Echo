@@ -3,6 +3,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    var reopenMainWindow: (() -> Void)?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         updateActivationPolicy()
     }
@@ -42,11 +44,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func createMainWindowIfNeeded() {
-        if NSApp.windows.isEmpty {
-            let contentView = ContentView()
-            let hostingView = NSHostingView(rootView: contentView)
-            let window = WindowManager.shared.createMainWindow(contentView: hostingView)
-            window.makeKeyAndOrderFront(nil)
+        if let reopenMainWindow {
+            reopenMainWindow()
         } else {
             NSApp.windows.first?.makeKeyAndOrderFront(nil)
         }

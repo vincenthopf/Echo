@@ -220,7 +220,32 @@ class WhisperState: NSObject, ObservableObject {
     }
     
     private func requestRecordPermission(response: @escaping (Bool) -> Void) {
-        response(true)
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            response(true)
+        case .denied, .restricted:
+            Task { @MainActor in
+                await NotificationManager.shared.showNotification(
+                    title: "Microphone access is required to start recording.",
+                    type: .error
+                )
+            }
+            response(false)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { granted in
+                if !granted {
+                    Task { @MainActor in
+                        await NotificationManager.shared.showNotification(
+                            title: "Microphone permission denied.",
+                            type: .error
+                        )
+                    }
+                }
+                response(granted)
+            }
+        @unknown default:
+            response(false)
+        }
     }
     
     private func transcribeAudio(on transcription: Transcription) async {
@@ -407,10 +432,22 @@ class WhisperState: NSObject, ObservableObject {
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                CursorPaster.pasteAtCursor(textToPaste)
+                if AXIsProcessTrusted() {
+                    CursorPaster.pasteAtCursor(textToPaste)
+                } else {
+                    ClipboardManager.copyToClipboard(textToPaste)
+                    Task { @MainActor in
+                        await NotificationManager.shared.showNotification(
+                            title: "Transcript copied to clipboard. Enable Accessibility for auto-paste.",
+                            type: .info
+                        )
+                    }
+                }
 
                 let powerMode = PowerModeManager.shared
-                if let activeConfig = powerMode.currentActiveConfiguration, activeConfig.isAutoSendEnabled {
+                if AXIsProcessTrusted(),
+                   let activeConfig = powerMode.currentActiveConfiguration,
+                   activeConfig.isAutoSendEnabled {
                     // Slight delay to ensure the paste operation completes
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         CursorPaster.pressEnter()

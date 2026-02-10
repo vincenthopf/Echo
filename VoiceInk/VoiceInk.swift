@@ -31,13 +31,10 @@ struct VoiceInkApp: App {
     @StateObject private var prewarmService: ModelPrewarmService
 
     init() {
+        AppDefaults.registerDefaults()
+
         // Configure FluidAudio logging subsystem
         AppLogger.defaultSubsystem = "com.VincentHopf.embrvoice.parakeet"
-
-        // Set default values for Adaptive Awareness settings if not already set
-        if UserDefaults.standard.object(forKey: PowerModeDefaults.autoRestoreKey) == nil {
-            UserDefaults.standard.set(true, forKey: PowerModeDefaults.autoRestoreKey)
-        }
 
         do {
             let schema = Schema([
@@ -105,6 +102,10 @@ struct VoiceInkApp: App {
         // Initialize model prewarm service for optimizing transcription on wake
         let prewarmService = ModelPrewarmService(whisperState: whisperState)
         _prewarmService = StateObject(wrappedValue: prewarmService)
+
+        appDelegate.reopenMainWindow = { [weak menuBarManager] in
+            menuBarManager?.openMainWindowIfNeeded()
+        }
 
         // Perform Adaptive Awareness migration (runs once)
         AdaptiveAwarenessMigration.performMigration()

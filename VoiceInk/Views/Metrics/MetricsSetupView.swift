@@ -1,44 +1,48 @@
 import SwiftUI
+import AVFoundation
+import AppKit
 import KeyboardShortcuts
 
 struct MetricsSetupView: View {
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @EnvironmentObject private var menuBarManager: MenuBarManager
-    @State private var isAccessibilityEnabled = false
-    @State private var isScreenRecordingEnabled = false
+
+    @State private var setupReadiness = SetupReadiness(
+        microphone: .incomplete,
+        hotkey: .incomplete,
+        defaultModel: .incomplete,
+        accessibility: .incomplete,
+        screenRecording: .incomplete
+    )
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 12) {
+                VStack(spacing: 10) {
                     AppIconView()
-                        .frame(width: 80, height: 80)
-                        .padding(.bottom, 20)
+                        .frame(width: 72, height: 72)
 
-                    VStack(spacing: 4) {
-                        Text("Welcome to Echo")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                            .multilineTextAlignment(.center)
+                    Text("Finish Setup")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
 
-                        Text("Complete the setup to get started")
-                            .font(.system(size: 16))
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
+                    Text("Required items unlock transcription. Recommended items improve the experience.")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
                 .padding(.top, 20)
-                .padding(.bottom, 20)
 
-                // Setup Steps
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(0..<4) { index in
-                        setupStep(for: index)
-                        if index < 3 {
-                            Divider().padding(.leading, 70)
-                        }
-                    }
+                VStack(spacing: 0) {
+                    readinessRow(title: "Microphone Access", description: "Required", completed: setupReadiness.microphone == .complete)
+                    Divider().padding(.leading, 70)
+                    readinessRow(title: "Keyboard Shortcut", description: "Required", completed: setupReadiness.hotkey == .complete)
+                    Divider().padding(.leading, 70)
+                    readinessRow(title: "Installed Default Model", description: "Required", completed: setupReadiness.defaultModel == .complete)
+                    Divider().padding(.leading, 70)
+                    readinessRow(title: "Accessibility", description: "Recommended", completed: setupReadiness.accessibility == .complete)
+                    Divider().padding(.leading, 70)
+                    readinessRow(title: "Screen Recording", description: "Recommended", completed: setupReadiness.screenRecording == .complete)
                 }
                 .background(Color(NSColor.textBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -48,199 +52,121 @@ struct MetricsSetupView: View {
                 )
                 .padding(.horizontal)
 
-                Spacer(minLength: 20)
+                Button(action: handleActionButton) {
+                    Text(actionTitle)
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.accentColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: 420)
 
-                // Action Button
-                actionButton
-                    .frame(maxWidth: 400)
-
-                // Help Text
-                helpText
+                Text("You can enable recommended permissions later from Settings.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             .padding()
         }
         .frame(minWidth: 500, minHeight: 600)
         .background(Color(NSColor.controlBackgroundColor))
-        .onAppear {
-            refreshPermissions()
-            setupNotificationObservers()
+        .task(priority: .userInitiated) {
+            refreshReadiness()
         }
-        .onDisappear {
-            removeNotificationObservers()
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            refreshReadiness()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .didChangeModel)) { _ in
+            refreshReadiness()
         }
     }
-    
-    private func setupStep(for index: Int) -> some View {
-        let stepInfo: (isCompleted: Bool, icon: String, title: String, description: String)
-        
-        switch index {
-        case 0:
-            stepInfo = (
-                isCompleted: hotkeyManager.selectedHotkey1 != .none,
-                icon: "command",
-                title: "Set Keyboard Shortcut",
-                description: "Use Echo anywhere with a shortcut."
-            )
-        case 1:
-            stepInfo = (
-                isCompleted: isAccessibilityEnabled,
-                icon: "hand.raised.fill",
-                title: "Enable Accessibility",
-                description: "Paste transcribed text at your cursor."
-            )
-        case 2:
-            stepInfo = (
-                isCompleted: isScreenRecordingEnabled,
-                icon: "video.fill",
-                title: "Enable Screen Recording",
-                description: "Get better transcriptions with screen context."
-            )
-        default:
-            stepInfo = (
-                isCompleted: whisperState.currentTranscriptionModel != nil,
-                icon: "arrow.down.to.line",
-                title: "Download Model",
-                description: "Choose an AI model to start transcribing."
-            )
-        }
-        
-        return HStack(spacing: 16) {
-            Image(systemName: stepInfo.icon)
-                .font(.system(size: 18))
+
+    private func readinessRow(title: String, description: String, completed: Bool) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: completed ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 24))
+                .foregroundColor(completed ? .green : .secondary)
                 .frame(width: 40, height: 40)
-                .background((stepInfo.isCompleted ? Color.green : Color.accentColor).opacity(0.1))
-                .foregroundColor(stepInfo.isCompleted ? .green : Color.accentColor)
-                .clipShape(Circle())
-            
-            VStack(alignment: .leading, spacing: 3) {
-                Text(stepInfo.title)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
                     .font(.headline)
-                    .fontWeight(.semibold)
-                Text(stepInfo.description)
+                Text(description)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            
+
             Spacer()
-            
-            if stepInfo.isCompleted {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(.green)
-            } else {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(NSColor.separatorColor))
-            }
         }
         .padding()
     }
-    
-    private var actionButton: some View {
-        Button(action: handleActionButton) {
-            HStack {
-                Text(getActionButtonTitle())
-                    .fontWeight(.semibold)
-                Image(systemName: "arrow.right")
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Color.accentColor)
-            .foregroundColor(.white)
-            .cornerRadius(12)
+
+    private var actionTitle: String {
+        if setupReadiness.microphone != .complete {
+            return "Enable Microphone"
         }
-        .buttonStyle(.plain)
-        .shadow(color: Color.accentColor.opacity(0.3), radius: 8, y: 4)
-    }
-    
-    private func handleActionButton() {
-        if isShortcutAndAccessibilityGranted {
-            openModelManagement()
-        } else {
-            // Handle different permission requests based on which one is missing
-            if hotkeyManager.selectedHotkey1 == .none {
-                openSettingsWindow()
-            } else if !AXIsProcessTrusted() {
-                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                    NSWorkspace.shared.open(url)
-                }
-            } else if !CGPreflightScreenCaptureAccess() {
-                CGRequestScreenCaptureAccess()
-                // After requesting, open system preferences as fallback
-                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
-                    NSWorkspace.shared.open(url)
-                }
-            }
-        }
-    }
-    
-    private func getActionButtonTitle() -> String {
-        if hotkeyManager.selectedHotkey1 == .none {
+        if setupReadiness.hotkey != .complete {
             return "Configure Shortcut"
-        } else if !AXIsProcessTrusted() {
-            return "Enable Accessibility"
-        } else if !CGPreflightScreenCaptureAccess() {
-            return "Enable Screen Recording"
-        } else if whisperState.currentTranscriptionModel == nil {
-            return "Download Model"
         }
-        return "Get Started"
+        if setupReadiness.defaultModel != .complete {
+            return "Download or Select Model"
+        }
+        if setupReadiness.accessibility != .complete {
+            return "Enable Accessibility (Recommended)"
+        }
+        if setupReadiness.screenRecording != .complete {
+            return "Enable Screen Recording (Recommended)"
+        }
+        return "Setup Complete"
     }
-    
-    private var helpText: some View {
-        Text("Need help? Check the Help menu for support options")
-            .font(.caption)
-            .foregroundColor(.secondary)
+
+    private func handleActionButton() {
+        if setupReadiness.microphone != .complete {
+            AVCaptureDevice.requestAccess(for: .audio) { _ in
+                DispatchQueue.main.async { refreshReadiness() }
+            }
+            return
+        }
+
+        if setupReadiness.hotkey != .complete {
+            openSettingsWindow()
+            return
+        }
+
+        if setupReadiness.defaultModel != .complete {
+            openModelManagement()
+            return
+        }
+
+        if setupReadiness.accessibility != .complete {
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+            AXIsProcessTrustedWithOptions(options)
+            return
+        }
+
+        if setupReadiness.screenRecording != .complete {
+            CGRequestScreenCaptureAccess()
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
+                NSWorkspace.shared.open(url)
+            }
+        }
     }
-    
-    private var isShortcutAndAccessibilityGranted: Bool {
-        hotkeyManager.selectedHotkey1 != .none &&
-        AXIsProcessTrusted() && 
-        CGPreflightScreenCaptureAccess()
+
+    private func refreshReadiness() {
+        setupReadiness = SetupReadinessEvaluator.current(
+            whisperState: whisperState,
+            hotkeyManager: hotkeyManager
+        )
     }
-    
+
     private func openSettingsWindow() {
         menuBarManager.navigateTo(.settings)
     }
 
     private func openModelManagement() {
-        // Set the selected tab to Transcription before opening Settings window
         UserDefaults.standard.set(SettingsTab.transcription.rawValue, forKey: "selectedSettingsTab")
         menuBarManager.navigateTo(.settings)
-    }
-
-    // MARK: - Permission Monitoring
-
-    private func refreshPermissions() {
-        isAccessibilityEnabled = AXIsProcessTrusted()
-        isScreenRecordingEnabled = CGPreflightScreenCaptureAccess()
-    }
-
-    private func setupNotificationObservers() {
-        // Observe when app becomes active (user returns from System Settings)
-        NotificationCenter.default.addObserver(
-            forName: NSApplication.didBecomeActiveNotification,
-            object: nil,
-            queue: .main
-        ) { [self] _ in
-            refreshPermissions()
-        }
-
-        // Observe system-wide accessibility changes using DistributedNotificationCenter
-        DistributedNotificationCenter.default().addObserver(
-            forName: NSNotification.Name("com.apple.accessibility.api"),
-            object: nil,
-            queue: .main
-        ) { [self] _ in
-            // Add a small delay as permissions take time to reflect in the system
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                refreshPermissions()
-            }
-        }
-    }
-
-    private func removeNotificationObservers() {
-        NotificationCenter.default.removeObserver(self, name: NSApplication.didBecomeActiveNotification, object: nil)
-        DistributedNotificationCenter.default().removeObserver(self, name: NSNotification.Name("com.apple.accessibility.api"), object: nil)
     }
 }

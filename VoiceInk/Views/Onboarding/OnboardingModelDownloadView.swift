@@ -4,40 +4,38 @@ struct OnboardingModelDownloadView: View {
     @Binding var hasCompletedOnboarding: Bool
     @EnvironmentObject private var whisperState: WhisperState
     @Environment(\.colorScheme) private var colorScheme
+
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
     @State private var isDownloading = false
     @State private var isModelSet = false
     @State private var showTutorial = false
+    @State private var errorMessage: String?
+    private let launchArguments = ProcessInfo.processInfo.arguments
 
-    // Accept a selected model, defaulting to Parakeet V3 if not provided
-    var selectedModel: any TranscriptionModel = PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!
+    var selectedModel: (any TranscriptionModel)?
 
-    // Cast to appropriate type for download operations
-    private var downloadableModel: (any TranscriptionModel)? {
-        if let localModel = selectedModel as? LocalModel {
-            return localModel
-        } else if let parakeetModel = selectedModel as? ParakeetModel {
-            return parakeetModel
-        }
-        return nil
+    private var resolvedModel: (any TranscriptionModel)? {
+        selectedModel ?? OnboardingModelPicker.recommendedModel()
     }
-    
+
+    private var progressState: ModelDownloadProgressState? {
+        guard let model = resolvedModel else { return nil }
+        return whisperState.downloadProgressState(for: model)
+    }
+
     var body: some View {
         ZStack {
             GeometryReader { geometry in
-                // Reusable background
                 OnboardingBackgroundView()
-                
+
                 VStack(spacing: 40) {
-                    // Model icon and title
                     VStack(spacing: 30) {
-                        // Model icon
                         ZStack {
                             Circle()
                                 .fill(Color.accentColor.opacity(0.1))
                                 .frame(width: 100, height: 100)
-                            
+
                             if isModelSet {
                                 Image(systemName: "checkmark.seal.fill")
                                     .font(.system(size: 50))
@@ -51,14 +49,13 @@ struct OnboardingModelDownloadView: View {
                         }
                         .scaleEffect(scale)
                         .opacity(opacity)
-                        
-                        // Title and description
+
                         VStack(spacing: 12) {
                             Text("Download AI Model")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
-                            
+
                             Text("We'll download the optimized model to get you started.")
                                 .font(.body)
                                 .foregroundColor(.white.opacity(0.7))
@@ -68,64 +65,71 @@ struct OnboardingModelDownloadView: View {
                         .scaleEffect(scale)
                         .opacity(opacity)
                     }
-                    
-                    // Model card - Centered and compact
-                    VStack(alignment: .leading, spacing: 16) {
-                        // Model name and details
-                        VStack(alignment: .center, spacing: 8) {
-                            Text(selectedModel.displayName)
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            Text(modelDetailsText)
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.7))
-                        }
-                        .frame(maxWidth: .infinity)
-                        
-                        Divider()
-                            .background(Color.white.opacity(0.1))
-                        
-                        // Performance indicators in a more compact layout
-                        HStack(spacing: 20) {
-                            performanceIndicator(label: "Speed", value: modelSpeed)
-                            performanceIndicator(label: "Accuracy", value: modelAccuracy)
-                            ramUsageLabel(gb: modelRAM)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
 
-                        // Download progress
-                        if isDownloading {
-                            DownloadProgressView(
-                                modelName: selectedModel.name,
-                                downloadProgress: whisperState.downloadProgress
-                            )
-                            .transition(.opacity)
+                    if let resolvedModel {
+                        VStack(alignment: .leading, spacing: 16) {
+                            VStack(alignment: .center, spacing: 8) {
+                                Text(resolvedModel.displayName)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text(modelDetailsText(for: resolvedModel))
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            .frame(maxWidth: .infinity)
+
+                            Divider()
+                                .background(Color.white.opacity(0.1))
+
+                            HStack(spacing: 20) {
+                                performanceIndicator(label: "Speed", value: modelSpeed(for: resolvedModel))
+                                performanceIndicator(label: "Accuracy", value: modelAccuracy(for: resolvedModel))
+                                ramUsageLabel(gb: modelRAM(for: resolvedModel))
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+
+                            if let progressState {
+                                DownloadProgressView(progressState: progressState)
+                                    .transition(.opacity)
+                                    .accessibilityIdentifier("onboarding.download.progress")
+                            }
+
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundColor(.red.opacity(0.9))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
+                        .padding(24)
+                        .frame(width: min(geometry.size.width * 0.6, 420))
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                        .scaleEffect(scale)
+                        .opacity(opacity)
+                    } else {
+                        Text("No compatible model is available on this device.")
+                            .font(.body)
+                            .foregroundColor(.white)
                     }
-                    .padding(24)
-                    .frame(width: min(geometry.size.width * 0.6, 400))
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    )
-                    .scaleEffect(scale)
-                    .opacity(opacity)
-                    
-                    // Action buttons
+
                     VStack(spacing: 16) {
                         Button(action: handleAction) {
                             Text(getButtonTitle())
                                 .font(.headline)
                                 .foregroundColor(.white)
-                                .frame(width: 200, height: 50)
+                                .frame(width: 230, height: 50)
                                 .background(Color.accentColor)
                                 .cornerRadius(25)
                         }
                         .buttonStyle(ScaleButtonStyle())
-                        .disabled(isDownloading)
-                        
+                        .disabled(isDownloading || resolvedModel == nil)
+                        .accessibilityIdentifier("onboarding.modelDownload.action")
+
                         if !isModelSet {
                             SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                 withAnimation {
@@ -141,7 +145,7 @@ struct OnboardingModelDownloadView: View {
                 .frame(width: min(geometry.size.width * 0.8, 600))
                 .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
             }
-            
+
             if showTutorial {
                 OnboardingTutorialView(hasCompletedOnboarding: $hasCompletedOnboarding)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -149,113 +153,140 @@ struct OnboardingModelDownloadView: View {
         }
         .onAppear {
             animateIn()
-            checkModelStatus()
+            seedUITestProgressIfNeeded()
+            refreshModelStatus()
         }
     }
-    
+
     private func animateIn() {
         withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) {
             scale = 1
             opacity = 1
         }
     }
-    
-    private func checkModelStatus() {
-        if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
-            isModelSet = whisperState.currentTranscriptionModel?.name == selectedModel.name
+
+    private func seedUITestProgressIfNeeded() {
+        guard launchArguments.contains("-uiTestMode") else { return }
+
+        if launchArguments.contains("-uiTestMockParakeetProgress") {
+            whisperState.downloadProgress["parakeet-tdt-0.6b-v3"] = 0.42
+        }
+
+        if launchArguments.contains("-uiTestMockLocalProgress") {
+            whisperState.downloadProgress["ggml-base.en_main"] = 0.30
+            whisperState.downloadProgress["ggml-base.en_coreml"] = 0.50
         }
     }
-    
+
+    private func refreshModelStatus() {
+        guard let resolvedModel else {
+            isModelSet = false
+            return
+        }
+        let isInstalled = whisperState.usableModels.contains { $0.name == resolvedModel.name }
+        isModelSet = isInstalled && whisperState.currentTranscriptionModel?.name == resolvedModel.name
+    }
+
     private func handleAction() {
+        errorMessage = nil
+
+        guard let resolvedModel else {
+            errorMessage = "No model available for onboarding."
+            return
+        }
+
         if isModelSet {
             withAnimation {
                 showTutorial = true
             }
-        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
-            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
+            return
+        }
+
+        if whisperState.usableModels.contains(where: { $0.name == resolvedModel.name }) {
+            if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == resolvedModel.name }) {
                 whisperState.setDefaultTranscriptionModel(modelToSet)
                 withAnimation {
                     isModelSet = true
                 }
             }
-        } else {
-            withAnimation {
-                isDownloading = true
-            }
-            Task {
-                // Download the selected model (works for both LocalModel and ParakeetModel)
-                if let localModel = selectedModel as? LocalModel {
-                    await whisperState.downloadModel(localModel)
-                } else if let parakeetModel = selectedModel as? ParakeetModel {
-                    await whisperState.downloadParakeetModel(parakeetModel)
-                }
+            return
+        }
 
-                if let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == selectedModel.name }) {
-                    whisperState.setDefaultTranscriptionModel(modelToSet)
-                    withAnimation {
-                        isModelSet = true
-                        isDownloading = false
-                    }
-                }
+        Task {
+            isDownloading = true
+            defer { isDownloading = false }
+
+            if let localModel = resolvedModel as? LocalModel {
+                await whisperState.downloadModel(localModel)
+            } else if let parakeetModel = resolvedModel as? ParakeetModel {
+                await whisperState.downloadParakeetModel(parakeetModel)
+            }
+
+            let isInstalled = whisperState.usableModels.contains { $0.name == resolvedModel.name }
+            guard isInstalled else {
+                errorMessage = "Download failed. Please retry."
+                return
+            }
+
+            guard let modelToSet = whisperState.allAvailableModels.first(where: { $0.name == resolvedModel.name }) else {
+                errorMessage = "Model downloaded but could not be activated."
+                return
+            }
+
+            whisperState.setDefaultTranscriptionModel(modelToSet)
+            withAnimation {
+                isModelSet = true
             }
         }
     }
-    
+
     private func getButtonTitle() -> String {
         if isModelSet {
             return "Continue"
-        } else if isDownloading {
-            return "Downloading..."
-        } else if whisperState.availableModels.contains(where: { $0.name == selectedModel.name }) {
-            return "Set as Default"
-        } else {
-            return "Download Model"
         }
+        if isDownloading {
+            return "Downloading..."
+        }
+        if let resolvedModel, whisperState.usableModels.contains(where: { $0.name == resolvedModel.name }) {
+            return "Set as Default"
+        }
+        return "Download Model"
     }
 
-    // Helper computed properties for model details
-    private var modelDetailsText: String {
-        if let localModel = selectedModel as? LocalModel {
+    private func modelDetailsText(for model: any TranscriptionModel) -> String {
+        if let localModel = model as? LocalModel {
             return "\(localModel.size) • \(localModel.language)"
-        } else if let parakeetModel = selectedModel as? ParakeetModel {
+        }
+        if let parakeetModel = model as? ParakeetModel {
             return "\(parakeetModel.size) • Multilingual"
         }
-        return selectedModel.displayName
+        return model.displayName
     }
 
-    private var modelSpeed: Double {
-        if let localModel = selectedModel as? LocalModel {
-            return localModel.speed
-        } else if let parakeetModel = selectedModel as? ParakeetModel {
-            return parakeetModel.speed
-        }
-        return 0.0
+    private func modelSpeed(for model: any TranscriptionModel) -> Double {
+        if let localModel = model as? LocalModel { return localModel.speed }
+        if let parakeetModel = model as? ParakeetModel { return parakeetModel.speed }
+        return 0
     }
 
-    private var modelAccuracy: Double {
-        if let localModel = selectedModel as? LocalModel {
-            return localModel.accuracy
-        } else if let parakeetModel = selectedModel as? ParakeetModel {
-            return parakeetModel.accuracy
-        }
-        return 0.0
+    private func modelAccuracy(for model: any TranscriptionModel) -> Double {
+        if let localModel = model as? LocalModel { return localModel.accuracy }
+        if let parakeetModel = model as? ParakeetModel { return parakeetModel.accuracy }
+        return 0
     }
 
-    private var modelRAM: Double {
-        if let localModel = selectedModel as? LocalModel {
-            return localModel.ramUsage
-        } else if let parakeetModel = selectedModel as? ParakeetModel {
-            return parakeetModel.ramUsage
-        }
-        return 0.0
+    private func modelRAM(for model: any TranscriptionModel) -> Double {
+        if let localModel = model as? LocalModel { return localModel.ramUsage }
+        if let parakeetModel = model as? ParakeetModel { return parakeetModel.ramUsage }
+        return 0
     }
-    
+
     private func performanceIndicator(label: String, value: Double) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
-            
+
             HStack(spacing: 4) {
                 ForEach(0..<5) { index in
                     Circle()
@@ -265,17 +296,16 @@ struct OnboardingModelDownloadView: View {
             }
         }
     }
-    
+
     private func ramUsageLabel(gb: Double) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("RAM")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
-            
+
             Text(String(format: "%.1f GB", gb))
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(.white)
         }
     }
 }
-

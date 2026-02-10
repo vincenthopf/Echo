@@ -3,16 +3,36 @@ import SwiftUI
 
 @MainActor
 extension WhisperState {
+    func isNativeModelSupported(_ model: any TranscriptionModel) -> Bool {
+        guard model.provider == .nativeApple else { return true }
+        if #available(macOS 26, *) {
+            return true
+        }
+        return false
+    }
+
     // Loads the default transcription model from UserDefaults
     func loadCurrentTranscriptionModel() {
         if let savedModelName = UserDefaults.standard.string(forKey: "CurrentTranscriptionModel"),
            let savedModel = allAvailableModels.first(where: { $0.name == savedModelName }) {
-            currentTranscriptionModel = savedModel
+            if isNativeModelSupported(savedModel) {
+                currentTranscriptionModel = savedModel
+            }
         }
     }
 
     // Function to set any transcription model as default
     func setDefaultTranscriptionModel(_ model: any TranscriptionModel) {
+        guard isNativeModelSupported(model) else {
+            Task { @MainActor in
+                await NotificationManager.shared.showNotification(
+                    title: "Apple Speech requires macOS 26 or later.",
+                    type: .warning
+                )
+            }
+            return
+        }
+
         self.currentTranscriptionModel = model
         UserDefaults.standard.set(model.name, forKey: "CurrentTranscriptionModel")
         
