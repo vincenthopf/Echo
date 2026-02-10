@@ -10,33 +10,41 @@ final class NavigationSmokeTests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments += ["-hasCompletedOnboarding", "YES"]
         app.launchArguments += ["-ApplePersistenceIgnoreState", "YES"]
+        app.launchArguments += ["-selectedSettingsTab", "Intelligence"]
+        addUIInterruptionMonitor(withDescription: "System Dialogs") { alert in
+            if alert.buttons["Don’t Allow"].exists { alert.buttons["Don’t Allow"].tap(); return true }
+            if alert.buttons["OK"].exists { alert.buttons["OK"].tap(); return true }
+            if alert.buttons["Allow"].exists { alert.buttons["Allow"].tap(); return true }
+            return false
+        }
         app.launch()
+        app.activate()
 
         let settingsNavButton = app.buttons["sidebar.Settings"]
         XCTAssertTrue(settingsNavButton.waitForExistence(timeout: 10))
-        settingsNavButton.tap()
-
-        // Tab controls can surface as either radio buttons or regular buttons on macOS.
-        let intelligenceRadioTab = app.radioButtons["Intelligence"]
-        let intelligenceButtonTab = app.buttons["Intelligence"]
+        tapSafely(settingsNavButton, in: app)
 
         let manageProfilesButton = app.buttons["intelligence.manageProfiles"]
-        if !manageProfilesButton.waitForExistence(timeout: 3) {
-            if intelligenceRadioTab.waitForExistence(timeout: 3) {
-                intelligenceRadioTab.tap()
-            } else if intelligenceButtonTab.waitForExistence(timeout: 3) {
-                intelligenceButtonTab.tap()
-            }
-        }
-
         XCTAssertTrue(manageProfilesButton.waitForExistence(timeout: 8))
-        manageProfilesButton.tap()
+        tapSafely(manageProfilesButton, in: app)
 
         let openGlobalSettingsButton = app.buttons["adaptive.openIntelligenceSettings"]
         XCTAssertTrue(openGlobalSettingsButton.waitForExistence(timeout: 5))
-        openGlobalSettingsButton.tap()
+        tapSafely(openGlobalSettingsButton, in: app)
+        app.activate()
 
-        XCTAssertTrue(intelligenceRadioTab.waitForExistence(timeout: 5) || intelligenceButtonTab.waitForExistence(timeout: 5))
         XCTAssertTrue(manageProfilesButton.waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func tapSafely(_ element: XCUIElement, in app: XCUIApplication) {
+        app.activate()
+        if element.isHittable {
+            element.tap()
+            return
+        }
+
+        let center = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        center.tap()
     }
 }

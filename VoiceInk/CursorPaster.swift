@@ -20,7 +20,8 @@ class CursorPaster {
 
         // Original clipboard-based paste logic
         let pasteboard = NSPasteboard.general
-        let shouldRestoreClipboard = UserDefaults.standard.bool(forKey: "restoreClipboardAfterPaste")
+        let shouldPreserveTranscript = UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard")
+        let shouldRestoreClipboard = UserDefaults.standard.bool(forKey: "restoreClipboardAfterPaste") && !shouldPreserveTranscript
 
         var savedContents: [(NSPasteboard.PasteboardType, Data)] = []
 

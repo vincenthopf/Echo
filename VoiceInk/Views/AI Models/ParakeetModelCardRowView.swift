@@ -103,13 +103,25 @@ struct ParakeetModelCardRowView: View {
 
     private var progressSection: some View {
         Group {
-            if isDownloading {
-                let progress = whisperState.downloadProgress[model.name] ?? 0.0
-                ProgressView(value: progress)
-                    .progressViewStyle(LinearProgressViewStyle())
-                    .tint(Tokens.Colors.orange)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, Tokens.Spacing.sm)
+            if let progressState = whisperState.downloadProgressState(for: model) {
+                VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
+                    ProgressView(value: progressState.fraction)
+                        .progressViewStyle(LinearProgressViewStyle())
+                        .tint(Tokens.Colors.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    HStack(spacing: Tokens.Spacing.xs) {
+                        Text("\(Int(progressState.fraction * 100))%")
+                            .font(Tokens.Typography.caption)
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        if progressState.isEstimated {
+                            Text("Estimated")
+                                .font(Tokens.Typography.caption)
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+                .padding(.top, Tokens.Spacing.sm)
             }
         }
     }

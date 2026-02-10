@@ -165,17 +165,15 @@ struct ContentView: View {
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @State private var selectedView: ViewType = .metrics
     @State private var hoveredView: ViewType?
-    @State private var hasLoadedData = false
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 
 
-    private var isSetupComplete: Bool {
-        hasLoadedData &&
-        whisperState.currentTranscriptionModel != nil &&
-        hotkeyManager.selectedHotkey1 != .none &&
-        AXIsProcessTrusted() &&
-        CGPreflightScreenCaptureAccess()
+    private var setupReadiness: SetupReadiness {
+        SetupReadinessEvaluator.current(
+            whisperState: whisperState,
+            hotkeyManager: hotkeyManager
+        )
     }
 
     var body: some View {
@@ -193,9 +191,6 @@ struct ContentView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .frame(minWidth: 1100, minHeight: 850)
-        .onAppear {
-            hasLoadedData = true
-        }
         // inside ContentView body:
         .onReceive(NotificationCenter.default.publisher(for: .toggleSidebar)) { _ in
             columnVisibility = columnVisibility == .all ? .detailOnly : .all
@@ -211,7 +206,7 @@ struct ContentView: View {
     private var detailView: some View {
         switch selectedView {
         case .metrics:
-            if isSetupComplete {
+            if setupReadiness.requiredComplete {
                 MetricsView(skipSetupCheck: true)
                     .accessibilityIdentifier("detail.metrics")
             } else {

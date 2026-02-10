@@ -19,6 +19,19 @@ struct LocalModelCardView: View {
         downloadProgress.keys.contains(model.name + "_main") ||
         downloadProgress.keys.contains(model.name + "_coreml")
     }
+    private var progressState: ModelDownloadProgressState? {
+        let main = downloadProgress[model.name + "_main"]
+        let core = downloadProgress[model.name + "_coreml"]
+        guard main != nil || core != nil else { return nil }
+
+        let supportsCoreML = !model.name.contains("q5") && !model.name.contains("q8")
+        let total = supportsCoreML ? ((main ?? 0) * 0.5 + (core ?? 0) * 0.5) : (main ?? 0)
+        let phase = supportsCoreML && core != nil
+            ? "Downloading Core ML Model for \(model.name)"
+            : "Downloading \(model.name) Model"
+
+        return ModelDownloadProgressState(fraction: max(0, min(1, total)), phase: phase, isEstimated: false)
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: Tokens.Spacing.lg) {
@@ -123,10 +136,9 @@ struct LocalModelCardView: View {
     
     private var progressSection: some View {
         Group {
-            if isDownloading {
+            if let progressState {
                 DownloadProgressView(
-                    modelName: model.name,
-                    downloadProgress: downloadProgress
+                    progressState: progressState
                 )
                 .padding(.top, Tokens.Spacing.sm)
                 .frame(maxWidth: .infinity, alignment: .leading)

@@ -122,6 +122,35 @@ class MenuBarManager: ObservableObject {
             }
         }
     }
+
+    func openMainWindowIfNeeded() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate(ignoringOtherApps: true)
+
+            let existingWindow = NSApp.windows.first { window in
+                window.contentView != nil &&
+                window.styleMask.contains(.titled) &&
+                window.className != "NSStatusBarWindow" &&
+                window.level == .normal
+            }
+
+            if let existingWindow {
+                existingWindow.makeKeyAndOrderFront(nil)
+                existingWindow.orderFrontRegardless()
+                return
+            }
+
+            if self.mainWindow == nil || self.mainWindow?.isVisible == false {
+                self.mainWindow = self.createMainWindow()
+            }
+
+            self.mainWindow?.makeKeyAndOrderFront(nil)
+            self.mainWindow?.orderFrontRegardless()
+            self.mainWindow?.center()
+        }
+    }
     
     private func createMainWindow() -> NSWindow {
         print("MenuBarManager: Creating new main window")

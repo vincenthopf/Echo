@@ -3,29 +3,26 @@ import SwiftUI
 struct OnboardingModelSelectionView: View {
     @Binding var hasCompletedOnboarding: Bool
     @Environment(\.colorScheme) private var colorScheme
+
     @State private var scale: CGFloat = 0.8
     @State private var opacity: CGFloat = 0
-    @State private var selectedModel: any TranscriptionModel = PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!
+    @State private var selectedModel: (any TranscriptionModel)? = OnboardingModelPicker.recommendedModel()
     @State private var showModelDownload = false
+    @State private var modelSelectionError: String?
 
-    // Recommended models for onboarding
-    private let recommendedModels: [any TranscriptionModel] = [
-        PredefinedModels.models.first { $0.name == "parakeet-tdt-0.6b-v3" }!,
-        PredefinedModels.models.first { $0.name == "ggml-large-v3-turbo-q5_0" }!
-    ]
+    private var recommendedModels: [any TranscriptionModel] {
+        OnboardingModelPicker.recommendedOptions()
+    }
 
     var body: some View {
         ZStack {
             GeometryReader { geometry in
-                // Reusable background
                 OnboardingBackgroundView()
 
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 40) {
-                        Spacer()
-                            .frame(height: 20)
+                        Spacer().frame(height: 20)
 
-                        // Icon and title
                         VStack(spacing: 30) {
                             ZStack {
                                 Circle()
@@ -55,33 +52,52 @@ struct OnboardingModelSelectionView: View {
                             .opacity(opacity)
                         }
 
-                        // Model cards
-                        VStack(spacing: 16) {
-                            ForEach(recommendedModels.indices, id: \.self) { index in
-                                ModelSelectionCard(
-                                    model: recommendedModels[index],
-                                    isSelected: selectedModel.name == recommendedModels[index].name,
-                                    isRecommended: index == 0, // First model (Parakeet V3) is recommended
-                                    onSelect: {
-                                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                            selectedModel = recommendedModels[index]
+                        if recommendedModels.isEmpty {
+                            Text("No onboarding model is currently available.")
+                                .font(.body)
+                                .foregroundColor(.white)
+                                .padding(.horizontal)
+                                .multilineTextAlignment(.center)
+                        } else {
+                            VStack(spacing: 16) {
+                                ForEach(recommendedModels.indices, id: \.self) { index in
+                                    let model = recommendedModels[index]
+                                    ModelSelectionCard(
+                                        model: model,
+                                        isSelected: selectedModel?.name == model.name,
+                                        isRecommended: index == 0,
+                                        onSelect: {
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                selectedModel = model
+                                                modelSelectionError = nil
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                    .accessibilityIdentifier("onboarding.modelSelection.\(model.name)")
+                                }
                             }
+                            .frame(maxWidth: min(geometry.size.width * 0.7, 500))
+                            .scaleEffect(scale)
+                            .opacity(opacity)
                         }
-                        .frame(maxWidth: min(geometry.size.width * 0.7, 500))
-                        .scaleEffect(scale)
-                        .opacity(opacity)
 
-                        // Action button
+                        if let modelSelectionError {
+                            Text(modelSelectionError)
+                                .font(.caption)
+                                .foregroundColor(.red.opacity(0.9))
+                        }
+
                         VStack(spacing: 16) {
                             Button(action: {
+                                guard selectedModel != nil else {
+                                    modelSelectionError = "Please select a model to continue."
+                                    return
+                                }
                                 withAnimation {
                                     showModelDownload = true
                                 }
                             }) {
-                                Text("Continue with \(selectedModel.displayName)")
+                                Text(buttonTitle)
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .frame(width: 300, height: 50)
@@ -89,6 +105,7 @@ struct OnboardingModelSelectionView: View {
                                     .cornerRadius(25)
                             }
                             .buttonStyle(ScaleButtonStyle())
+                            .accessibilityIdentifier("onboarding.modelSelection.continue")
 
                             SkipButton(text: "Skip for now", colorScheme: colorScheme) {
                                 withAnimation {
@@ -98,8 +115,7 @@ struct OnboardingModelSelectionView: View {
                         }
                         .opacity(opacity)
 
-                        Spacer()
-                            .frame(height: 40)
+                        Spacer().frame(height: 40)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -113,9 +129,14 @@ struct OnboardingModelSelectionView: View {
                 .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
-        .onAppear {
-            animateIn()
+        .onAppear { animateIn() }
+    }
+
+    private var buttonTitle: String {
+        if let selectedModel {
+            return "Continue with \(selectedModel.displayName)"
         }
+        return "Continue"
     }
 
     private func animateIn() {
@@ -136,7 +157,6 @@ struct ModelSelectionCard: View {
     var body: some View {
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 16) {
-                // Header with icon, title, and badge
                 HStack(spacing: 12) {
                     ZStack {
                         Circle()
@@ -172,16 +192,13 @@ struct ModelSelectionCard: View {
 
                     Spacer()
 
-                    // Selection indicator
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 24))
                         .foregroundColor(isSelected ? .accentColor : .white.opacity(0.3))
                 }
 
-                Divider()
-                    .background(Color.white.opacity(0.1))
+                Divider().background(Color.white.opacity(0.1))
 
-                // Model stats
                 HStack(spacing: 20) {
                     if let localModel = model as? LocalModel {
                         StatItem(label: "Size", value: localModel.size, icon: "square.stack.3d.down.right")
@@ -192,10 +209,8 @@ struct ModelSelectionCard: View {
                     }
                 }
 
-                Divider()
-                    .background(Color.white.opacity(0.1))
+                Divider().background(Color.white.opacity(0.1))
 
-                // Features
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(modelFeatures, id: \.self) { feature in
                         HStack(spacing: 8) {
@@ -212,10 +227,8 @@ struct ModelSelectionCard: View {
                     }
                 }
 
-                Divider()
-                    .background(Color.white.opacity(0.1))
+                Divider().background(Color.white.opacity(0.1))
 
-                // Performance indicators
                 HStack(spacing: 20) {
                     if let localModel = model as? LocalModel {
                         performanceIndicator(label: "Speed", value: localModel.speed)
@@ -251,36 +264,23 @@ struct ModelSelectionCard: View {
     }
 
     private var modelIcon: String {
-        if model is ParakeetModel {
-            return "waveform.badge.mic"
-        } else {
-            return "cpu"
-        }
+        model is ParakeetModel ? "waveform.badge.mic" : "cpu"
     }
 
     private var modelColor: Color {
-        if model is ParakeetModel {
-            return .blue
-        } else {
-            return .purple
-        }
+        model is ParakeetModel ? .blue : .purple
     }
 
     private var modelSubtitle: String {
         if model.name.contains("parakeet") {
             return "NVIDIA's Parakeet V3 model with multilingual support across English and 25 European languages."
-        } else {
-            return "OpenAI's Whisper model optimized for speed and accuracy."
         }
+        return "OpenAI's Whisper model optimized for speed and accuracy."
     }
 
     private var languageCount: String {
         let count = model.supportedLanguages.count
-        if count > 20 {
-            return "Multilingual"
-        } else {
-            return "\(count) languages"
-        }
+        return count > 20 ? "Multilingual" : "\(count) languages"
     }
 
     private var modelFeatures: [String] {
@@ -291,14 +291,13 @@ struct ModelSelectionCard: View {
                 "Optimized for Apple Silicon",
                 "Works completely offline"
             ]
-        } else {
-            return [
-                "High-quality transcription",
-                "Supports 90+ languages",
-                "Quantized for efficiency",
-                "Works completely offline"
-            ]
         }
+        return [
+            "High-quality transcription",
+            "Supports 90+ languages",
+            "Quantized for efficiency",
+            "Works completely offline"
+        ]
     }
 
     private func performanceIndicator(label: String, value: Double) -> some View {
@@ -330,7 +329,6 @@ struct ModelSelectionCard: View {
     }
 }
 
-// MARK: - Stat Item
 struct StatItem: View {
     let label: String
     let value: String
@@ -339,23 +337,16 @@ struct StatItem: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 12))
-                .foregroundColor(.accentColor)
-
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.6))
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.6))
                 Text(value)
                     .font(.caption)
-                    .fontWeight(.medium)
                     .foregroundColor(.white)
             }
         }
     }
-}
-
-// MARK: - Preview
-#Preview {
-    OnboardingModelSelectionView(hasCompletedOnboarding: .constant(false))
 }

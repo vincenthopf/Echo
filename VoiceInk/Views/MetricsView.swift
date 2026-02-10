@@ -9,7 +9,6 @@ struct MetricsView: View {
     @Query(sort: \Transcription.timestamp) private var transcriptions: [Transcription]
     @EnvironmentObject private var whisperState: WhisperState
     @EnvironmentObject private var hotkeyManager: HotkeyManager
-    @State private var hasLoadedData = false
     let skipSetupCheck: Bool
 
     init(skipSetupCheck: Bool = false) {
@@ -21,7 +20,7 @@ struct MetricsView: View {
             Group {
                 if skipSetupCheck {
                     MetricsContent(transcriptions: Array(transcriptions))
-                } else if isSetupComplete {
+                } else if setupReadiness.requiredComplete {
                     MetricsContent(transcriptions: Array(transcriptions))
                 } else {
                     MetricsSetupView()
@@ -29,17 +28,12 @@ struct MetricsView: View {
             }
         }
         .background(ParallelDesignTokens.Colors.background(for: colorScheme))
-        .task {
-            // Ensure the model context is ready
-            hasLoadedData = true
-        }
     }
 
-    private var isSetupComplete: Bool {
-        hasLoadedData &&
-        whisperState.currentTranscriptionModel != nil &&
-        hotkeyManager.selectedHotkey1 != .none &&
-        AXIsProcessTrusted() &&
-        CGPreflightScreenCaptureAccess()
+    private var setupReadiness: SetupReadiness {
+        SetupReadinessEvaluator.current(
+            whisperState: whisperState,
+            hotkeyManager: hotkeyManager
+        )
     }
 }

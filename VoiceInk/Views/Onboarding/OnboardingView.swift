@@ -6,6 +6,7 @@ struct OnboardingView: View {
     @State private var textOpacity: CGFloat = 0
     @State private var showSecondaryElements = false
     @State private var showPermissions = false
+    private let launchArguments = ProcessInfo.processInfo.arguments
 
     // Animation timing
     private let animationDelay = 0.2
@@ -63,7 +64,7 @@ struct OnboardingView: View {
                                             showPermissions = true
                                         }
                                     }) {
-                                        Text("Get Started")
+                                        Text("Start Quick Setup")
                                             .font(ParallelDesignTokens.Typography.heading3)
                                             .foregroundColor(.white)
                                             .frame(width: min(geometry.size.width * 0.3, 200), height: 50)
@@ -73,6 +74,7 @@ struct OnboardingView: View {
                                             )
                                     }
                                     .buttonStyle(ScaleButtonStyle())
+                                    .accessibilityIdentifier("onboarding.startQuickSetup")
 
                                     SkipButton(text: "Skip Tour", colorScheme: colorScheme) {
                                         hasCompletedOnboarding = true
@@ -97,6 +99,13 @@ struct OnboardingView: View {
     }
 
     private func startAnimations() {
+        if launchArguments.contains("-uiTestSkipOnboardingIntro") {
+            textOpacity = 1
+            showSecondaryElements = true
+            showPermissions = launchArguments.contains("-uiTestStartQuickSetup")
+            return
+        }
+
         // Text fade in
         withAnimation(.easeOut(duration: textAnimationDuration).delay(animationDelay)) {
             textOpacity = 1
@@ -253,4 +262,3 @@ struct ScaleButtonStyle: ButtonStyle {
 #Preview {
     OnboardingView(hasCompletedOnboarding: .constant(false))
 } 
-

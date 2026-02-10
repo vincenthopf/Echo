@@ -7,6 +7,7 @@ struct NativeAppleModelCardView: View {
 
     let model: NativeAppleModel
     let isCurrent: Bool
+    let isSupported: Bool
     var setDefaultAction: () -> Void
 
     var body: some View {
@@ -93,18 +94,30 @@ struct NativeAppleModelCardView: View {
     }
 
     private var descriptionSection: some View {
-        Text(model.description)
-            .font(Tokens.Typography.caption)
-            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
-            .lineLimit(2)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, Tokens.Spacing.xs)
+        VStack(alignment: .leading, spacing: Tokens.Spacing.xs) {
+            Text(model.description)
+                .font(Tokens.Typography.caption)
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if !isSupported {
+                Text("Unavailable on this macOS version")
+                    .font(Tokens.Typography.caption)
+                    .foregroundColor(Tokens.Colors.error)
+            }
+        }
+        .padding(.top, Tokens.Spacing.xs)
     }
 
     private var actionSection: some View {
         HStack(spacing: Tokens.Spacing.sm) {
             if isCurrent {
                 Text("Default Model")
+                    .font(Tokens.Typography.label)
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+            } else if !isSupported {
+                Text("Not Supported")
                     .font(Tokens.Typography.label)
                     .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             } else {
@@ -115,6 +128,7 @@ struct NativeAppleModelCardView: View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
                 .tint(Tokens.Colors.orange)
+                .disabled(!isSupported)
             }
         }
     }
