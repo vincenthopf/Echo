@@ -17,6 +17,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var selectedTranscriptionModelName: String?
     var selectedLanguage: String?
     var useScreenCapture: Bool
+    var useClipboardContext: Bool = false
     var selectedAIProvider: String?
     var selectedAIModel: String?
     var isAutoSendEnabled: Bool = false
@@ -27,6 +28,13 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var useTypeOutPaste: Bool = false
     // When type-out mode is enabled, use Shift+Enter for newlines instead of Enter
     var useShiftEnterForNewlines: Bool = false
+    // Speed multiplier for type-out mode (1.0 = default 30ms/char, 3.0 = fastest, 0.33 = slowest)
+    var typeOutSpeed: Double = 1.0
+
+    // Recording behavior settings (per-profile)
+    var isPauseMediaEnabled: Bool = false
+    var isSystemMuteEnabled: Bool = true
+    var isPreserveTranscriptInClipboard: Bool = false
 
     // Voice trigger support for Adaptive Awareness integration
     var triggerWords: [String] = []
@@ -35,15 +43,15 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
     var triggerLogicMode: TriggerLogicMode = .any
 
     enum CodingKeys: String, CodingKey {
-        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords, triggerLogicMode, useTypeOutPaste, useShiftEnterForNewlines
+        case id, name, emoji, appConfigs, urlConfigs, isAIEnhancementEnabled, selectedPrompt, selectedLanguage, useScreenCapture, useClipboardContext, selectedAIProvider, selectedAIModel, isAutoSendEnabled, isEnabled, isDefault, triggerWords, triggerLogicMode, useTypeOutPaste, useShiftEnterForNewlines, typeOutSpeed, isPauseMediaEnabled, isSystemMuteEnabled, isPreserveTranscriptInClipboard
         case selectedWhisperModel
         case selectedTranscriptionModelName
     }
     
     init(id: UUID = UUID(), name: String, emoji: String, appConfigs: [AppConfig]? = nil,
          urlConfigs: [URLConfig]? = nil, isAIEnhancementEnabled: Bool, selectedPrompt: String? = nil,
-         selectedTranscriptionModelName: String? = nil, selectedLanguage: String? = nil, useScreenCapture: Bool = false,
-         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = [], triggerLogicMode: TriggerLogicMode = .any, useTypeOutPaste: Bool = false, useShiftEnterForNewlines: Bool = false) {
+         selectedTranscriptionModelName: String? = nil, selectedLanguage: String? = nil, useScreenCapture: Bool = false, useClipboardContext: Bool = false,
+         selectedAIProvider: String? = nil, selectedAIModel: String? = nil, isAutoSendEnabled: Bool = false, isEnabled: Bool = true, isDefault: Bool = false, triggerWords: [String] = [], triggerLogicMode: TriggerLogicMode = .any, useTypeOutPaste: Bool = false, useShiftEnterForNewlines: Bool = false, typeOutSpeed: Double = 1.0, isPauseMediaEnabled: Bool = false, isSystemMuteEnabled: Bool = true, isPreserveTranscriptInClipboard: Bool = false) {
         self.id = id
         self.name = name
         self.emoji = emoji
@@ -52,6 +60,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         self.isAIEnhancementEnabled = isAIEnhancementEnabled
         self.selectedPrompt = selectedPrompt
         self.useScreenCapture = useScreenCapture
+        self.useClipboardContext = useClipboardContext
         self.isAutoSendEnabled = isAutoSendEnabled
         self.selectedAIProvider = selectedAIProvider ?? UserDefaults.standard.string(forKey: "selectedAIProvider")
         self.selectedAIModel = selectedAIModel
@@ -63,6 +72,10 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         self.triggerLogicMode = triggerLogicMode
         self.useTypeOutPaste = useTypeOutPaste
         self.useShiftEnterForNewlines = useShiftEnterForNewlines
+        self.typeOutSpeed = typeOutSpeed
+        self.isPauseMediaEnabled = isPauseMediaEnabled
+        self.isSystemMuteEnabled = isSystemMuteEnabled
+        self.isPreserveTranscriptInClipboard = isPreserveTranscriptInClipboard
     }
 
     init(from decoder: Decoder) throws {
@@ -76,6 +89,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         selectedPrompt = try container.decodeIfPresent(String.self, forKey: .selectedPrompt)
         selectedLanguage = try container.decodeIfPresent(String.self, forKey: .selectedLanguage)
         useScreenCapture = try container.decode(Bool.self, forKey: .useScreenCapture)
+        useClipboardContext = try container.decodeIfPresent(Bool.self, forKey: .useClipboardContext) ?? false
         selectedAIProvider = try container.decodeIfPresent(String.self, forKey: .selectedAIProvider)
         selectedAIModel = try container.decodeIfPresent(String.self, forKey: .selectedAIModel)
         isAutoSendEnabled = try container.decodeIfPresent(Bool.self, forKey: .isAutoSendEnabled) ?? false
@@ -91,6 +105,12 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         // Decode type-out paste settings with fallback for backward compatibility
         useTypeOutPaste = try container.decodeIfPresent(Bool.self, forKey: .useTypeOutPaste) ?? false
         useShiftEnterForNewlines = try container.decodeIfPresent(Bool.self, forKey: .useShiftEnterForNewlines) ?? false
+        typeOutSpeed = try container.decodeIfPresent(Double.self, forKey: .typeOutSpeed) ?? 1.0
+
+        // Decode recording behavior settings with fallback for backward compatibility
+        isPauseMediaEnabled = try container.decodeIfPresent(Bool.self, forKey: .isPauseMediaEnabled) ?? false
+        isSystemMuteEnabled = try container.decodeIfPresent(Bool.self, forKey: .isSystemMuteEnabled) ?? true
+        isPreserveTranscriptInClipboard = try container.decodeIfPresent(Bool.self, forKey: .isPreserveTranscriptInClipboard) ?? false
 
         if let newModelName = try container.decodeIfPresent(String.self, forKey: .selectedTranscriptionModelName) {
             selectedTranscriptionModelName = newModelName
@@ -112,6 +132,7 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encodeIfPresent(selectedPrompt, forKey: .selectedPrompt)
         try container.encodeIfPresent(selectedLanguage, forKey: .selectedLanguage)
         try container.encode(useScreenCapture, forKey: .useScreenCapture)
+        try container.encode(useClipboardContext, forKey: .useClipboardContext)
         try container.encodeIfPresent(selectedAIProvider, forKey: .selectedAIProvider)
         try container.encodeIfPresent(selectedAIModel, forKey: .selectedAIModel)
         try container.encode(isAutoSendEnabled, forKey: .isAutoSendEnabled)
@@ -122,6 +143,10 @@ struct PowerModeConfig: Codable, Identifiable, Equatable {
         try container.encode(triggerLogicMode, forKey: .triggerLogicMode)
         try container.encode(useTypeOutPaste, forKey: .useTypeOutPaste)
         try container.encode(useShiftEnterForNewlines, forKey: .useShiftEnterForNewlines)
+        try container.encode(typeOutSpeed, forKey: .typeOutSpeed)
+        try container.encode(isPauseMediaEnabled, forKey: .isPauseMediaEnabled)
+        try container.encode(isSystemMuteEnabled, forKey: .isSystemMuteEnabled)
+        try container.encode(isPreserveTranscriptInClipboard, forKey: .isPreserveTranscriptInClipboard)
     }
     // MARK: - Trigger Logic Helpers
 
@@ -184,9 +209,12 @@ class PowerModeManager: ObservableObject {
     private let configKey = "powerModeConfigurationsV2"
     private let activeConfigIdKey = "activeConfigurationId"
 
+    private let globalSettingsMigrationKey = "didMigrateGlobalSettingsToDefaultProfile_v1"
+
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
         loadConfigurations()
+        migrateGlobalSettingsToDefaultProfile()
         reconcileActiveConfiguration()
     }
 
@@ -202,6 +230,40 @@ class PowerModeManager: ObservableObject {
         if normalizedConfigs != decodedConfigs {
             persistConfigurations()
         }
+    }
+
+    /// One-time migration: moves global AI enhancement settings into the default profile.
+    /// This ensures existing users don't lose their settings when global toggles are removed.
+    private func migrateGlobalSettingsToDefaultProfile() {
+        guard !userDefaults.bool(forKey: globalSettingsMigrationKey) else { return }
+
+        let globalEnhancementEnabled = userDefaults.bool(forKey: "isAIEnhancementEnabled")
+        let globalScreenCapture = userDefaults.bool(forKey: "useScreenCaptureContext")
+        let globalClipboardContext = userDefaults.bool(forKey: "useClipboardContext")
+
+        if configurations.isEmpty {
+            // No profiles exist — create a default profile from global settings
+            let defaultConfig = PowerModeConfig(
+                name: "Default",
+                emoji: "circle.fill",
+                isAIEnhancementEnabled: globalEnhancementEnabled,
+                useScreenCapture: globalScreenCapture,
+                useClipboardContext: globalClipboardContext,
+                isDefault: true
+            )
+            configurations = [defaultConfig]
+            persistConfigurations()
+        } else {
+            // Profiles exist — update the default profile with current global settings
+            if let defaultIndex = configurations.firstIndex(where: { $0.isDefault }) {
+                configurations[defaultIndex].isAIEnhancementEnabled = globalEnhancementEnabled
+                configurations[defaultIndex].useScreenCapture = globalScreenCapture
+                configurations[defaultIndex].useClipboardContext = globalClipboardContext
+                persistConfigurations()
+            }
+        }
+
+        userDefaults.set(true, forKey: globalSettingsMigrationKey)
     }
 
     func saveConfigurations() {

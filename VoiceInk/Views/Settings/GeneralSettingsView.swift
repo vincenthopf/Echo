@@ -38,9 +38,6 @@ struct GeneralSettingsView: View {
 
                 // MARK: - Reset Section
                 resetSection
-
-                // MARK: - Experimental Features Section
-                experimentalSection
             }
             .padding(.horizontal, Tokens.Spacing.lg)
             .padding(.vertical, Tokens.Spacing.sm)
@@ -215,8 +212,6 @@ struct GeneralSettingsView: View {
                             whisperPrompt: whisperState.whisperPrompt,
                             hotkeyManager: hotkeyManager,
                             menuBarManager: menuBarManager,
-                            mediaController: MediaController.shared,
-                            playbackController: PlaybackController.shared,
                             soundManager: SoundManager.shared,
                             whisperState: whisperState
                         )
@@ -244,8 +239,6 @@ struct GeneralSettingsView: View {
                             whisperPrompt: whisperState.whisperPrompt,
                             hotkeyManager: hotkeyManager,
                             menuBarManager: menuBarManager,
-                            mediaController: MediaController.shared,
-                            playbackController: PlaybackController.shared,
                             soundManager: SoundManager.shared,
                             whisperState: whisperState
                         )
@@ -322,23 +315,4 @@ struct GeneralSettingsView: View {
 
     // MARK: - Experimental Features Section
 
-    private var experimentalSection: some View {
-        VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
-            SectionHeader(
-                title: "Experimental Features",
-                subtitle: "Try new features that may be unstable"
-            )
-
-            VStack(spacing: 0) {
-                ExperimentalFeaturesSection()
-                    .padding(Tokens.Spacing.lg)
-            }
-            .background(Tokens.Colors.elevated(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: Tokens.Radius.lg))
-            .overlay(
-                RoundedRectangle(cornerRadius: Tokens.Radius.lg)
-                    .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
-            )
-        }
-    }
 }

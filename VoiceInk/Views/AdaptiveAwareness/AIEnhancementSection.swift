@@ -162,7 +162,7 @@ struct AIEnhancementSection: View {
                         FormDivider()
 
                         // Screen capture row
-                        FormRow(label: "Context") {
+                        FormRow(label: "Screen") {
                             HStack(spacing: Tokens.Spacing.sm) {
                                 Toggle("", isOn: Binding(
                                     get: { config.useScreenCapture },
@@ -181,6 +181,34 @@ struct AIEnhancementSection: View {
                                 InfoTip(
                                     title: "Visual Context",
                                     message: "Captures the screen to provide visual context to the AI for better enhancement results. Requires screen recording permission."
+                                )
+
+                                Spacer()
+                            }
+                        }
+
+                        FormDivider()
+
+                        // Clipboard context row
+                        FormRow(label: "Clipboard") {
+                            HStack(spacing: Tokens.Spacing.sm) {
+                                Toggle("", isOn: Binding(
+                                    get: { config.useClipboardContext },
+                                    set: { newValue in
+                                        config.useClipboardContext = newValue
+                                        onSave()
+                                    }
+                                ))
+                                .toggleStyle(.switch)
+                                .labelsHidden()
+
+                                Text("Use clipboard text for AI context")
+                                    .font(Tokens.Typography.bodySmall)
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+
+                                InfoTip(
+                                    title: "Clipboard Context",
+                                    message: "Uses text from your clipboard to provide additional context to the AI for more accurate enhancement results."
                                 )
 
                                 Spacer()

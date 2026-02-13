@@ -8,7 +8,7 @@ struct RecordingSettingsView: View {
     @EnvironmentObject private var hotkeyManager: HotkeyManager
     @EnvironmentObject private var whisperState: WhisperState
     @StateObject private var deviceManager = AudioDeviceManager.shared
-    @ObservedObject private var mediaController = MediaController.shared
+
     @State private var isCustomCancelEnabled = false
     @Environment(\.colorScheme) private var colorScheme
 
@@ -312,47 +312,6 @@ struct RecordingSettingsView: View {
                         .labelsHidden()
 
                         Text("Sound feedback")
-                            .font(Tokens.Typography.body)
-                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
-
-                        Spacer()
-                    }
-                }
-
-                FormDivider()
-
-                // Mute system audio
-                FormRow(label: "Mute") {
-                    HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: $mediaController.isSystemMuteEnabled)
-                            .toggleStyle(.switch)
-                            .tint(Tokens.Colors.orange)
-                            .labelsHidden()
-                            .help("Automatically mute system audio when recording starts and restore when recording stops")
-
-                        Text("Mute system audio during recording")
-                            .font(Tokens.Typography.body)
-                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
-
-                        Spacer()
-                    }
-                }
-
-                FormDivider()
-
-                // Preserve transcript
-                FormRow(label: "Clipboard") {
-                    HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: Binding(
-                            get: { UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard") },
-                            set: { UserDefaults.standard.set($0, forKey: "preserveTranscriptInClipboard") }
-                        ))
-                        .toggleStyle(.switch)
-                        .tint(Tokens.Colors.orange)
-                        .labelsHidden()
-                        .help("Keep the transcribed text in clipboard instead of restoring the original clipboard content")
-
-                        Text("Preserve transcript in clipboard")
                             .font(Tokens.Typography.body)
                             .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 

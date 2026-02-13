@@ -20,10 +20,10 @@ struct GeneralSettings: Codable {
     let audioRetentionPeriod: Int?
 
     let isSoundFeedbackEnabled: Bool?
-    let isSystemMuteEnabled: Bool?
-    let isPauseMediaEnabled: Bool?
+    let isSystemMuteEnabled: Bool?  // Legacy: now per-profile in PowerModeConfig
+    let isPauseMediaEnabled: Bool?  // Legacy: now per-profile in PowerModeConfig
     let isTextFormattingEnabled: Bool?
-    let isExperimentalFeaturesEnabled: Bool?
+    let isExperimentalFeaturesEnabled: Bool?  // Legacy: removed
 }
 
 struct VoiceInkExportedSettings: Codable {
@@ -53,7 +53,6 @@ class ImportExportService {
     private let keyAudioRetentionPeriod = "AudioRetentionPeriod"
 
     private let keyIsSoundFeedbackEnabled = "isSoundFeedbackEnabled"
-    private let keyIsSystemMuteEnabled = "isSystemMuteEnabled"
     private let keyIsTextFormattingEnabled = "IsTextFormattingEnabled"
 
     private init() {
@@ -65,7 +64,7 @@ class ImportExportService {
     }
 
     @MainActor
-    func exportSettings(enhancementService: AIEnhancementService, whisperPrompt: WhisperPrompt, hotkeyManager: HotkeyManager, menuBarManager: MenuBarManager, mediaController: MediaController, playbackController: PlaybackController, soundManager: SoundManager, whisperState: WhisperState) {
+    func exportSettings(enhancementService: AIEnhancementService, whisperPrompt: WhisperPrompt, hotkeyManager: HotkeyManager, menuBarManager: MenuBarManager, soundManager: SoundManager, whisperState: WhisperState) {
         let powerModeManager = PowerModeManager.shared
         let emojiManager = EmojiManager.shared
 
@@ -100,10 +99,10 @@ class ImportExportService {
             audioRetentionPeriod: UserDefaults.standard.integer(forKey: keyAudioRetentionPeriod),
 
             isSoundFeedbackEnabled: soundManager.isEnabled,
-            isSystemMuteEnabled: mediaController.isSystemMuteEnabled,
-            isPauseMediaEnabled: playbackController.isPauseMediaEnabled,
+            isSystemMuteEnabled: nil,
+            isPauseMediaEnabled: nil,
             isTextFormattingEnabled: UserDefaults.standard.object(forKey: keyIsTextFormattingEnabled) as? Bool ?? true,
-            isExperimentalFeaturesEnabled: UserDefaults.standard.bool(forKey: "isExperimentalFeaturesEnabled")
+            isExperimentalFeaturesEnabled: nil
         )
 
         let exportedSettings = VoiceInkExportedSettings(
@@ -149,7 +148,7 @@ class ImportExportService {
     }
 
     @MainActor
-    func importSettings(enhancementService: AIEnhancementService, whisperPrompt: WhisperPrompt, hotkeyManager: HotkeyManager, menuBarManager: MenuBarManager, mediaController: MediaController, playbackController: PlaybackController, soundManager: SoundManager, whisperState: WhisperState) {
+    func importSettings(enhancementService: AIEnhancementService, whisperPrompt: WhisperPrompt, hotkeyManager: HotkeyManager, menuBarManager: MenuBarManager, soundManager: SoundManager, whisperState: WhisperState) {
         let openPanel = NSOpenPanel()
         openPanel.allowedContentTypes = [UTType.json]
         openPanel.canChooseFiles = true
@@ -259,18 +258,8 @@ class ImportExportService {
                         if let soundFeedback = general.isSoundFeedbackEnabled {
                             soundManager.isEnabled = soundFeedback
                         }
-                        if let muteSystem = general.isSystemMuteEnabled {
-                            mediaController.isSystemMuteEnabled = muteSystem
-                        }
-                        if let pauseMedia = general.isPauseMediaEnabled {
-                            playbackController.isPauseMediaEnabled = pauseMedia
-                        }
-                        if let experimentalEnabled = general.isExperimentalFeaturesEnabled {
-                            UserDefaults.standard.set(experimentalEnabled, forKey: "isExperimentalFeaturesEnabled")
-                            if experimentalEnabled == false {
-                                playbackController.isPauseMediaEnabled = false
-                            }
-                        }
+                        // isSystemMuteEnabled, isPauseMediaEnabled, isExperimentalFeaturesEnabled
+                        // are now per-profile settings in PowerModeConfig (imported via powerModeConfigs)
                         if let textFormattingEnabled = general.isTextFormattingEnabled {
                             UserDefaults.standard.set(textFormattingEnabled, forKey: self.keyIsTextFormattingEnabled)
                         }

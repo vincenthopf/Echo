@@ -144,6 +144,7 @@ struct ProfileListView: View {
             selectedTranscriptionModelName: config.selectedTranscriptionModelName,
             selectedLanguage: config.selectedLanguage,
             useScreenCapture: config.useScreenCapture,
+            useClipboardContext: config.useClipboardContext,
             selectedAIProvider: config.selectedAIProvider,
             selectedAIModel: config.selectedAIModel,
             isAutoSendEnabled: config.isAutoSendEnabled,

@@ -1,10 +1,7 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
-/// Intelligence settings for AI Enhancement and Adaptive Awareness
+/// Intelligence settings for AI Provider, Adaptive Awareness, and Shortcuts
 struct IntelligenceSettingsView: View {
-    // AI Enhancement
-    @EnvironmentObject private var enhancementService: AIEnhancementService
     @EnvironmentObject private var menuBarManager: MenuBarManager
 
     // Adaptive Awareness
@@ -22,8 +19,8 @@ struct IntelligenceSettingsView: View {
                 // MARK: - Adaptive Awareness Section
                 adaptiveAwarenessSection
 
-                // MARK: - AI Enhancement Section
-                aiEnhancementSection
+                // MARK: - Keyboard Shortcuts Section
+                keyboardShortcutsSection
             }
             .padding(.horizontal, Tokens.Spacing.xl)
             .padding(.vertical, Tokens.Spacing.sm)
@@ -118,90 +115,17 @@ struct IntelligenceSettingsView: View {
         }
     }
 
-    // MARK: - AI Enhancement Section
+    // MARK: - Keyboard Shortcuts Section
 
-    private var aiEnhancementSection: some View {
+    private var keyboardShortcutsSection: some View {
         VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
             SectionHeader(
-                title: "Intelligent Transformation",
-                subtitle: "Transform your transcriptions with AI",
-                icon: "wand.and.stars"
+                title: "Keyboard Shortcuts",
+                subtitle: "Quick access during recording",
+                icon: "command"
             )
 
             VStack(spacing: 0) {
-                // Enable toggle row
-                FormRow(label: "Enabled") {
-                    HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: $enhancementService.isEnhancementEnabled)
-                            .toggleStyle(.switch)
-                            .tint(Tokens.Colors.orange)
-                            .labelsHidden()
-
-                        Text("Turn on AI-powered transformation features")
-                            .font(Tokens.Typography.bodySmall)
-                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
-
-                        InfoTip(
-                            title: "Intelligent Transformation",
-                            message: "Intelligent transformation lets you pass the transcribed audio through LLMs to post-process using different prompts suitable for different use cases like e-mails, summary, writing, etc.",
-                            learnMoreURL: "https://vjh.io/embr-echo-docs"
-                        )
-
-                        Spacer()
-                    }
-                }
-
-                FormDivider()
-
-                // Clipboard Context row
-                FormRow(label: "Clipboard") {
-                    HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: $enhancementService.useClipboardContext)
-                            .toggleStyle(.switch)
-                            .tint(Tokens.Colors.orange)
-                            .labelsHidden()
-                            .disabled(!enhancementService.isEnhancementEnabled)
-
-                        Text("Use text from clipboard to understand the context")
-                            .font(Tokens.Typography.bodySmall)
-                            .foregroundColor(enhancementService.isEnhancementEnabled
-                                ? Tokens.Colors.textSecondary(for: colorScheme)
-                                : Tokens.Colors.textSecondary(for: colorScheme).opacity(0.5))
-
-                        Spacer()
-                    }
-                }
-
-                FormDivider()
-
-                // Context Awareness row
-                FormRow(label: "Screen") {
-                    HStack(spacing: Tokens.Spacing.sm) {
-                        Toggle("", isOn: $enhancementService.useScreenCaptureContext)
-                            .toggleStyle(.switch)
-                            .tint(Tokens.Colors.orange)
-                            .labelsHidden()
-                            .disabled(!enhancementService.isEnhancementEnabled)
-
-                        Text("Learn what is on the screen to understand the context")
-                            .font(Tokens.Typography.bodySmall)
-                            .foregroundColor(enhancementService.isEnhancementEnabled
-                                ? Tokens.Colors.textSecondary(for: colorScheme)
-                                : Tokens.Colors.textSecondary(for: colorScheme).opacity(0.5))
-
-                        Spacer()
-
-                        // Vision/OCR mode indicator
-                        if enhancementService.useScreenCaptureContext,
-                           let aiService = enhancementService.getAIService() {
-                            ScreenCaptureModeIndicator(aiService: aiService, colorScheme: colorScheme)
-                        }
-                    }
-                }
-
-                FormDivider()
-
-                // Enhancement shortcuts
                 VStack(alignment: .leading, spacing: Tokens.Spacing.lg) {
                     EnhancementShortcutsSection()
                 }

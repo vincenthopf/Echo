@@ -36,11 +36,15 @@ enum ActivationSource: Codable, Equatable {
 struct ApplicationState: Codable {
     var isEnhancementEnabled: Bool
     var useScreenCaptureContext: Bool
+    var useClipboardContext: Bool?
     var selectedPromptId: String?
     var selectedAIProvider: String?
     var selectedAIModel: String?
     var selectedLanguage: String?
     var transcriptionModelName: String?
+    var isPauseMediaEnabled: Bool?
+    var isSystemMuteEnabled: Bool?
+    var isPreserveTranscriptInClipboard: Bool?
 }
 
 struct PowerModeSession: Codable {
@@ -82,11 +86,15 @@ class PowerModeSessionManager: ObservableObject {
         let originalState = ApplicationState(
             isEnhancementEnabled: enhancementService.isEnhancementEnabled,
             useScreenCaptureContext: enhancementService.useScreenCaptureContext,
+            useClipboardContext: enhancementService.useClipboardContext,
             selectedPromptId: enhancementService.selectedPromptId?.uuidString,
             selectedAIProvider: enhancementService.getAIService()?.selectedProvider.rawValue,
             selectedAIModel: enhancementService.getAIService()?.currentModel,
             selectedLanguage: UserDefaults.standard.string(forKey: "SelectedLanguage"),
-            transcriptionModelName: whisperState.currentTranscriptionModel?.name
+            transcriptionModelName: whisperState.currentTranscriptionModel?.name,
+            isPauseMediaEnabled: PlaybackController.shared.isPauseMediaEnabled,
+            isSystemMuteEnabled: MediaController.shared.isSystemMuteEnabled,
+            isPreserveTranscriptInClipboard: UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard")
         )
 
         let newSession = PowerModeSession(
@@ -126,11 +134,15 @@ class PowerModeSessionManager: ObservableObject {
         let updatedState = ApplicationState(
             isEnhancementEnabled: enhancementService.isEnhancementEnabled,
             useScreenCaptureContext: enhancementService.useScreenCaptureContext,
+            useClipboardContext: enhancementService.useClipboardContext,
             selectedPromptId: enhancementService.selectedPromptId?.uuidString,
             selectedAIProvider: enhancementService.getAIService()?.selectedProvider.rawValue,
             selectedAIModel: enhancementService.getAIService()?.currentModel,
             selectedLanguage: UserDefaults.standard.string(forKey: "SelectedLanguage"),
-            transcriptionModelName: whisperState.currentTranscriptionModel?.name
+            transcriptionModelName: whisperState.currentTranscriptionModel?.name,
+            isPauseMediaEnabled: PlaybackController.shared.isPauseMediaEnabled,
+            isSystemMuteEnabled: MediaController.shared.isSystemMuteEnabled,
+            isPreserveTranscriptInClipboard: UserDefaults.standard.bool(forKey: "preserveTranscriptInClipboard")
         )
         
         session.originalState = updatedState
@@ -143,6 +155,7 @@ class PowerModeSessionManager: ObservableObject {
         await MainActor.run {
             enhancementService.isEnhancementEnabled = config.isAIEnhancementEnabled
             enhancementService.useScreenCaptureContext = config.useScreenCapture
+            enhancementService.useClipboardContext = config.useClipboardContext
 
             if config.isAIEnhancementEnabled {
                 if let promptId = config.selectedPrompt, let uuid = UUID(uuidString: promptId) {
@@ -163,6 +176,11 @@ class PowerModeSessionManager: ObservableObject {
                 UserDefaults.standard.set(language, forKey: "SelectedLanguage")
                 NotificationCenter.default.post(name: .languageDidChange, object: nil)
             }
+
+            // Apply recording behavior settings
+            PlaybackController.shared.isPauseMediaEnabled = config.isPauseMediaEnabled
+            MediaController.shared.isSystemMuteEnabled = config.isSystemMuteEnabled
+            UserDefaults.standard.set(config.isPreserveTranscriptInClipboard, forKey: "preserveTranscriptInClipboard")
         }
 
         if let whisperState = whisperState,
@@ -183,6 +201,9 @@ class PowerModeSessionManager: ObservableObject {
         await MainActor.run {
             enhancementService.isEnhancementEnabled = state.isEnhancementEnabled
             enhancementService.useScreenCaptureContext = state.useScreenCaptureContext
+            if let useClipboard = state.useClipboardContext {
+                enhancementService.useClipboardContext = useClipboard
+            }
             enhancementService.selectedPromptId = state.selectedPromptId.flatMap(UUID.init)
 
             if let aiService = enhancementService.getAIService() {
@@ -197,6 +218,17 @@ class PowerModeSessionManager: ObservableObject {
             if let language = state.selectedLanguage {
                 UserDefaults.standard.set(language, forKey: "SelectedLanguage")
                 NotificationCenter.default.post(name: .languageDidChange, object: nil)
+            }
+
+            // Restore recording behavior settings
+            if let pauseMedia = state.isPauseMediaEnabled {
+                PlaybackController.shared.isPauseMediaEnabled = pauseMedia
+            }
+            if let systemMute = state.isSystemMuteEnabled {
+                MediaController.shared.isSystemMuteEnabled = systemMute
+            }
+            if let preserveClipboard = state.isPreserveTranscriptInClipboard {
+                UserDefaults.standard.set(preserveClipboard, forKey: "preserveTranscriptInClipboard")
             }
         }
 

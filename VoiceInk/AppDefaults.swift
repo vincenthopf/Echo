@@ -11,12 +11,9 @@ enum AppDefaults {
             // Clipboard
             "restoreClipboardAfterPaste": true,
             "clipboardRestoreDelay": 2.0,
-            "preserveTranscriptInClipboard": false,
 
             // Audio & Media
-            "isSystemMuteEnabled": true,
             "audioResumptionDelay": 0.0,
-            "isPauseMediaEnabled": false,
             "isSoundFeedbackEnabled": true,
 
             // Recording & Transcription
@@ -38,6 +35,7 @@ enum AppDefaults {
             "powerModeAutoRestoreEnabled": true,
             "UseAppleScriptPaste": false,
             "UseTypeOutPaste": false,
+            "TypeOutSpeed": 1.0,
 
             // Hotkey
             "isMiddleClickToggleEnabled": false,

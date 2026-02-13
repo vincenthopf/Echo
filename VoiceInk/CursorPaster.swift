@@ -8,13 +8,17 @@ class CursorPaster {
         // Check if active PowerMode config has type-out mode enabled
         let powerMode = PowerModeManager.shared
         if let activeConfig = powerMode.currentActiveConfiguration, activeConfig.useTypeOutPaste {
-            typeAtCursor(text, useShiftEnterForNewlines: activeConfig.useShiftEnterForNewlines)
+            let charDelayMs = 30.0 / max(activeConfig.typeOutSpeed, 0.1)
+            typeAtCursor(text, useShiftEnterForNewlines: activeConfig.useShiftEnterForNewlines, charDelayMs: charDelayMs)
             return
         }
 
         // Fallback to global setting for backward compatibility
         if UserDefaults.standard.bool(forKey: "UseTypeOutPaste") {
-            typeAtCursor(text, useShiftEnterForNewlines: false)
+            let globalSpeed = UserDefaults.standard.double(forKey: "TypeOutSpeed")
+            let speed = globalSpeed > 0 ? globalSpeed : 1.0
+            let charDelayMs = 30.0 / speed
+            typeAtCursor(text, useShiftEnterForNewlines: false, charDelayMs: charDelayMs)
             return
         }
 
@@ -63,15 +67,14 @@ class CursorPaster {
 
     /// Types text using keyboard simulation via AppleScript.
     /// This bypasses the clipboard entirely, avoiding "pasted text" overlays in apps like Claude Code.
-    /// Typing speed simulates ~200 WPM (approximately 60ms per character).
     /// - Parameters:
     ///   - text: The text to type
     ///   - useShiftEnterForNewlines: If true, uses Shift+Enter for newlines instead of Enter
-    private static func typeAtCursor(_ text: String, useShiftEnterForNewlines: Bool) {
+    ///   - charDelayMs: Delay between characters in milliseconds (default 30ms ≈ 400 WPM)
+    private static func typeAtCursor(_ text: String, useShiftEnterForNewlines: Bool, charDelayMs: Double = 30.0) {
         guard AXIsProcessTrusted() else { return }
 
-        // Typing delay: ~400 WPM ≈ 2000 chars/min ≈ 30ms per character
-        let charDelayMicroseconds: useconds_t = 30000 // 30ms
+        let charDelayMicroseconds: useconds_t = useconds_t(charDelayMs * 1000)
 
         // Process text line by line to handle newlines properly
         let lines = text.components(separatedBy: "\n")
