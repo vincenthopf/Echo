@@ -15,14 +15,12 @@ struct MetricsSetupView: View {
         accessibility: .incomplete,
         screenRecording: .incomplete
     )
+    @State private var pollingAccessibility = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                VStack(spacing: 10) {
-                    AppIconView()
-                        .frame(width: 72, height: 72)
-
+                VStack(spacing: 16) {
                     Text("Finish Setup")
                         .font(.system(size: 30, weight: .bold, design: .rounded))
 
@@ -80,6 +78,17 @@ struct MetricsSetupView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .didChangeModel)) { _ in
             refreshReadiness()
+        }
+        .task(id: pollingAccessibility) {
+            guard pollingAccessibility else { return }
+            while !Task.isCancelled {
+                if AXIsProcessTrusted() {
+                    pollingAccessibility = false
+                    refreshReadiness()
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
         }
     }
 
@@ -141,8 +150,12 @@ struct MetricsSetupView: View {
         }
 
         if setupReadiness.accessibility != .complete {
-            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-            AXIsProcessTrustedWithOptions(options)
+            // Open System Settings directly — avoid AXIsProcessTrustedWithOptions(prompt: true)
+            // which can reset/toggle the permission if the app is already in the TCC list
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                NSWorkspace.shared.open(url)
+            }
+            pollingAccessibility = true
             return
         }
 

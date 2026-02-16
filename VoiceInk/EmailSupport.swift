@@ -21,7 +21,7 @@ struct EmailSupport {
 
 
         ## 📋 COMMON ISSUES:
-        Check out our Common Issues page before sending an email: https://embr.sh/common-issues
+        Check out our Common Issues page before sending an email: https://echo.vjh.io/docs/troubleshooting
         ------------------------
 
         System Information:

@@ -196,7 +196,7 @@ struct AdaptiveAwarenessHelpSheet: View {
             // Footer
             HStack {
                 Button(action: {
-                    if let url = URL(string: "https://vjh.io/embr-echo-help") {
+                    if let url = URL(string: "https://echo.vjh.io/docs") {
                         NSWorkspace.shared.open(url)
                     }
                 }) {

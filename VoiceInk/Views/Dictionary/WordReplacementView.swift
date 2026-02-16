@@ -403,7 +403,7 @@ struct SwiftDataAddReplacementSheet: View {
                                 Text("Replacement:")
                                     .font(Tokens.Typography.caption)
                                     .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
-                                Text("https://embr.sh")
+                                Text("https://echo.vjh.io")
                                     .font(Tokens.Typography.bodySmall)
                                     .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                             }

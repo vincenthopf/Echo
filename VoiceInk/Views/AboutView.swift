@@ -126,8 +126,8 @@ struct AboutView: View {
                     .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 VStack(alignment: .leading, spacing: Tokens.Spacing.md) {
-                    LinkButton(title: "support", url: "https://vjh.io/embr-echo-support", icon: "book.fill")
-                    LinkButton(title: "Tutorial Guide", url: "https://vjh.io/embr-echo-docs", icon: "graduationcap.fill")
+                    LinkButton(title: "support", url: "https://echo.vjh.io/docs/troubleshooting", icon: "book.fill")
+                    LinkButton(title: "Tutorial Guide", url: "https://echo.vjh.io/docs", icon: "graduationcap.fill")
                 }
             }
 

@@ -44,8 +44,9 @@ class PermissionManager: ObservableObject {
     }
     
     func checkAccessibilityPermissions() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: false]
-        let accessibilityEnabled = AXIsProcessTrustedWithOptions(options)
+        // Use AXIsProcessTrusted() directly — simpler and avoids any quirks
+        // with AXIsProcessTrustedWithOptions even when prompt is false
+        let accessibilityEnabled = AXIsProcessTrusted()
         DispatchQueue.main.async {
             self.isAccessibilityEnabled = accessibilityEnabled
         }
@@ -273,7 +274,7 @@ struct PermissionsView: View {
                         checkPermission: { permissionManager.checkScreenRecordingPermission() },
                         infoTipTitle: "Screen Recording Access",
                         infoTipMessage: "Echo captures on-screen text to understand the context of your voice input, which significantly improves transcription accuracy. Your privacy is important: this data is processed locally and is not stored.",
-                        infoTipLink: "https://embr.sh/docs/contextual-awareness"
+                        infoTipLink: "https://echo.vjh.io/docs/adaptive-awareness"
                     )
                 }
             }

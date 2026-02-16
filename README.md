@@ -13,13 +13,13 @@
   </p>
 
   <p>
-    <a href="https://embr.sh">
+    <a href="https://echo.vjh.io">
       <img src="https://img.shields.io/badge/Download%20Now-Latest%20Version-blue?style=for-the-badge&logo=apple" alt="Download Embr Voice" width="250"/>
     </a>
   </p>
 
   <p>
-    <a href="https://embr.sh">Website</a> •
+    <a href="https://echo.vjh.io">Website</a> •
     <a href="#get-started">Get Started</a> •
     <a href="#what-you-can-do">Features</a> •
     <a href="BUILDING.md">Build from Source</a>
@@ -67,7 +67,7 @@ Talk to ChatGPT without leaving your workflow. Ask questions, get answers, all t
 
 ## Get Started
 
-**[Download Embr Voice](https://embr.sh)** — macOS 14.0 or later
+**[Download Embr Voice](https://echo.vjh.io)** — macOS 14.0 or later
 
 Works on Apple Silicon and Intel Macs.
 
@@ -123,7 +123,7 @@ Contributions are welcome! Check out our [Building Guide](BUILDING.md) to get st
 
 Need help? Have questions?
 
-* Visit [embr.sh](https://embr.sh) for documentation and support
+* Visit [embr.sh](https://echo.vjh.io) for documentation and support
 * Found a bug? Open an issue on GitHub
 * Want to discuss features? Join our community
 

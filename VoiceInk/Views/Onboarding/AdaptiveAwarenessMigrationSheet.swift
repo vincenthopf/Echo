@@ -109,7 +109,7 @@ struct AdaptiveAwarenessMigrationSheet: View {
 
                     Button(action: {
                         // Open documentation
-                        if let url = URL(string: "https://vjh.io/embr-echo-help") {
+                        if let url = URL(string: "https://echo.vjh.io/docs") {
                             NSWorkspace.shared.open(url)
                         }
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

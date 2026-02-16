@@ -6,6 +6,7 @@ struct OnboardingIntelMacGuidanceView: View {
     @State private var opacity: CGFloat = 0
     @State private var selectedOption: TranscriptionOption = .appleSpeech
     @State private var showTutorial = false
+    @Environment(\.colorScheme) private var colorScheme
 
     enum TranscriptionOption: String, CaseIterable {
         case appleSpeech = "Apple Speech"
@@ -118,11 +119,11 @@ struct OnboardingIntelMacGuidanceView: View {
                                 Text("Let's optimize for your Mac")
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                                 Text("We've detected you're using an Intel Mac. Here are transcription options that work beautifully with your hardware.")
                                     .font(.body)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
@@ -138,21 +139,21 @@ struct OnboardingIntelMacGuidanceView: View {
                                     .foregroundColor(.accentColor)
                                 Text("Quick Context")
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                             }
 
                             Text("Your Intel Mac runs transcription differently than newer Apple Silicon models. We've selected options that give you the best experience—fast, accurate, and optimized for your processor.")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         .padding(16)
                         .frame(maxWidth: min(geometry.size.width * 0.7, 500))
-                        .background(Color.black.opacity(0.3))
+                        .background(Tokens.Colors.elevated(for: colorScheme))
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                         )
                         .scaleEffect(scale)
                         .opacity(opacity)
@@ -194,7 +195,7 @@ struct OnboardingIntelMacGuidanceView: View {
                             }) {
                                 Text("Skip for now")
                                     .font(.system(size: 13, weight: .regular))
-                                    .foregroundColor(.white.opacity(0.2))
+                                    .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
                             }
                         }
                         .opacity(opacity)
@@ -256,6 +257,7 @@ struct OnboardingIntelMacGuidanceView: View {
 
 // MARK: - Option Card
 struct OptionCard: View {
+    @Environment(\.colorScheme) private var colorScheme
     let option: OnboardingIntelMacGuidanceView.TranscriptionOption
     let isSelected: Bool
     let onSelect: () -> Void
@@ -274,7 +276,7 @@ struct OptionCard: View {
                         HStack(spacing: 8) {
                             Text(option.rawValue)
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             if option.isRecommended {
                                 Text("RECOMMENDED")
@@ -289,7 +291,7 @@ struct OptionCard: View {
 
                         Text(option.subtitle)
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     }
 
                     Spacer()
@@ -297,11 +299,11 @@ struct OptionCard: View {
                     // Selection indicator
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 24))
-                        .foregroundColor(isSelected ? .accentColor : .white.opacity(0.3))
+                        .foregroundColor(isSelected ? .accentColor : Tokens.Colors.textTertiary(for: colorScheme))
                 }
 
                 Divider()
-                    .background(Color.white.opacity(0.1))
+                    .background(Tokens.Colors.border(for: colorScheme))
 
                 // Features
                 VStack(alignment: .leading, spacing: 8) {
@@ -313,7 +315,7 @@ struct OptionCard: View {
 
                             Text(feature.text)
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             Spacer()
                         }
@@ -321,7 +323,7 @@ struct OptionCard: View {
                 }
 
                 Divider()
-                    .background(Color.white.opacity(0.1))
+                    .background(Tokens.Colors.border(for: colorScheme))
 
                 // Performance indicators
                 HStack(spacing: 20) {
@@ -332,7 +334,7 @@ struct OptionCard: View {
             .padding(20)
             .background(
                 ZStack {
-                    Color.black.opacity(0.3)
+                    Tokens.Colors.elevated(for: colorScheme)
 
                     if isSelected {
                         RoundedRectangle(cornerRadius: 16)
@@ -343,7 +345,7 @@ struct OptionCard: View {
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.white.opacity(isSelected ? 0 : 0.1), lineWidth: 1)
+                    .stroke(Tokens.Colors.border(for: colorScheme).opacity(isSelected ? 0 : 1), lineWidth: 1)
             )
             .scaleEffect(isSelected ? 1.02 : 1.0)
             .shadow(color: isSelected ? Color.accentColor.opacity(0.3) : .clear, radius: 10)
@@ -354,6 +356,7 @@ struct OptionCard: View {
 
 // MARK: - Performance Indicator
 struct PerformanceIndicator: View {
+    @Environment(\.colorScheme) private var colorScheme
     let label: String
     let rating: Int
 
@@ -361,12 +364,12 @@ struct PerformanceIndicator: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
 
             HStack(spacing: 4) {
                 ForEach(0..<5) { index in
                     Circle()
-                        .fill(index < rating ? Color.accentColor : Color.white.opacity(0.2))
+                        .fill(index < rating ? Color.accentColor : Tokens.Colors.textTertiary(for: colorScheme).opacity(0.5))
                         .frame(width: 6, height: 6)
                 }
             }

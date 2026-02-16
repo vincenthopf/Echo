@@ -11,7 +11,7 @@ struct HelpAndResourcesSection: View {
                 resourceLink(
                     icon: "sparkles",
                     title: "Recommended Models",
-                    url: "https://tryvoiceink.com/recommended-models"
+                    url: "https://echo.vjh.io/docs/transcription/local-models"
                 )
 
                 resourceLink(
@@ -23,7 +23,7 @@ struct HelpAndResourcesSection: View {
                 resourceLink(
                     icon: "book.fill",
                     title: "Documentation",
-                    url: "https://tryvoiceink.com/docs"
+                    url: "https://echo.vjh.io/docs"
                 )
                 
                 resourceLink(

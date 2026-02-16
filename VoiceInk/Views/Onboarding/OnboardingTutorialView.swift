@@ -26,11 +26,11 @@ struct OnboardingTutorialView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Try It Out!")
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                            
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
                             Text("Let's test your Echo setup.")
                                 .font(.system(size: 24, weight: .medium, design: .rounded))
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                 .lineSpacing(4)
                         }
                         
@@ -39,9 +39,9 @@ struct OnboardingTutorialView: View {
                             HStack {
                                 Text("Your Shortcut")
                                     .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                    .foregroundColor(.white)
-                                
-                                
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+
+
                             }
                             
                             if hotkeyManager.selectedHotkey1 == .custom,
@@ -54,7 +54,7 @@ struct OnboardingTutorialView: View {
                                     .foregroundColor(.accentColor)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Tokens.Colors.elevated(for: colorScheme))
                                     .cornerRadius(8)
                             }
                         }
@@ -96,10 +96,10 @@ struct OnboardingTutorialView: View {
                         ZStack {
                             // Glowing background
                             RoundedRectangle(cornerRadius: 20)
-                                .fill(Color.black.opacity(0.4))
+                                .fill(Tokens.Colors.elevated(for: colorScheme))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                                 )
                                 .overlay(
                                     // Subtle gradient overlay
@@ -120,7 +120,7 @@ struct OnboardingTutorialView: View {
                                 .focused($isFocused)
                                 .scrollContentBackground(.hidden)
                                 .background(Color.clear)
-                                .foregroundColor(.white)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                                 .padding(20)
                             
                             // Placeholder text with magical appearance
@@ -128,11 +128,11 @@ struct OnboardingTutorialView: View {
                                 VStack(spacing: 16) {
                                     Image(systemName: "wand.and.stars")
                                         .font(.system(size: 36))
-                                        .foregroundColor(.white.opacity(0.3))
+                                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
                                     
                                     Text("Click here and start speaking...")
                                         .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                        .foregroundColor(.white.opacity(0.5))
+                                        .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
                                         .multilineTextAlignment(.center)
                                 }
                                 .padding()
@@ -181,17 +181,17 @@ struct OnboardingTutorialView: View {
         HStack(spacing: 20) {
             Text("\(number)")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.accentColor.opacity(0.2)))
+                .background(Circle().fill(Tokens.Colors.orangeSoft(for: colorScheme)))
                 .overlay(
                     Circle()
-                        .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                        .stroke(Tokens.Colors.orangeMedium(for: colorScheme), lineWidth: 1)
                 )
             
             Text(text)
                 .font(.system(size: 18, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.9))
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 .lineSpacing(4)
         }
     }

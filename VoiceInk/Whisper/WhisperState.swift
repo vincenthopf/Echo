@@ -177,13 +177,15 @@ class WhisperState: NSObject, ObservableObject {
                             let permanentURL = self.recordingsDirectory.appendingPathComponent(fileName)
                             self.recordedFile = permanentURL
         
+                            // Apply profile configuration BEFORE recording so
+                            // media pause and system mute settings are in effect
+                            await ActiveWindowService.shared.applyConfigurationForCurrentApp()
+
                             try await self.recorder.startRecording(toOutputFile: permanentURL)
-                            
+
                             await MainActor.run {
                                 self.recordingState = .recording
                             }
-                            
-                            await ActiveWindowService.shared.applyConfigurationForCurrentApp()
          
                             // Only load model if it's a local model and not already loaded
                             if let model = self.currentTranscriptionModel, model.provider == .local {

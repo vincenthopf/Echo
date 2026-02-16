@@ -39,8 +39,8 @@
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://embr.sh/appcast.xml</string>
+	<string>https://echo.vjh.io/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>rLRdZIjK3gHKfqNlAF9nT7FbjwSvwkJ8BVn0v2mD1Mo=</string>
+	<string>tmHJg3zGKt0wPIpA/IKBHOXIM2v/pGH9Qoqfl1bbhH4=</string>
 </dict>
 </plist>

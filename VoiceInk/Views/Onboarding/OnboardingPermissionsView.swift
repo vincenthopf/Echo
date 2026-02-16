@@ -35,11 +35,11 @@ struct OnboardingPermissionsView: View {
             VStack(spacing: 24) {
                 Text("Start Quick Setup")
                     .font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                 Text("Complete required items now. Recommended items can be done later in Settings.")
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
 
                 VStack(spacing: 12) {
@@ -88,6 +88,10 @@ struct OnboardingPermissionsView: View {
         }
         .task(id: pollingPermission, priority: .userInitiated) {
             await pollIfNeeded()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            // Re-check permissions when user switches back from System Settings
+            refreshPermissionStates()
         }
         .onChange(of: hotkeyManager.selectedHotkey1) { _, newValue in
             shortcutConfigured = newValue != .none
@@ -212,30 +216,30 @@ struct OnboardingPermissionsView: View {
                 .font(.system(size: 16, weight: .semibold))
                 .frame(width: 36, height: 36)
                 .foregroundColor(.orange)
-                .background(Color.white.opacity(0.08))
+                .background(Tokens.Colors.orangeSoft(for: colorScheme))
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                 Text(subtitle)
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                 Text(description)
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.75))
+                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
             }
 
             Spacer()
             content()
 
             Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
-                .foregroundColor(isComplete ? .green : .white.opacity(0.4))
+                .foregroundColor(isComplete ? .green : Tokens.Colors.textTertiary(for: colorScheme))
                 .font(.system(size: 18, weight: .semibold))
         }
         .padding(14)
-        .background(Color.white.opacity(0.06))
+        .background(Tokens.Colors.elevated(for: colorScheme))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
@@ -272,15 +276,30 @@ struct OnboardingPermissionsView: View {
     }
 
     private func requestAccessibility() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-        AXIsProcessTrustedWithOptions(options)
+        // Always check current state first to avoid re-prompting when already granted
+        if AXIsProcessTrusted() {
+            accessibilityGranted = true
+            pollingPermission = nil
+            return
+        }
+        // Open System Settings directly — avoid AXIsProcessTrustedWithOptions(prompt: true)
+        // which can reset/toggle the permission if the app is already in the TCC list
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
         pollingPermission = .accessibility
     }
 
     private func requestScreenRecording() {
-        CGRequestScreenCaptureAccess()
-        if let prefpaneURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
-            NSWorkspace.shared.open(prefpaneURL)
+        // Always check current state first
+        if CGPreflightScreenCaptureAccess() {
+            screenRecordingGranted = true
+            pollingPermission = nil
+            return
+        }
+        // Open System Settings directly for screen recording
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
+            NSWorkspace.shared.open(url)
         }
         pollingPermission = .screenRecording
     }

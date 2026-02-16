@@ -54,11 +54,11 @@ struct OnboardingModelDownloadView: View {
                             Text("Download AI Model")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             Text("We'll download the optimized model to get you started.")
                                 .font(.body)
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
@@ -71,15 +71,15 @@ struct OnboardingModelDownloadView: View {
                             VStack(alignment: .center, spacing: 8) {
                                 Text(resolvedModel.displayName)
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                                 Text(modelDetailsText(for: resolvedModel))
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                             }
                             .frame(maxWidth: .infinity)
 
                             Divider()
-                                .background(Color.white.opacity(0.1))
+                                .background(Tokens.Colors.border(for: colorScheme))
 
                             HStack(spacing: 20) {
                                 performanceIndicator(label: "Speed", value: modelSpeed(for: resolvedModel))
@@ -103,18 +103,18 @@ struct OnboardingModelDownloadView: View {
                         }
                         .padding(24)
                         .frame(width: min(geometry.size.width * 0.6, 420))
-                        .background(Color.black.opacity(0.3))
+                        .background(Tokens.Colors.elevated(for: colorScheme))
                         .cornerRadius(16)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
                         )
                         .scaleEffect(scale)
                         .opacity(opacity)
                     } else {
                         Text("No compatible model is available on this device.")
                             .font(.body)
-                            .foregroundColor(.white)
+                            .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                     }
 
                     VStack(spacing: 16) {
@@ -285,12 +285,12 @@ struct OnboardingModelDownloadView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
             HStack(spacing: 4) {
                 ForEach(0..<5) { index in
                     Circle()
-                        .fill(Double(index) / 5.0 <= value ? Color.accentColor : Color.white.opacity(0.2))
+                        .fill(Double(index) / 5.0 <= value ? Color.accentColor : Tokens.Colors.textTertiary(for: colorScheme).opacity(0.5))
                         .frame(width: 6, height: 6)
                 }
             }
@@ -301,11 +301,11 @@ struct OnboardingModelDownloadView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("RAM")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
             Text(String(format: "%.1f GB", gb))
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
         }
     }
 }

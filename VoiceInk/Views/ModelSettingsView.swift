@@ -20,7 +20,7 @@ struct ModelSettingsView: View {
                 InfoTip(
                     title: "Output Format Guide",
                     message: "Unlike GPT, Voice Models(whisper) follows the style of your prompt rather than instructions. Use examples of your desired output format instead of commands.",
-                    learnMoreURL: "https://vjh.io/embr-echo-docs"
+                    learnMoreURL: "https://echo.vjh.io/docs"
                 )
 
                 Spacer()

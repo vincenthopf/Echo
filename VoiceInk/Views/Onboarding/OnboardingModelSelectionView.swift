@@ -40,11 +40,11 @@ struct OnboardingModelSelectionView: View {
                                 Text("Choose Your AI Model")
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                                 Text("Select the transcription model that best fits your needs. You can always change this later in settings.")
                                     .font(.body)
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal)
                             }
@@ -55,7 +55,7 @@ struct OnboardingModelSelectionView: View {
                         if recommendedModels.isEmpty {
                             Text("No onboarding model is currently available.")
                                 .font(.body)
-                                .foregroundColor(.white)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
                                 .padding(.horizontal)
                                 .multilineTextAlignment(.center)
                         } else {
@@ -149,6 +149,7 @@ struct OnboardingModelSelectionView: View {
 
 // MARK: - Model Selection Card
 struct ModelSelectionCard: View {
+    @Environment(\.colorScheme) private var colorScheme
     let model: any TranscriptionModel
     let isSelected: Bool
     let isRecommended: Bool
@@ -172,7 +173,7 @@ struct ModelSelectionCard: View {
                         HStack(spacing: 8) {
                             Text(model.displayName)
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             if isRecommended {
                                 Text("RECOMMENDED")
@@ -187,17 +188,17 @@ struct ModelSelectionCard: View {
 
                         Text(modelSubtitle)
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     }
 
                     Spacer()
 
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 24))
-                        .foregroundColor(isSelected ? .accentColor : .white.opacity(0.3))
+                        .foregroundColor(isSelected ? .accentColor : Tokens.Colors.textTertiary(for: colorScheme))
                 }
 
-                Divider().background(Color.white.opacity(0.1))
+                Divider().background(Tokens.Colors.border(for: colorScheme))
 
                 HStack(spacing: 20) {
                     if let localModel = model as? LocalModel {
@@ -209,7 +210,7 @@ struct ModelSelectionCard: View {
                     }
                 }
 
-                Divider().background(Color.white.opacity(0.1))
+                Divider().background(Tokens.Colors.border(for: colorScheme))
 
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(modelFeatures, id: \.self) { feature in
@@ -220,14 +221,14 @@ struct ModelSelectionCard: View {
 
                             Text(feature)
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
 
                             Spacer()
                         }
                     }
                 }
 
-                Divider().background(Color.white.opacity(0.1))
+                Divider().background(Tokens.Colors.border(for: colorScheme))
 
                 HStack(spacing: 20) {
                     if let localModel = model as? LocalModel {
@@ -244,7 +245,7 @@ struct ModelSelectionCard: View {
             .padding(20)
             .background(
                 ZStack {
-                    Color.black.opacity(0.3)
+                    Tokens.Colors.elevated(for: colorScheme)
 
                     if isSelected {
                         RoundedRectangle(cornerRadius: 16)
@@ -255,7 +256,7 @@ struct ModelSelectionCard: View {
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.white.opacity(isSelected ? 0 : 0.1), lineWidth: 1)
+                    .stroke(Tokens.Colors.border(for: colorScheme).opacity(isSelected ? 0 : 1), lineWidth: 1)
             )
             .scaleEffect(isSelected ? 1.02 : 1.0)
             .shadow(color: isSelected ? Color.accentColor.opacity(0.3) : .clear, radius: 10)
@@ -304,12 +305,12 @@ struct ModelSelectionCard: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
             HStack(spacing: 4) {
                 ForEach(0..<5) { index in
                     Circle()
-                        .fill(Double(index) / 5.0 <= value ? Color.accentColor : Color.white.opacity(0.2))
+                        .fill(Double(index) / 5.0 <= value ? Color.accentColor : Tokens.Colors.textTertiary(for: colorScheme).opacity(0.5))
                         .frame(width: 6, height: 6)
                 }
             }
@@ -320,16 +321,17 @@ struct ModelSelectionCard: View {
         VStack(alignment: .leading, spacing: 4) {
             Text("RAM")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
 
             Text(String(format: "%.1f GB", gb))
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
         }
     }
 }
 
 struct StatItem: View {
+    @Environment(\.colorScheme) private var colorScheme
     let label: String
     let value: String
     let icon: String
@@ -338,14 +340,14 @@ struct StatItem: View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.caption2)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
                 Text(value)
                     .font(.caption)
-                    .foregroundColor(.white)
+                    .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
             }
         }
     }

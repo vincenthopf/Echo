@@ -116,6 +116,13 @@ struct VoiceInkApp: App {
         }
 
         AppShortcuts.updateAppShortcutParameters()
+
+        #if DEBUG
+        // Prompt for Accessibility permission on launch so dev builds can paste.
+        // The system remembers the grant across rebuilds as long as the bundle ID stays the same.
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
+        #endif
     }
     
     var body: some Scene {
@@ -209,7 +216,7 @@ struct VoiceInkApp: App {
 
             CommandGroup(replacing: .help) {
                 Button("Echo Help") {
-                    if let url = URL(string: "https://vjh.io/embr-echo-help") {
+                    if let url = URL(string: "https://echo.vjh.io/docs") {
                         NSWorkspace.shared.open(url)
                     }
                 }
