@@ -1,0 +1,78 @@
+---
+title: Audio File Transcription
+description: Transcribe existing audio and video files by dragging them into Echo or using the file picker.
+---
+
+In addition to live recording, Echo can transcribe audio and video files you already have on your Mac. This is useful for transcribing meeting recordings, podcast episodes, voice memos, or any other media with spoken content.
+
+## Supported Formats
+
+Echo accepts the following file types:
+
+- **Audio:** WAV, MP3, M4A, AIFF, AAC, FLAC, CAF
+- **Video:** MP4, MOV
+
+Video files are supported because Echo extracts and transcribes the audio track from them.
+
+## How to Transcribe a File
+
+### Drag and Drop
+
+1. Click **Transcribe Files** in the sidebar.
+2. Drag an audio or video file onto the drop zone that reads **Drop audio or video file here**.
+3. The file name will appear, confirming your selection.
+4. Optionally, toggle **AI Enhancement** and select a prompt if you want the transcription refined by AI.
+5. Click **Start Transcription**.
+
+{/* Screenshot: The Transcribe Files view showing the drag-and-drop zone */}
+
+### Using the File Picker
+
+1. Click **Transcribe Files** in the sidebar.
+2. Click **Choose File**.
+3. Select an audio or video file from the file picker dialog.
+4. Configure AI Enhancement if desired.
+5. Click **Start Transcription**.
+
+{/* Screenshot: The file selected state showing the file name, AI Enhancement toggle, and Start Transcription button */}
+
+## Processing Steps
+
+After you click **Start Transcription**, Echo processes the file in stages. You can see the current step displayed on screen:
+
+1. **Loading transcription model** -- The selected model is loaded into memory (if not already loaded).
+2. **Processing audio file for transcription** -- The file is converted to the format the model expects.
+3. **Transcribing audio** -- The model processes the audio and generates text.
+4. **Enhancing transcription with AI** -- If AI Enhancement is enabled, the raw text is refined. This step is skipped if enhancement is off.
+5. **Transcription completed** -- The result is shown on screen.
+
+## AI Enhancement for File Transcription
+
+You can apply AI Enhancement to file transcriptions just like live recordings:
+
+1. After selecting a file, toggle **AI Enhancement** on.
+2. Choose a **Prompt** from the dropdown to control how the AI processes the text.
+3. Click **Start Transcription**.
+
+The enhancement uses the same AI provider and prompt system as live transcription. See [AI Enhancement](/docs/ai-enhancement) for more details.
+
+## Viewing Results
+
+Once transcription is complete, the result appears directly below the file selection area. The transcription is also saved to your [History](/docs/history), where you can review, copy, or search through past transcriptions.
+
+## Choosing a Different File
+
+If you want to transcribe another file after one is selected, click **Choose Different File** to clear the current selection and start over.
+
+## Tips
+
+- File transcription uses whichever model is set as your default in **Settings > Transcription**. If you want to use a specific model, change your default before starting.
+- Longer audio files take more time to process, especially with local models. Cloud models can be faster for lengthy recordings.
+- The transcription result includes the same post-processing as live recordings: word replacements, filler word removal, and text formatting are all applied automatically based on your settings.
+
+## Related
+
+- [Transcription Overview](/docs/transcription) -- How Echo's transcription system works
+- [Local Models](/docs/transcription/local-models) -- Models that run on your Mac
+- [Cloud Services](/docs/transcription/cloud-services) -- Cloud-based models for faster processing of long files
+- [AI Enhancement](/docs/ai-enhancement) -- Refining transcription output with AI

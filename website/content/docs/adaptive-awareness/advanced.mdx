@@ -1,0 +1,98 @@
+---
+title: Advanced Profile Settings
+description: Per-profile settings for AI enhancement, type-out mode, auto-send, media controls, and clipboard behavior.
+---
+
+Each Adaptive Awareness profile can customize how Echo processes and delivers your transcription. These settings let you tailor the full pipeline -- from AI enhancement to output behavior -- on a per-profile basis.
+
+## AI Enhancement Per Profile
+
+The **Intelligent Transformation** section controls whether AI enhancement runs for a profile and how it's configured.
+
+### Enabling AI Enhancement
+
+1. Open a profile in Adaptive Awareness
+2. In the **Intelligent Transformation** section, toggle **Enable Intelligent Transformation** on
+
+Once enabled, you'll see additional options:
+
+{/* Screenshot: The Intelligent Transformation section with provider, model, prompt, and context options */}
+
+### Provider and Model
+
+You can override the global AI provider and model for each profile:
+
+- **Provider** -- Choose a specific AI provider (OpenAI, Anthropic, etc.) or leave on **Use Global Setting**
+- **Model** -- Choose a specific model from the selected provider, or leave on **Use Global Setting**
+
+This lets you use a faster, cheaper model for casual messages and a more capable model for important writing.
+
+### Prompt Selection
+
+Use the **Prompt** selector to assign a specific AI enhancement prompt to this profile. Each profile can use a different prompt, which is the core of what makes Adaptive Awareness powerful -- you can have one profile that formats text for email, another that cleans up casual speech, and another that structures text as code comments.
+
+### Screen Capture
+
+Toggle **Capture screen for AI context** to give the AI a screenshot of your screen when enhancing text. This provides visual context that can improve enhancement quality -- for example, the AI can see what application you're using or what you're working on.
+
+This requires Screen Recording permission in macOS System Settings.
+
+### Clipboard Context
+
+Toggle **Use clipboard text for AI context** to include whatever text is currently on your clipboard as additional context for the AI. This can help the AI understand the broader context of what you're dictating.
+
+## Type-Out Mode
+
+By default, Echo pastes your transcription using the clipboard. Type-out mode changes this behavior to simulate typing each character individually.
+
+### When to Use Type-Out Mode
+
+Type-out mode is useful in applications that detect and flag clipboard pastes -- for example, some chat applications show a "pasted text" indicator, or coding tools may treat pasted text differently from typed text.
+
+### Enabling Type-Out Mode
+
+1. Open a profile in Adaptive Awareness
+2. In the **Advanced** section, toggle **Type-Out Mode** on
+
+Once enabled, two additional settings appear:
+
+- **Speed** -- A slider from **Slow** to **Fast** that controls typing speed
+- **Use Shift+Enter for newlines** -- When enabled, Echo presses Shift+Enter instead of Enter for line breaks. Use this in apps where pressing Enter sends a message (like chat applications or terminal prompts)
+
+{/* Screenshot: The Advanced section showing Type-Out Mode toggle with Speed slider and Shift+Enter option */}
+
+## Auto-Send
+
+Toggle **Send after transcription** to have Echo automatically press Enter after pasting or typing your text. This sends the message immediately in chat apps, submits forms, or confirms input -- whatever Enter does in the active application.
+
+Auto-send works with both regular clipboard paste and type-out mode.
+
+## Media Controls
+
+Two settings control how Echo handles audio during recording:
+
+- **Pause media during recording** -- Automatically pauses any playing music or video when you start recording, then resumes playback when you stop
+- **Mute system audio during recording** -- Mutes all system audio when recording starts and restores volume when recording stops. This is enabled by default.
+
+These settings are useful if you often dictate while listening to music or watching videos, since background audio can interfere with transcription accuracy.
+
+## Clipboard Behavior
+
+**Preserve transcript in clipboard** controls what happens to your clipboard after Echo delivers the transcription.
+
+- **Off** (default) -- Echo restores your clipboard to whatever was there before the transcription. This means your previous clipboard contents are preserved.
+- **On** -- Echo leaves the transcribed text in your clipboard so you can paste it again elsewhere.
+
+## Tips
+
+- Pair auto-send with chat app profiles for a hands-free messaging experience. Add Slack or Messages as an app trigger, enable auto-send, and your dictated messages send automatically.
+- For coding workflows, enable type-out mode with Shift+Enter for newlines. This prevents accidental command execution in terminals and ensures multi-line text is entered correctly.
+- If you use screen capture for AI context, you only need to enable it on profiles where visual context matters. Keeping it off on other profiles avoids unnecessary permission prompts and processing time.
+
+## Related
+
+- [What is Adaptive Awareness](/docs/adaptive-awareness)
+- [Creating and Managing Profiles](/docs/adaptive-awareness/profiles)
+- [Triggers: Voice, URL, and App Matching](/docs/adaptive-awareness/triggers)
+- [AI Enhancement](/docs/ai-enhancement)
+- [Screen Capture for Context](/docs/ai-enhancement/screen-context)

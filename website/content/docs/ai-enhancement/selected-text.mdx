@@ -1,0 +1,74 @@
+---
+title: Selected Text Context
+description: How Echo uses highlighted text from other apps to provide context for AI Enhancement.
+---
+
+Selected Text Context lets Echo read whatever text you've highlighted in another application and use it as additional context for AI Enhancement. This is useful when you want the AI to reference, respond to, or work with specific text while processing your transcription.
+
+## How It Works
+
+When AI Enhancement runs, Echo automatically checks for any text you've selected (highlighted) in the frontmost application. If selected text is found, it's included in the AI request as context alongside your transcription.
+
+The AI then uses this selected text to produce a more relevant result. For example:
+
+- **Replying to a message** -- Highlight a message, then dictate your reply. The AI sees what you're replying to and can adjust tone and content accordingly.
+- **Editing a paragraph** -- Select a block of text, then say what you want changed. The AI sees the original and applies your instructions to it.
+- **Asking about code** -- Highlight a code snippet, then ask a question about it. With the Assistant prompt, the AI can reference the code and answer your question.
+- **Summarizing content** -- Select a long passage, then ask for a summary. The Assistant prompt will process it based on your voice instruction.
+
+## Using Selected Text
+
+There's nothing to configure. Selected text context is always active when AI Enhancement is enabled. Just follow these steps:
+
+1. In any application, **highlight the text** you want the AI to reference
+2. **Start recording** with Echo (using your keyboard shortcut or the menu bar)
+3. **Speak** your instruction or message
+4. **Stop recording** -- Echo will include the highlighted text as context when enhancing your transcription
+
+{/* Screenshot: A browser with text highlighted, and the Echo recorder active in the corner */}
+
+The selected text appears in the AI request as context, clearly separated from your transcription. The AI knows the difference between what you said and what was already selected on screen.
+
+## How Echo Reads Selected Text
+
+Echo uses multiple strategies to read your selected text, trying each in order until one succeeds:
+
+1. **Accessibility API** -- Reads the selected text directly from the app via macOS accessibility features
+2. **Menu action** -- Simulates the Copy action through the app's menu
+3. **Keyboard shortcut** -- Uses the standard copy shortcut as a fallback
+
+This multi-strategy approach means selected text works across most macOS applications, including browsers, text editors, email clients, code editors, and messaging apps.
+
+## Permissions
+
+Selected text requires the **Accessibility** permission in macOS.
+
+1. Open **System Settings** > **Privacy & Security** > **Accessibility**
+2. Find Echo in the list and enable the toggle
+3. You may need to restart Echo after granting this permission
+
+Without this permission, Echo cannot read selected text from other applications.
+
+## Selected Text vs. Screen Context
+
+Both features provide context to the AI, but they serve different purposes:
+
+| Feature | What It Captures | Best For |
+|---------|-----------------|----------|
+| **Selected text** | Only the text you've deliberately highlighted | Targeted references, replying to specific content, working with a particular passage |
+| **[Screen context](/docs/ai-enhancement/screen-context)** | Everything visible in the active window | General awareness of what you're working on, correcting technical terms, visual context |
+
+You can use both at the same time. When both are active, the AI receives your selected text, the screen content, and your transcription -- giving it the fullest possible picture of your context.
+
+## Tips
+
+- Select your text before you start recording. Echo reads the selection at the time it processes the enhancement, but it's most reliable when the selection is in place before the recording begins.
+- Selected text works especially well with the **Assistant** prompt, which is designed to respond to your instructions using available context.
+- If selected text doesn't seem to be picked up, check that Echo has Accessibility permission in System Settings.
+
+## Related
+
+- [AI Enhancement Overview](/docs/ai-enhancement)
+- [Screen Context](/docs/ai-enhancement/screen-context)
+- [Prompts](/docs/ai-enhancement/prompts)
+- [Permissions](/docs/getting-started/permissions)

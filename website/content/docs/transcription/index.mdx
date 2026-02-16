@@ -1,0 +1,72 @@
+---
+title: Transcription
+description: How Echo turns your voice into text using local, cloud, or Apple transcription engines.
+---
+
+Echo gives you three ways to transcribe speech into text: local models that run entirely on your Mac, cloud services that send audio to external APIs for processing, and Apple's built-in speech engine. Each approach has different trade-offs in speed, accuracy, privacy, and setup complexity, so you can choose what fits your workflow best.
+
+## How Transcription Works
+
+When you record with Echo, the audio is captured at high quality and then sent to whichever transcription model you have selected as your default. The transcription pipeline looks like this:
+
+1. You speak into your microphone while Echo is recording.
+2. Echo captures the audio.
+3. The audio is sent to your chosen transcription model.
+4. The raw text comes back from the model.
+5. Optional processing is applied -- word replacements, filler word removal, AI enhancement, and text formatting.
+6. The final text is placed on your clipboard and (optionally) pasted into the active app.
+
+{/* Screenshot: The Settings > Transcription tab showing the current model and language selection */}
+
+## Three Approaches to Transcription
+
+### Local Models
+
+Local models run entirely on your Mac. Your audio never leaves your device, which makes this the most private option. Echo supports two families of local models:
+
+- **Whisper** -- OpenAI's speech recognition models, available in sizes from Tiny (75 MB) to Large v3 (2.9 GB). Larger models are more accurate but slower.
+- **Parakeet** -- NVIDIA's speech recognition models, optimized for speed. Available in English-only (V2) and multilingual (V3) versions.
+
+Local models need to be downloaded before first use. Once downloaded, they work without an internet connection.
+
+[Learn more about local models](/docs/transcription/local-models)
+
+### Cloud Services
+
+Cloud services send your audio to external APIs for transcription. They typically offer faster processing and high accuracy without using your Mac's resources, but they require an internet connection and an API key from the provider.
+
+Echo supports five cloud transcription providers: **Deepgram**, **Groq**, **ElevenLabs**, **Gemini**, and **Mistral**.
+
+[Learn more about cloud services](/docs/transcription/cloud-services)
+
+### Apple Speech
+
+On macOS 26 and later, Echo can use Apple's built-in speech framework for on-device transcription. This requires no setup, no downloads, and no API keys -- it uses the speech models already built into macOS.
+
+[Learn more about Apple Speech](/docs/transcription/apple-speech)
+
+## Choosing a Model
+
+Open **Settings** and go to the **Transcription** tab to see all available models. Models are organized into four tabs:
+
+- **Recommended** -- A curated selection of models that offer the best balance of speed and accuracy. This is a good starting point.
+- **Local** -- All local models including Whisper, Parakeet, and Apple Speech.
+- **Cloud** -- All cloud-based transcription services.
+- **Custom** -- Models you have added yourself using custom API endpoints.
+
+{/* Screenshot: The model filter tabs showing Recommended, Local, Cloud, and Custom */}
+
+To set a model as your default, find it in the list and click **Set as Default**. The model card will show a **Default** badge, and the model name will appear in the **Current Model** section at the top of the Transcription tab.
+
+## Tips
+
+- If you are just getting started, try one of the **Recommended** models. Parakeet V3 offers the fastest local transcription, while Base (English) is a solid lightweight option for English-only use.
+- You can change your default model at any time. The switch takes effect on your next recording.
+- Local models are loaded into memory when you start recording and stay loaded between recordings for faster performance.
+
+## Related
+
+- [Local Models](/docs/transcription/local-models) -- Downloading and configuring Whisper and Parakeet models
+- [Cloud Services](/docs/transcription/cloud-services) -- Setting up Deepgram, Groq, and other cloud providers
+- [Language Selection](/docs/transcription/language-selection) -- Choosing your transcription language
+- [Audio File Transcription](/docs/transcription/audio-file) -- Transcribing existing audio and video files

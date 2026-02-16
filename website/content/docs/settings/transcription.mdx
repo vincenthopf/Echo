@@ -1,0 +1,59 @@
+---
+title: Transcription
+description: Browse, download, and manage transcription models, language settings, and output formatting.
+---
+
+The **Transcription** tab in Settings is where you manage your transcription models and configure how raw transcription output is formatted. Open Echo, go to **Settings** in the sidebar, then click the **Transcription** tab.
+
+## Current Model
+
+At the top of the tab, you'll see which model is currently set as your default, along with the selected language.
+
+{/* Screenshot: The Current Model section showing the active model name and language */}
+
+## Choosing a Model
+
+Below the current model display, you'll find all available models organized into four filter tabs:
+
+- **Recommended** -- A curated selection of models that offer the best balance of speed and accuracy. This is a good starting point.
+- **Local** -- All local models including Whisper, Parakeet, and Apple Speech.
+- **Cloud** -- All cloud-based transcription services.
+- **Custom** -- Models you have added yourself using custom API endpoints.
+
+{/* Screenshot: The model filter tabs showing Recommended, Local, Cloud, and Custom */}
+
+To set a model as your default, find it in the list and click **Set as Default**. The currently active model shows a **Default** badge.
+
+For details about specific models, see:
+- [Local Models](/docs/transcription/local-models)
+- [Cloud Services](/docs/transcription/cloud-services)
+- [Custom Cloud Models](/docs/integrations/custom-models)
+
+## Language Selection
+
+The **Language** section appears below the current model display. Use the dropdown to pick your language. The language you select applies to all transcriptions until you change it.
+
+Different models handle language differently -- some support dozens of languages, some are English-only, and some auto-detect the language. See [Language Selection](/docs/transcription/language-selection) for details.
+
+## Output Format Settings
+
+Click the **gear icon** in the top-right corner of the model list to access output formatting options:
+
+- **Output Format** -- A prompt that guides how the model styles its output. Unlike AI chat models, Whisper follows the style of your prompt rather than treating it as instructions. Use examples of your desired format.
+- **Add space after paste** -- Adds a trailing space after pasted text, useful for languages that use spaces between words.
+- **Automatic text formatting** -- Breaks long blocks of text into paragraphs automatically.
+- **Voice Activity Detection (VAD)** -- Filters out silence in longer recordings to improve accuracy. Applies to Parakeet models on recordings of 20 seconds or longer.
+
+{/* Screenshot: The output format settings panel showing all options */}
+
+## Tips
+
+- If you're just getting started, check the **Recommended** tab. It shows models curated for the best balance of speed and accuracy.
+- You can change your default model at any time. The switch takes effect on your next recording.
+- Output format settings apply globally to all transcriptions.
+
+## Related
+
+- [Transcription Overview](/docs/transcription) -- How the three transcription approaches compare
+- [Recording](/docs/settings/recording) -- Audio input and microphone settings
+- [Intelligence](/docs/settings/intelligence) -- AI Enhancement provider setup

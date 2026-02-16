@@ -1,0 +1,57 @@
+---
+title: Apple Speech
+description: Use Apple's built-in speech recognition for on-device transcription with no setup required.
+---
+
+Apple Speech uses the speech recognition engine built into macOS itself. It runs entirely on your device, requires no downloads, no API keys, and no configuration. If your Mac supports it, it just works.
+
+## Requirements
+
+Apple Speech requires **macOS 26 (Tahoe) or later**. On earlier versions of macOS, this model will not be available in Echo's model list.
+
+## Supported Languages
+
+Apple Speech supports the following languages with regional variants:
+
+- **Arabic** (Saudi Arabia)
+- **Chinese Simplified** (China), **Chinese Traditional** (Taiwan, Hong Kong)
+- **Cantonese** (China)
+- **English** (United States, United Kingdom, Canada, Australia, India, Ireland, New Zealand, South Africa, Saudi Arabia, UAE, Singapore, Philippines, Indonesia)
+- **French** (France, Canada, Belgium, Switzerland)
+- **German** (Germany, Austria, Switzerland)
+- **Italian** (Italy, Switzerland)
+- **Japanese** (Japan)
+- **Korean** (South Korea)
+- **Portuguese** (Brazil, Portugal)
+- **Spanish** (Spain, Mexico, United States, Colombia, Chile, Latin America)
+
+The specific regional variant is chosen automatically based on your language selection in Echo.
+
+## Setting Up Apple Speech
+
+1. Open **Settings** and go to the **Transcription** tab.
+2. Select the **Local** filter tab.
+3. Find **Apple Speech** in the model list.
+4. Click **Set as Default**.
+
+That is it. No download or API key is needed. If the speech model for your selected language has not been downloaded to your Mac yet, macOS will prompt you to install it automatically when you first use it.
+
+{/* Screenshot: The Apple Speech model card in the Local models list */}
+
+## How It Works
+
+When you record with Apple Speech selected, Echo sends the audio to Apple's on-device SpeechAnalyzer framework. The processing happens entirely on your Mac -- no data is sent to Apple's servers or any external service.
+
+If the language model for your selected language is not yet installed on your Mac, macOS will download it automatically the first time you use it. This is a one-time download managed by macOS, not by Echo.
+
+## Tips
+
+- Apple Speech is the simplest option to set up since it requires no downloads or API keys, but it is only available on macOS 26 and later.
+- For languages not supported by Apple Speech, use a multilingual [local model](/docs/transcription/local-models) like Parakeet V3 or a Whisper model instead.
+- The quality of Apple Speech depends on the speech models that Apple ships with macOS, which may vary by language.
+
+## Related
+
+- [Transcription Overview](/docs/transcription) -- How the three transcription approaches compare
+- [Local Models](/docs/transcription/local-models) -- Whisper and Parakeet models for broader language support
+- [Language Selection](/docs/transcription/language-selection) -- Choosing your transcription language

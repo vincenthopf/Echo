@@ -1,0 +1,55 @@
+---
+title: Troubleshooting
+description: Solutions for common issues you may encounter while using Echo.
+---
+
+If something isn't working as expected, you're likely to find the answer here. This page covers the most common issues and links to more detailed guides for specific topics.
+
+## Echo Won't Start Recording
+
+**No model selected.** Echo needs a transcription model before it can record. Open Echo and go to **Settings** > **Transcription** to download or select a model.
+
+**Microphone permission not granted.** Check that Echo has microphone access in **System Settings** > **Privacy & Security** > **Microphone**. See [Permission issues](/docs/troubleshooting/permissions) for step-by-step instructions.
+
+**No keyboard shortcut set.** Echo requires a keyboard shortcut to start recording. Open **Settings** > **Recording** and set a shortcut in the **Echo Shortcuts** section.
+
+## Text Not Appearing After Transcription
+
+**Accessibility not enabled.** Without Accessibility access, Echo copies your transcription to the clipboard instead of pasting it directly. You'll see a notification saying "Transcript copied to clipboard. Enable Accessibility for auto-paste." Grant Accessibility access in **System Settings** > **Privacy & Security** > **Accessibility** to enable automatic pasting.
+
+**Cursor not in a text field.** Make sure your cursor is placed in a text field before stopping the recording. Echo pastes text at your current cursor position.
+
+## Poor Transcription Quality
+
+**Using a small model.** Smaller models are faster but less accurate. Try switching to a larger model like **Large v3 Turbo** or a cloud service for better results. See [Improving transcription quality](/docs/troubleshooting/transcription-quality) for detailed guidance.
+
+**Background noise.** Excessive ambient noise can reduce accuracy. Try moving to a quieter environment or using a directional microphone closer to your mouth.
+
+**Wrong language.** If your selected language doesn't match what you're speaking, transcription quality will suffer. Check your language setting in **Settings** > **Transcription**.
+
+## Microphone Not Detected
+
+If Echo doesn't detect your microphone, or the wrong microphone is being used, see [Audio issues](/docs/troubleshooting/audio-issues) for troubleshooting steps.
+
+## Exporting Diagnostic Logs
+
+If you're experiencing an issue you can't resolve, you can export diagnostic logs to share with support.
+
+1. Open Echo and go to **Settings**
+2. Under the diagnostics section, click **Export**
+3. Once complete, click **Show in Finder** to locate the log file
+
+{/* Screenshot: Diagnostics settings showing Export Logs button */}
+
+## Tips
+
+- Many permission-related issues can be resolved by quitting Echo completely and reopening it after making changes in System Settings.
+- Check the [Permissions troubleshooting](/docs/troubleshooting/permissions) page if Echo's permission status doesn't update after granting access.
+- If you're unsure which model to use, start with **Large v3 Turbo (Quantized)** for a good balance of speed and accuracy.
+
+## Related
+
+- [Permission issues](/docs/troubleshooting/permissions) -- Fix Accessibility, Microphone, and Screen Recording permissions
+- [Audio issues](/docs/troubleshooting/audio-issues) -- Microphone detection and audio quality problems
+- [Transcription quality](/docs/troubleshooting/transcription-quality) -- Tips for improving accuracy
+- [Privacy](/docs/privacy) -- How Echo handles your data

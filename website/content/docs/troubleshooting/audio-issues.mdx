@@ -1,0 +1,93 @@
+---
+title: Audio Issues
+description: Fix microphone detection, audio quality, and device switching problems.
+---
+
+If Echo isn't picking up your voice correctly, or the wrong microphone is being used, this page covers the most common audio problems and how to resolve them.
+
+## Microphone Not Detected
+
+### Symptom
+
+No microphone appears in Echo's device list, or Echo falls back to the system default when your preferred microphone should be available.
+
+### Fix
+
+1. Make sure your microphone is physically connected and powered on
+2. Open **System Settings** > **Sound** > **Input** and confirm macOS recognizes the device
+3. In Echo, go to **Settings** > **Recording** > **Audio Input** and check the microphone selection
+4. If your device doesn't appear, click **System Default** to use whatever macOS has selected, then reconnect your microphone
+
+If you're using a USB microphone or audio interface, try disconnecting and reconnecting it. macOS occasionally loses track of USB audio devices.
+
+{/* Screenshot: Echo Settings > Audio Input showing microphone selection dropdown */}
+
+## Wrong Microphone Being Used
+
+### Symptom
+
+Echo records audio, but it sounds like it's coming from the wrong microphone (e.g., your laptop's built-in mic instead of your headset).
+
+### Fix
+
+Echo offers three input modes:
+
+- **System Default** -- Uses whatever microphone macOS is currently set to. If you change your system default, Echo follows automatically.
+- **Custom Device** -- Locks Echo to a specific microphone regardless of your system setting.
+- **Prioritized** -- You rank multiple microphones in order of preference. Echo automatically uses the highest-priority device that's currently connected.
+
+To select a specific microphone:
+
+1. Open Echo and go to **Settings** > **Recording** > **Audio Input**
+2. Choose **Custom Device** from the input mode options
+3. Select your preferred microphone from the device list
+
+If you frequently switch between microphones (for example, a desk mic and a headset), use **Prioritized** mode to rank them. Echo will automatically switch to the highest-priority device that's available.
+
+{/* Screenshot: Echo Settings > Audio Input showing input mode options */}
+
+## Microphone Disconnected During Use
+
+If your microphone disconnects while Echo is running (for example, a USB device is unplugged), Echo automatically falls back to the system default input device. When you reconnect the microphone:
+
+- In **Custom Device** mode, Echo restores your selected microphone automatically
+- In **Prioritized** mode, Echo re-evaluates the priority list and switches to the highest-priority available device
+- In **System Default** mode, Echo follows whatever macOS selects
+
+You don't need to restart Echo after reconnecting a microphone.
+
+## Poor Audio Quality
+
+### Symptom
+
+Transcriptions are inaccurate, contain gibberish, or miss large portions of what you said.
+
+### Possible Causes and Fixes
+
+**Microphone too far away.** Position your microphone closer to your mouth. Headset or lapel microphones typically produce better results than a laptop's built-in mic from across a desk.
+
+**Excessive background noise.** Echo works best in reasonably quiet environments. If you're in a noisy space, try a directional microphone or a headset with noise isolation.
+
+**Low microphone input level.** Check your microphone's input volume in **System Settings** > **Sound** > **Input**. If the level is too low, Echo may struggle to pick up your voice clearly.
+
+**Audio interference.** Other apps using the microphone simultaneously can cause issues. Close any apps that might be accessing the mic (video calls, other recording software) before using Echo.
+
+## No Sound When Recording Starts or Stops
+
+Echo plays a sound when you start and stop recording. If you don't hear it:
+
+1. Check that your Mac's volume is not muted
+2. In Echo's settings, verify that recording sounds are enabled
+3. If you have system mute enabled during recording (to prevent media playback interference), the stop sound plays with a slight delay after unmuting
+
+## Tips
+
+- For the best transcription accuracy, use a dedicated microphone rather than your Mac's built-in mic. Even an inexpensive USB headset can significantly improve results.
+- If you use Bluetooth headphones, note that macOS sometimes switches the microphone input when Bluetooth devices connect or disconnect. Use **Custom Device** or **Prioritized** mode to prevent unexpected switches.
+- Keep your microphone input level high enough that macOS shows consistent activity in **System Settings** > **Sound** > **Input** when you speak at a normal volume.
+
+## Related
+
+- [Permission issues](/docs/troubleshooting/permissions) -- Fix microphone permission problems
+- [Transcription quality](/docs/troubleshooting/transcription-quality) -- Improve accuracy through model selection and settings
+- [Common issues](/docs/troubleshooting) -- Overview of all troubleshooting topics

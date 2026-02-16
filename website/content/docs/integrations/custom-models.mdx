@@ -1,0 +1,57 @@
+---
+title: Custom Cloud Models
+description: Add your own transcription API endpoints to Echo.
+---
+
+If you use a transcription service that Echo does not include by default, you can add it as a custom cloud model. Any service that provides an OpenAI-compatible transcription API will work.
+
+## Adding a Custom Model
+
+1. Open Echo and go to **Settings** (click the gear icon in the sidebar, or press **Cmd + ,**).
+2. Select the **Transcription** tab.
+3. In the model list, click the **Custom** filter at the top.
+4. Click **Add Model**.
+5. Fill in the form fields:
+   - **Display Name** -- a label you will see when selecting this model (for example, "My Whisper Server").
+   - **API Endpoint** -- the full URL of the transcription endpoint (for example, `https://api.example.com/v1/audio/transcriptions`).
+   - **API Key** -- your authentication key for the service.
+   - **Model Name** -- the model identifier expected by the API (for example, `whisper-1` or `large-v3-turbo`).
+   - **Multilingual Model** -- turn this on if the model supports multiple languages, or off if it is English-only.
+6. Click **Add Model**.
+
+{/* Screenshot: The Add Custom Model form with fields filled in */}
+
+Your new model will appear in the **Custom** section of the model list and can be selected like any built-in model.
+
+## Editing a Custom Model
+
+1. Go to **Settings > Transcription** and select the **Custom** filter.
+2. Find the model you want to change and click its **Edit** button.
+3. The form will open with the current values pre-filled. Update any fields you need to change.
+4. Click **Update Model** to save your changes.
+
+## Removing a Custom Model
+
+1. Go to **Settings > Transcription** and select the **Custom** filter.
+2. Find the model you want to remove and click its **Delete** button.
+3. Confirm the deletion when prompted.
+
+If the deleted model was your active transcription model, you will need to select a different model before your next recording.
+
+## Requirements
+
+- The API must be **OpenAI-compatible** -- it should accept audio files at the endpoint you provide and return transcription text in the same format as OpenAI's transcription API.
+- You need a valid **API key** for authentication.
+- The endpoint must be reachable from your Mac (check any firewall or VPN settings if you are connecting to a self-hosted server).
+
+## Tips
+
+- Custom models work everywhere in Echo, including in Adaptive Awareness profiles. You can assign a custom model to a specific profile just like any built-in model.
+- If you run a local transcription server (for example, a self-hosted Whisper API), use `http://localhost` or your local IP as the API endpoint.
+- Double-check the model name your provider expects. Getting this wrong is the most common reason a custom model fails to return results.
+
+## Related
+
+- [Cloud Transcription Services](/docs/transcription/cloud-services) -- built-in cloud providers included with Echo
+- [Local Models](/docs/transcription/local-models) -- offline transcription with downloaded models
+- [Adaptive Awareness Profiles](/docs/adaptive-awareness/profiles) -- assign models per profile

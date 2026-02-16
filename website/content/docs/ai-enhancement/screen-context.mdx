@@ -1,0 +1,85 @@
+---
+title: Screen Context
+description: How Echo captures your screen to give AI Enhancement visual context about what you're working on.
+---
+
+Screen Context lets Echo take a snapshot of your active window when you start recording. This snapshot is analyzed and sent alongside your transcription to the AI, so it understands what you're looking at. The result is more accurate and relevant enhancement -- the AI can correct technical terms, reference on-screen content, and produce output that fits the context of what you're doing.
+
+## How It Works
+
+When you begin a recording with screen context enabled:
+
+1. Echo captures an image of your currently active window
+2. The image is analyzed using text recognition (OCR) to extract any visible text
+3. The extracted text -- along with the window title and application name -- is included in the AI Enhancement request as context
+4. The AI uses this context to better understand your transcription and produce more accurate results
+
+For example, if you're looking at a code editor and say "change the function name to handle response," the AI can see the actual code on screen and understand exactly what you're referring to.
+
+### Vision Mode
+
+When using **OpenRouter** with a vision-capable model, Echo can send the actual screenshot image directly to the AI instead of just the extracted text. This gives the AI a richer understanding of your screen, including layout, images, and UI elements that text extraction alone might miss.
+
+Vision mode activates automatically when all of these conditions are met:
+- Your provider is set to OpenRouter
+- Your selected model supports vision (image input)
+- Screen context is enabled
+- A screen capture was successfully taken
+
+## Enabling Screen Context
+
+Screen context is configured per [Adaptive Awareness](/docs/adaptive-awareness) profile. Each profile can independently enable or disable screen capture.
+
+1. Open **Adaptive Awareness** in the sidebar
+2. Select a profile (use the **Default** profile for your general settings)
+3. In the **Intelligent Transformation** section, toggle **Capture screen for AI context** on
+
+{/* Screenshot: The Intelligent Transformation section showing the screen capture context toggle */}
+
+See [Adaptive Awareness Advanced Settings](/docs/adaptive-awareness/advanced) for more details on per-profile configuration.
+
+## Permissions
+
+Screen context requires the **Screen Recording** permission in macOS.
+
+1. Open **System Settings** > **Privacy & Security** > **Screen Recording**
+2. Find Echo in the list and enable the toggle
+3. You may need to restart Echo after granting this permission
+
+If the permission isn't granted, screen capture will silently fail and the AI will process your transcription without screen context.
+
+## What Gets Captured
+
+Echo captures only the **active (frontmost) window**, not your entire screen. The captured information includes:
+
+- **Window title** -- The title of the active window
+- **Application name** -- The name of the app that owns the window
+- **Window content** -- Text extracted via OCR from the visible area of the window
+
+In vision mode (OpenRouter with a vision model), the actual image is sent. The image is resized if it exceeds 1536 pixels wide to manage bandwidth and processing time.
+
+The capture happens once at the start of recording. It does not continuously monitor your screen.
+
+## When to Use It
+
+Screen context is most valuable when:
+
+- **Coding** -- The AI can see your code and correct variable names, function names, and technical terms that speech recognition might get wrong
+- **Writing** -- The AI understands the document you're working in and can match its tone and style
+- **Browsing** -- The AI knows what page you're looking at and can reference specific content
+- **Working with data** -- The AI can see spreadsheets, dashboards, or other visual information
+
+If you're dictating something unrelated to what's on screen (like a personal note while a random app is open), screen context may not add much value.
+
+## Tips
+
+- Screen context works best when the relevant content is visible on screen before you start recording. The capture happens at the start of the recording, so switch to the right window first.
+- If you're concerned about sending screen content to a cloud AI provider, use [Ollama](/docs/ai-enhancement/setup#ollama) to keep everything local. With Ollama, your screen capture never leaves your Mac.
+- Vision mode through OpenRouter provides richer context than OCR-only mode, especially for non-text content like diagrams, charts, or UI layouts.
+
+## Related
+
+- [AI Enhancement Overview](/docs/ai-enhancement)
+- [Selected Text Context](/docs/ai-enhancement/selected-text)
+- [Adaptive Awareness Advanced Settings](/docs/adaptive-awareness/advanced)
+- [Permissions](/docs/getting-started/permissions)

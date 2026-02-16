@@ -1,0 +1,50 @@
+---
+title: Smart Corrections
+description: Automatically replace specific words or phrases in your transcriptions with the text you actually want.
+---
+
+Smart Corrections let you define rules that automatically replace words or phrases after transcription. If Echo consistently writes "my website link" when you say it, you can set up a rule to replace that with your actual URL. If it misspells a name, you can fix it once and never think about it again.
+
+## Adding a Replacement
+
+1. Click **Vocabulary** in the sidebar
+2. Select **Smart Corrections**
+3. Click the **+** button in the top-right corner of the corrections list
+4. In the **Original Text** field, enter the word or phrase you want replaced
+5. In the **Replacement Text** field, enter what it should become
+6. Click **Add**
+
+{/* Screenshot: Add Word Replacement sheet showing Original Text and Replacement Text fields */}
+
+## Using Multiple Originals
+
+You can map several variations to a single replacement by separating them with commas in the **Original Text** field. For example:
+
+- **Original Text:** `Voicing, Voice ink, Voiceing`
+- **Replacement Text:** `Echo`
+
+This means any of those three mistranscriptions will be corrected to "Echo" automatically.
+
+## Editing and Removing Rules
+
+- To edit an existing rule, click the **pencil** icon next to it
+- To delete a rule, click the **x** icon next to it
+
+You can also sort your rules by clicking the **Original** or **Replacement** column headers to toggle between ascending and descending order.
+
+{/* Screenshot: Smart Corrections list showing several replacement rules with edit and delete buttons */}
+
+## Enabling and Disabling
+
+Smart Corrections are enabled by default. To turn them off without deleting your rules, use the toggle switch at the top of the Smart Corrections section. Your rules are preserved and will apply again when you re-enable the feature.
+
+## Tips
+
+- Smart Corrections are case-insensitive. A rule for "chatgpt" will also match "ChatGPT" and "CHATGPT."
+- Use this feature to insert formatted text you can't easily dictate, like email addresses, URLs, or code snippets. For example, set "my email" to replace with your actual email address.
+- Replacements work across all languages. For languages like Japanese, Chinese, Korean, and Thai, Echo uses substring matching instead of word boundaries, so corrections work naturally with those writing systems.
+
+## Related
+
+- [Personal Vocabulary](/docs/vocabulary/personal-vocabulary) -- Teach Echo to recognize specialized terms
+- [Filler Word Removal](/docs/vocabulary/filler-words) -- Automatically strip out filler words

@@ -1,0 +1,89 @@
+---
+title: Local Models
+description: Download, select, and configure Whisper and Parakeet transcription models that run entirely on your Mac.
+---
+
+Local models run on your Mac's hardware, so your audio never leaves your device. Echo supports two model families: **Whisper** (by OpenAI) and **Parakeet** (by NVIDIA). Both process speech locally, but they differ in speed, accuracy, and language support.
+
+## Available Models
+
+### Parakeet Models
+
+Parakeet models are optimized for speed and offer near-instant transcription.
+
+| Model | Size | Languages | Best For |
+|-------|------|-----------|----------|
+| **Parakeet V2** | 474 MB | English only | Fastest possible English transcription |
+| **Parakeet V3** | 494 MB | English + 25 European languages | Fast multilingual transcription |
+
+Parakeet models automatically detect the spoken language -- you do not need to select a language manually.
+
+### Whisper Models
+
+Whisper models come in multiple sizes. Larger models are more accurate but take longer to process.
+
+| Model | Size | Languages | Speed | Accuracy |
+|-------|------|-----------|-------|----------|
+| **Tiny** | 75 MB | Multilingual | Very fast | Basic |
+| **Tiny (English)** | 75 MB | English only | Very fast | Slightly better for English |
+| **Base** | 142 MB | Multilingual | Fast | Good |
+| **Base (English)** | 142 MB | English only | Fast | Good for English |
+| **Large v3 Turbo (Quantized)** | 547 MB | Multilingual | Fast | Very good |
+| **Large v3 Turbo** | 1.5 GB | Multilingual | Moderate | Excellent |
+| **Large v2** | 2.9 GB | Multilingual | Slow | Excellent |
+| **Large v3** | 2.9 GB | Multilingual | Slow | Best |
+
+English-only models (marked with "English") are fine-tuned for English and tend to be slightly more accurate for English speech than their multilingual counterparts.
+
+## Downloading a Model
+
+1. Open **Settings** and go to the **Transcription** tab.
+2. Use the filter tabs to select **Local** (or browse **Recommended** for curated picks).
+3. Find the model you want and click the download button.
+4. Wait for the download to complete. Progress is shown on the model card.
+
+{/* Screenshot: A local model card showing the download progress bar */}
+
+Once downloaded, the model is stored on your Mac and available for offline use.
+
+## Setting a Default Model
+
+1. In the **Transcription** tab, find a downloaded model.
+2. Click **Set as Default**.
+3. The model card will show a **Default** badge, and it will be displayed in the **Current Model** section at the top.
+
+{/* Screenshot: The Current Model section showing the active model name */}
+
+## Deleting a Model
+
+If you need to free up disk space, you can delete downloaded models:
+
+1. In the **Transcription** tab, find the downloaded model.
+2. Click the delete option on the model card.
+3. Confirm by clicking **Delete** in the dialog.
+
+You can always re-download a model later.
+
+## Model Settings
+
+Click the gear icon in the top-right corner of the model list to access additional settings:
+
+- **Output Format** -- A prompt that guides how the model styles its output. Unlike AI chat models, Whisper follows the style of your prompt rather than treating it as instructions. Use examples of your desired format.
+- **Add space after paste** -- Adds a trailing space after pasted text, useful for languages that use spaces between words.
+- **Automatic text formatting** -- Breaks long blocks of text into paragraphs automatically.
+- **Voice Activity Detection (VAD)** -- Filters out silence to improve transcription accuracy. For Whisper models, VAD applies to all recordings. For Parakeet models, VAD activates on recordings of 20 seconds or longer.
+
+{/* Screenshot: The model settings panel showing Output Format, text formatting, and VAD options */}
+
+## Tips
+
+- **Parakeet V3** is the recommended starting point for most users. It offers the best combination of speed and multilingual support among local models.
+- **Base (English)** is a great lightweight option if you only need English transcription and want minimal resource usage.
+- **Large v3 Turbo (Quantized)** gives you near-Large accuracy at a fraction of the size (547 MB vs. 2.9 GB), making it the best high-accuracy option for most Macs.
+- Models stay loaded in memory between recordings, so your second recording will start faster than the first.
+
+## Related
+
+- [Transcription Overview](/docs/transcription) -- How the three transcription approaches compare
+- [Cloud Services](/docs/transcription/cloud-services) -- Cloud-based alternatives that do not use local resources
+- [Language Selection](/docs/transcription/language-selection) -- Choosing the transcription language for multilingual models

@@ -1,0 +1,81 @@
+---
+title: Cloud Services
+description: Set up cloud transcription providers like Deepgram, Groq, ElevenLabs, Gemini, and Mistral.
+---
+
+Cloud transcription services process your audio on external servers. They are fast, highly accurate, and do not consume your Mac's processing power. The trade-off is that your audio is sent over the internet, and each provider requires an API key.
+
+## Available Cloud Providers
+
+| Provider | Model | Accuracy | Multilingual | Notes |
+|----------|-------|----------|--------------|-------|
+| **Deepgram** | Nova | Very good | Yes | Fast and cost-effective. Uses Nova-3 for English, Nova-2 for other languages. |
+| **Deepgram** | Nova-3 Medical | Excellent | English only | Specialized for clinical and medical terminology. |
+| **Groq** | Whisper Large v3 Turbo | Excellent | Yes | Runs Whisper on Groq's fast inference hardware. |
+| **ElevenLabs** | Scribe v1 | Excellent | Yes | High-accuracy transcription from ElevenLabs. |
+| **Gemini** | Gemini 2.5 Pro | Excellent | Yes | Google's advanced multimodal model. |
+| **Gemini** | Gemini 2.5 Flash | Very good | Yes | Optimized for low-latency transcription. |
+| **Mistral** | Voxtral Mini | Excellent | Yes | Mistral's state-of-the-art transcription model. |
+
+## Setting Up a Cloud Provider
+
+Each cloud provider needs an API key before you can use it. The setup process is the same for all providers:
+
+1. Open **Settings** and go to the **Transcription** tab.
+2. Select the **Cloud** filter tab to see all cloud models.
+3. Find the provider you want. It will show a **Setup Required** badge.
+4. Click **Configure** on the model card.
+5. Enter your API key in the **API Key Configuration** field.
+6. Click **Verify**. Echo will test the key with the provider.
+7. If verification succeeds, the card will show a **Configured** badge.
+8. Click **Set as Default** to use this model for transcription.
+
+{/* Screenshot: A cloud model card expanded to show the API Key Configuration section with the Verify button */}
+
+## Where to Get API Keys
+
+Each provider has a dashboard where you can create an API key:
+
+| Provider | Where to Get Your Key |
+|----------|----------------------|
+| **Deepgram** | [Deepgram Console](https://console.deepgram.com) |
+| **Groq** | [Groq Console](https://console.groq.com/keys) |
+| **ElevenLabs** | [ElevenLabs Dashboard](https://elevenlabs.io) |
+| **Gemini** | [Google AI Studio](https://makersuite.google.com/app/apikey) |
+| **Mistral** | [Mistral Console](https://console.mistral.ai/api-keys) |
+
+Most providers offer a free tier or trial credits, so you can try a service before committing.
+
+## Removing an API Key
+
+If you need to remove a configured API key:
+
+1. In the **Transcription** tab, find the configured cloud model.
+2. Click the three-dot menu on the model card.
+3. Select **Remove API Key**.
+
+This will clear the stored key. If this model was your default, you will need to select a different model.
+
+## How Cloud Transcription Works
+
+When you record with a cloud model selected, Echo:
+
+1. Captures your audio locally.
+2. Sends the audio file to the cloud provider's API.
+3. Receives the transcribed text back.
+4. Applies your output settings (word replacements, formatting, AI enhancement) locally.
+
+The audio is sent directly to the provider you have selected. Echo does not store or relay your audio through any intermediary servers.
+
+## Tips
+
+- Cloud services require an internet connection. If you need to transcribe offline, use a [local model](/docs/transcription/local-models) instead.
+- You can have multiple cloud providers configured at the same time. Only the one set as your default will be used for transcription, but you can switch between them quickly.
+- If you see an "API key is missing" error, check that you have entered and verified your key for the provider you are trying to use.
+
+## Related
+
+- [Transcription Overview](/docs/transcription) -- How the three transcription approaches compare
+- [Local Models](/docs/transcription/local-models) -- Models that run on your Mac without an internet connection
+- [Language Selection](/docs/transcription/language-selection) -- Choosing the transcription language
+- [Personal Vocabulary](/docs/vocabulary/personal-vocabulary) -- Adding custom words to improve accuracy

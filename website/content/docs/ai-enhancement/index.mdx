@@ -1,0 +1,80 @@
+---
+title: AI Enhancement
+description: How Echo uses AI to clean up, reformat, and improve your transcriptions after they're captured.
+---
+
+AI Enhancement is a post-transcription step that takes your raw spoken words and transforms them into polished, ready-to-use text. It can fix grammar, remove filler words, restructure sentences, format emails, clean up technical speech, or even act as an AI assistant that responds to your voice.
+
+## How It Works
+
+When you finish recording, Echo sends your transcription to an AI model along with a prompt that tells it what to do. The AI processes the text and returns an improved version, which is then pasted or copied as your final output.
+
+The pipeline looks like this:
+
+1. You speak and Echo transcribes your audio
+2. If AI Enhancement is enabled for the active profile, the transcription is sent to your chosen AI provider
+3. The AI applies your selected prompt (cleanup, rewrite, email formatting, etc.)
+4. The enhanced text replaces the raw transcription in your clipboard or paste output
+
+## What It Can Do
+
+AI Enhancement is controlled by **prompts** -- instructions that tell the AI how to handle your text. Echo ships with two built-in prompts and several templates to get you started:
+
+- **Default** -- Cleans up grammar, removes filler words ("um", "uh", "like"), fixes self-corrections, formats lists, and converts spoken numbers to digits. Preserves your voice and personality.
+- **Assistant** -- Treats your speech as a question or request and provides a direct answer, using your screen and clipboard as context.
+
+You can also create custom prompts for specific use cases like email drafting, coding conversations, meeting notes, or creative writing. See [Prompts](/docs/ai-enhancement/prompts) for details.
+
+## Setting Up AI Enhancement
+
+AI Enhancement requires two things: an AI provider with an API key, and an Adaptive Awareness profile with enhancement enabled.
+
+### Step 1: Connect an AI Provider
+
+1. Open Echo and go to **Settings** > **Intelligence** tab
+2. Under **AI Provider Integration**, choose a provider and add your API key (see [Setup](/docs/ai-enhancement/setup))
+
+### Step 2: Enable Enhancement in Your Profile
+
+AI Enhancement is configured through [Adaptive Awareness](/docs/adaptive-awareness) profiles. Your **Default** profile controls what happens during normal use, and you can create additional profiles for specific apps, websites, or voice triggers.
+
+1. Open **Adaptive Awareness** in the sidebar
+2. Select your **Default** profile (or any profile you want to configure)
+3. In the **Intelligent Transformation** section, toggle **Enable Intelligent Transformation** on
+4. Choose your provider, model, and prompt
+5. Optionally enable **Screen capture** or **Clipboard context** for richer AI awareness
+
+{/* Screenshot: The Intelligent Transformation section in an Adaptive Awareness profile */}
+
+Once enabled on your Default profile, AI Enhancement runs on every transcription unless a different profile overrides it.
+
+### Switching Prompts During Recording
+
+You can change prompts on the fly using keyboard shortcuts while the recorder is visible:
+
+- **Command + E** -- Toggle enhancement on or off
+- **Command + 1** through **Command + 0** -- Switch between your saved prompts by number
+
+## Context Sources
+
+AI Enhancement becomes more accurate when it understands what you're working on. Echo can automatically provide context from these sources:
+
+- **Screen capture** -- A snapshot of your active window, so the AI knows what you're looking at. Configurable per profile. See [Screen Context](/docs/ai-enhancement/screen-context).
+- **Selected text** -- Whatever text you've highlighted before recording, giving the AI something specific to reference. Always active when enhancement is enabled. See [Selected Text](/docs/ai-enhancement/selected-text).
+- **Clipboard** -- The current contents of your clipboard. Configurable per profile.
+- **Personal vocabulary** -- Your custom dictionary of names, terms, and jargon, so the AI spells them correctly. Always included. See [Vocabulary](/docs/vocabulary).
+
+## Tips
+
+- AI Enhancement requires an internet connection for cloud providers (OpenAI, Anthropic, Gemini, etc.). For fully offline enhancement, use [Ollama](/docs/ai-enhancement/setup#ollama).
+- You can quickly toggle enhancement on or off from the recorder window without opening settings.
+- If a transcription comes back unchanged or odd, check that your selected prompt matches your use case -- the Default prompt will not answer questions, while the Assistant prompt will.
+- Configure your Default profile first. It acts as your baseline, and you only need additional profiles when you want different behavior in specific contexts.
+
+## Related
+
+- [Setup API Keys](/docs/ai-enhancement/setup)
+- [Prompts](/docs/ai-enhancement/prompts)
+- [Screen Context](/docs/ai-enhancement/screen-context)
+- [Selected Text](/docs/ai-enhancement/selected-text)
+- [Adaptive Awareness](/docs/adaptive-awareness) -- configure enhancement per profile

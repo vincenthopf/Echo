@@ -1,0 +1,4 @@
+{
+  "title": "Settings",
+  "pages": ["index", "general", "recording", "transcription", "intelligence"]
+}

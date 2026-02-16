@@ -1,0 +1,47 @@
+---
+title: Personal Vocabulary
+description: Add custom words and terminology so Echo recognizes names, jargon, and specialized terms correctly.
+---
+
+Personal Vocabulary lets you teach Echo the words it wouldn't otherwise know -- technical terms, product names, people's names, or industry jargon. When you add words here, Echo passes them as context to the AI enhancement step, which helps it produce the correct spelling and formatting for those terms.
+
+**Note:** Personal Vocabulary requires [Intelligent Transformation](/docs/ai-enhancement) to be enabled, since the vocabulary is used as context during AI processing.
+
+## Adding Words
+
+1. Click **Vocabulary** in the sidebar
+2. Select **Personal Vocabulary**
+3. Type a word or phrase in the **Add word to vocabulary** field
+4. Press **Return** or click the **+** button
+
+{/* Screenshot: Personal Vocabulary section showing the input field and a list of vocabulary items */}
+
+You can add multiple words at once by separating them with commas. For example, typing `Kubernetes, kubectl, Helm` and pressing Return will add all three words.
+
+## Managing Your Vocabulary
+
+Your words appear in a grid under **Vocabulary Items** with a count showing how many you've added. To remove a word, hover over it and click the **x** button.
+
+Duplicate entries are prevented automatically. If you try to add a word that's already in your vocabulary, Echo will let you know.
+
+## How It Works
+
+When you record a transcription with Intelligent Transformation enabled, Echo includes your vocabulary words as context for the AI model. This helps the model:
+
+- Spell specialized terms correctly (e.g., "Kubernetes" instead of "Kuber netties")
+- Preserve brand-specific capitalization (e.g., "ChatGPT" instead of "chat gpt")
+- Recognize names and acronyms that would otherwise be unfamiliar
+
+Echo also includes a built-in set of common technology terms to improve recognition out of the box.
+
+## Tips
+
+- Add the exact capitalization and formatting you want. If you add "macOS," the AI will prefer that spelling over "MacOS" or "Mac OS."
+- Focus on words that are genuinely uncommon or specialized. Common English words don't need to be added.
+- This feature is especially valuable for non-English names and technical terms that general-purpose models tend to get wrong.
+
+## Related
+
+- [Smart Corrections](/docs/vocabulary/smart-corrections) -- Auto-replace words after transcription
+- [Filler Word Removal](/docs/vocabulary/filler-words) -- Automatically strip out filler words
+- [AI Enhancement](/docs/ai-enhancement) -- Learn about Intelligent Transformation

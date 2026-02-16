@@ -1,0 +1,65 @@
+---
+title: Auto-Cleanup
+description: Automatically delete old transcriptions and audio files to manage storage and protect your privacy.
+---
+
+Echo can automatically clean up your transcription history and audio recordings on a schedule you choose. This is useful for managing disk space and keeping sensitive dictation data from accumulating over time.
+
+## Accessing Cleanup Settings
+
+1. Open Echo and select **Settings** in the sidebar.
+2. Scroll down to the **Privacy Controls** section.
+
+{/* Screenshot: Settings view scrolled to the Privacy Controls section showing cleanup options */}
+
+## Transcript Auto-Cleanup
+
+Transcript cleanup deletes both the transcription text and its associated audio file after a set retention period.
+
+1. In the **Privacy Controls** section, toggle on **Automatically delete transcript history**.
+2. Use the **Delete transcripts older than** dropdown to choose a retention period:
+   - **Immediately** -- Transcriptions are deleted right after they are processed (nothing is saved to history).
+   - **1 hour**
+   - **1 day** (default)
+   - **3 days**
+   - **7 days**
+3. To run a cleanup right away based on your current retention setting, click **Run Transcript Cleanup Now**.
+
+{/* Screenshot: Transcript cleanup settings showing the toggle enabled and the retention period dropdown */}
+
+When transcript cleanup is enabled, Echo automatically removes transcriptions older than your chosen period each time a new transcription is completed and when the app starts.
+
+## Audio-Only Cleanup
+
+If you want to keep your transcription text but free up storage by removing audio recordings, use audio-only cleanup instead. This option is only available when transcript cleanup is turned off.
+
+1. Make sure **Automatically delete transcript history** is toggled off.
+2. Toggle on **Enable automatic audio cleanup**.
+3. Use the **Keep audio files for** dropdown to choose how long to retain recordings:
+   - **1 day**
+   - **3 days**
+   - **7 days** (default)
+   - **14 days**
+   - **30 days**
+4. To run a cleanup right away, click **Run Cleanup Now**. Echo will show you how many files will be deleted and how much storage will be freed before you confirm.
+
+{/* Screenshot: Audio cleanup settings showing the toggle enabled and the retention period dropdown */}
+
+Audio-only cleanup preserves your transcription text and metadata while removing only the audio files. After cleanup, you will still see your transcription history, but the audio playback option will no longer be available for cleaned-up entries.
+
+## How Cleanup Works
+
+- **Transcript cleanup** runs automatically after each new transcription and at app launch. It deletes transcriptions (and their audio files) older than your retention period.
+- **Audio cleanup** runs once per day automatically. It deletes only the audio files from transcriptions older than your retention period, keeping the text intact.
+- Both cleanup types can also be triggered manually using the respective **Run Cleanup Now** buttons.
+
+## Tips
+
+- If privacy is your top priority, set transcript retention to **Immediately** -- your dictation will still be transcribed and pasted, but nothing will be saved to history.
+- Audio files take up significantly more storage than text transcriptions. If you want to keep your history searchable but save disk space, use audio-only cleanup.
+- Manual cleanup is useful if you have just changed your retention period and want the new setting to take effect right away.
+
+## Related
+
+- [Transcription History](/docs/history) -- Browse and manage your transcription history
+- [Privacy](/docs/privacy) -- How Echo handles your data

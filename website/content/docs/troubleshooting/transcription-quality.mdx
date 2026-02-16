@@ -1,0 +1,81 @@
+---
+title: Transcription Quality
+description: Improve transcription accuracy by choosing the right model, language, and environment.
+---
+
+If your transcriptions aren't as accurate as you'd like, there are several things you can adjust. The biggest factors are which model you use, whether the correct language is selected, and your recording environment.
+
+## Choosing the Right Model
+
+Echo offers local models (which run on your Mac), cloud models (which send audio to a service for transcription), and Apple Speech (which uses macOS's built-in speech framework).
+
+### Local Models
+
+Local models vary significantly in speed and accuracy. Here's a general guide:
+
+| Model | Size | Best For |
+|-------|------|----------|
+| **Tiny / Tiny (English)** | 75 MB | Quick tests, low-resource Macs |
+| **Base / Base (English)** | 142 MB | Light everyday use |
+| **Large v3 Turbo (Quantized)** | 547 MB | Best balance of speed and accuracy |
+| **Large v3 Turbo** | 1.5 GB | High accuracy with good speed |
+| **Large v3** | 2.9 GB | Highest accuracy, slowest |
+
+**English-only models** (marked with "English" in the name) are more accurate for English than their multilingual counterparts of the same size.
+
+**Parakeet V2** and **Parakeet V3** are separate models from NVIDIA that offer very fast transcription. Parakeet V2 is English-only; Parakeet V3 supports English and 25 European languages.
+
+### Cloud Models
+
+Cloud models send your audio to an external service for transcription. They typically offer high accuracy without using your Mac's processing power, but require an internet connection and an API key for the relevant service.
+
+Available cloud services include Groq, ElevenLabs, Deepgram, Mistral, and Gemini. Each has different strengths -- see the cloud services documentation for details.
+
+### Apple Speech
+
+Apple Speech uses macOS's built-in transcription engine. It requires macOS 26 or later and supports a range of languages and regional variants.
+
+## Setting the Correct Language
+
+If the language setting doesn't match what you're speaking, accuracy will drop significantly.
+
+1. Open Echo and go to **Settings** > **Transcription**
+2. Select the language that matches what you'll be speaking
+
+Multilingual models support an **Auto-detect** option that attempts to identify the language automatically. This works reasonably well but is less accurate than explicitly selecting the correct language. For best results, set the language manually.
+
+> **Note:** English-only models (like Tiny English, Base English, and Parakeet V2) only support English. If you speak in another language, choose a multilingual model.
+
+## Improving Accuracy with Your Environment
+
+**Speak clearly and at a natural pace.** Speaking too quickly or mumbling reduces accuracy across all models. You don't need to speak slowly -- just naturally and clearly.
+
+**Reduce background noise.** Background conversations, music, and ambient noise all interfere with transcription. A quiet room makes a noticeable difference, especially with smaller models.
+
+**Use a good microphone.** A headset or desk microphone positioned close to your mouth consistently outperforms a laptop's built-in microphone. See [Audio issues](/docs/troubleshooting/audio-issues) for microphone recommendations.
+
+## Using Vocabulary Tools
+
+Echo has several features to improve accuracy for your specific use case:
+
+- **Personal Vocabulary** -- Add specialized words, names, or terms that Echo might not recognize. These are passed to the transcription model as hints.
+- **Smart Corrections** -- Set up automatic text replacements. For example, replace "gonna" with "going to", or fix a name that's consistently misspelled.
+- **Filler Word Removal** -- Automatically remove "um", "uh", "like", and other filler words from your transcriptions.
+
+## Using AI Enhancement
+
+AI Enhancement runs your transcription through an AI model (like ChatGPT or Claude) after transcription. This can fix grammar, restructure sentences, and apply formatting -- producing polished text from casual speech.
+
+If your raw transcriptions are close but not perfect, AI Enhancement can bridge the gap. It's especially useful for cleaning up punctuation, capitalization, and sentence structure.
+
+## Tips
+
+- If you're new to Echo, start with **Large v3 Turbo (Quantized)** -- it offers strong accuracy at a reasonable size (547 MB) and works well on most Macs.
+- For languages other than English, the **Large v3 Turbo** and **Large v3** models generally provide the best results among local models.
+- If speed matters more than accuracy (quick notes, casual messages), a smaller model or Parakeet is a great choice. For important documents, use a larger model or a cloud service.
+
+## Related
+
+- [Audio issues](/docs/troubleshooting/audio-issues) -- Fix microphone and audio quality problems
+- [Common issues](/docs/troubleshooting) -- Overview of all troubleshooting topics
+- [Privacy](/docs/privacy) -- Understand what data stays local versus what is sent to cloud services

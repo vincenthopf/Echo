@@ -1,0 +1,86 @@
+---
+title: Permissions
+description: Grant the macOS permissions Echo needs to transcribe and paste text.
+---
+
+Echo needs macOS permissions to record your voice and deliver transcriptions. During first launch, the Quick Setup guide walks you through granting permissions and configuring initial settings together.
+
+## macOS Permissions
+
+These are system-level permissions managed in **System Settings** > **Privacy & Security**.
+
+### Microphone (Required)
+
+Echo needs access to your microphone to record your voice for transcription.
+
+1. When Echo asks for microphone permission, click **Enable**
+2. In the macOS dialog that appears, click **OK** to grant access
+
+If you previously denied microphone access:
+
+1. Open **System Settings** > **Privacy & Security** > **Microphone**
+2. Find **Echo** in the list and toggle it on
+
+{/* Screenshot: macOS Microphone permission dialog */}
+
+### Accessibility (Recommended)
+
+Accessibility access allows Echo to paste transcribed text directly at your cursor position in any app. Without it, Echo copies text to your clipboard instead, and you'll need to paste manually with Command + V.
+
+1. In Echo's setup, click **Enable** next to **Accessibility Access**
+2. macOS will open **System Settings** > **Privacy & Security** > **Accessibility**
+3. Find **Echo** in the list and toggle it on
+4. Switch back to Echo -- it will detect the change automatically
+
+{/* Screenshot: macOS Accessibility permission in System Settings */}
+
+> **Tip:** If Echo doesn't appear in the Accessibility list, try dragging the Echo app from your Applications folder into the list.
+
+### Screen Recording (Recommended)
+
+Screen Recording access lets Echo read what's on your screen to provide context-aware transcription. This improves AI Enhancement by letting it understand what you're working on. Your screen content is processed locally and is not stored.
+
+1. In Echo's setup, click **Enable** next to **Screen Recording**
+2. macOS will open **System Settings** > **Privacy & Security** > **Screen Recording**
+3. Find **Echo** in the list and toggle it on
+4. Switch back to Echo -- it will detect the change automatically
+
+{/* Screenshot: macOS Screen Recording permission in System Settings */}
+
+## Initial Setup
+
+These are configuration steps completed during onboarding, not macOS permissions. You can change them later in **Settings** > **Recording**.
+
+### Microphone Selection
+
+During setup, choose which microphone Echo should use. You can select **System Default** to use whatever microphone macOS is currently using, or pick a specific device from the dropdown. You can change this at any time in **Settings** > **Recording** under **Audio Input**.
+
+### Keyboard Shortcut
+
+Echo needs a keyboard shortcut so you can start and stop recording from anywhere on your Mac. During setup, click the shortcut recorder field and press your preferred key combination.
+
+Popular choices include a function key (like F5) or a modifier combination (like Control + Shift + Space). You can change this at any time in **Settings** > **Recording** under **Echo Shortcuts**.
+
+{/* Screenshot: Keyboard shortcut recorder in onboarding */}
+
+## Checking Permission Status
+
+You can check and manage all permissions at any time:
+
+1. Open Echo and go to **Settings** > **General** tab
+2. Scroll to the **Permissions** section
+
+Each permission shows a green checkmark when granted or an orange indicator when it still needs attention. You'll also see your keyboard shortcut status here. For macOS permissions, click the button on each card to request access or open the relevant System Settings pane.
+
+{/* Screenshot: Echo permissions view in Settings showing status indicators */}
+
+## Tips
+
+- If a permission toggle doesn't seem to take effect, try quitting Echo completely (right-click the Dock icon > Quit) and reopening it. Some macOS permissions require a restart of the app.
+- You can always re-check permission status in **Settings** > **General** > **Permissions**.
+- On macOS, you may be prompted to authenticate (password or Touch ID) when toggling permissions in System Settings.
+
+## Related
+
+- [Quick start](/docs/getting-started/quickstart) -- Make your first transcription after setting up permissions
+- [Installation](/docs/getting-started/installation) -- Download and install Echo

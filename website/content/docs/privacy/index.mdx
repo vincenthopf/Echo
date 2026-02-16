@@ -1,0 +1,81 @@
+---
+title: Privacy
+description: How Echo handles your data, what stays on your Mac, and what is sent to external services.
+---
+
+Echo is designed with privacy as a core principle. When you use local transcription, your voice data never leaves your Mac. This page explains exactly what data Echo stores, what it sends externally, and what controls you have.
+
+## What Stays on Your Mac
+
+When you use local transcription models (Whisper or Parakeet), everything happens entirely on your device:
+
+- **Voice recordings** are processed locally and stored in Echo's application data folder. You can configure automatic cleanup to delete recordings after a set period.
+- **Transcription text** is stored locally in Echo's database on your Mac.
+- **AI models** are downloaded once and run locally. No audio is sent to any server during transcription.
+- **Screen captures** (used for context-aware AI Enhancement) are processed locally and are not stored permanently. They're used only during the current transcription session to provide context.
+- **Personal vocabulary, smart corrections, and filler word settings** are stored locally in Echo's preferences.
+- **Adaptive Awareness profiles** (including trigger words, URL patterns, and app rules) are stored locally.
+
+## What Is Sent Externally
+
+Echo sends data to external services **only** when you explicitly choose to use them. Nothing is sent by default.
+
+### Cloud Transcription
+
+If you select a cloud transcription model (Groq, Deepgram, ElevenLabs, Mistral, or Gemini), your audio recording is sent to that provider's servers for transcription. Each provider has its own privacy policy governing how they handle your audio data. Echo does not control or have access to data once it reaches a cloud provider.
+
+### AI Enhancement
+
+If you enable AI Enhancement and configure it with an API key (OpenAI, Anthropic, or a custom provider), your transcribed text is sent to that AI service for processing. If screen context is enabled, a text description of your screen content may also be included. No audio is sent to AI Enhancement services -- only text.
+
+### Ollama (Local AI)
+
+If you use Ollama for AI Enhancement, the processing happens locally on your Mac. No data is sent to external servers.
+
+### Auto-Updates
+
+Echo uses Sparkle for automatic update checks. When enabled, it contacts the update server to check for new versions. This sends only basic information needed to check for updates (app version and macOS version). You can disable automatic update checks in **Settings**.
+
+## No Telemetry or Analytics
+
+Echo does not collect telemetry, usage analytics, or any form of tracking data. There are no analytics SDKs, no crash reporting services, and no usage metrics sent anywhere. Echo does not phone home.
+
+## No Account Required
+
+Echo does not require you to create an account or sign in to use it. License activation (if applicable) is the only interaction with an external service beyond those you explicitly configure.
+
+## Data Storage Locations
+
+All of Echo's data is stored locally in your Mac's Application Support directory:
+
+- **Transcription history** -- Stored in Echo's local database
+- **Audio recordings** -- Stored in a Recordings folder within Echo's application data
+- **Downloaded models** -- Stored in a WhisperModels folder within Echo's application data
+- **Preferences and settings** -- Stored in macOS user defaults
+
+You can manage your transcription history and audio recordings within Echo. The auto-cleanup feature can automatically delete old transcriptions and recordings after a period you choose.
+
+## Permissions and What They Access
+
+Echo requests macOS permissions for specific purposes:
+
+| Permission | Purpose | Required? |
+|------------|---------|-----------|
+| **Microphone** | Record your voice for transcription | Yes |
+| **Accessibility** | Paste text directly at your cursor position | Recommended |
+| **Screen Recording** | Capture screen content for context-aware AI Enhancement | Optional |
+| **Network** | Download models, use cloud transcription, use AI Enhancement, check for updates | Only for cloud features |
+
+Each permission is used only for its stated purpose. Echo does not access any data beyond what's needed for the feature you're using.
+
+## Tips
+
+- For maximum privacy, use local transcription models and Ollama for AI Enhancement. This keeps all data entirely on your Mac.
+- Review each cloud service's privacy policy before entering your API key. Echo sends data to the service you choose, and that service's terms govern how it's handled.
+- Use the auto-cleanup feature to automatically delete old recordings and transcriptions if you prefer not to keep a history.
+
+## Related
+
+- [Permissions setup](/docs/getting-started/permissions) -- How to grant and manage macOS permissions
+- [Permission troubleshooting](/docs/troubleshooting/permissions) -- Fix permission issues
+- [Common issues](/docs/troubleshooting) -- Overview of all troubleshooting topics

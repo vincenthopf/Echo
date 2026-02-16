@@ -1,0 +1,56 @@
+---
+title: Adaptive Awareness
+description: Context-aware transcription profiles that automatically adjust Echo's settings based on what you're doing.
+---
+
+Adaptive Awareness lets you create profiles that automatically change how Echo transcribes and processes your voice. Each profile can have its own transcription model, language, AI enhancement prompt, and output behavior -- and Echo switches between them based on which app you're using, which website you're visiting, or a keyword you speak.
+
+## Why Use Adaptive Awareness
+
+Without Adaptive Awareness, Echo uses the same settings for everything. That works fine if you only use voice transcription in one context, but most people don't. You might want formal, polished text when writing emails, quick casual messages in Slack, and code-friendly formatting in your editor.
+
+Adaptive Awareness handles this automatically. You set up profiles once, and Echo applies the right settings for you -- no manual switching required.
+
+## How It Works
+
+Adaptive Awareness uses a simple system of profiles and triggers.
+
+**Profiles** define *what happens* -- which transcription model to use, which language, whether AI enhancement runs, which prompt to apply, and how the text gets delivered.
+
+**Triggers** define *when it happens* -- which app is in the foreground, which URL is open in the browser, or which keyword you say during recording.
+
+When you start a recording, Echo checks the current context against your profiles and activates the one that matches. If nothing matches, the default profile is used as a fallback.
+
+{/* Screenshot: The Adaptive Awareness main view showing the profile list on the left and profile detail editor on the right */}
+
+## Getting Started
+
+1. Open Echo and click **Adaptive Awareness** in the sidebar
+2. You'll see a profile list on the left and profile settings on the right
+3. Echo creates a **Default** profile automatically -- this is your fallback profile that activates when no other triggers match
+4. Click the **+** button at the top of the profile list to create a new profile
+5. Give it a name, add triggers, and configure the settings you want
+
+From there, Echo handles the rest. As you switch between apps and websites, the matching profile activates automatically.
+
+## Activation Precedence
+
+When multiple trigger types could match, Echo follows this priority order (highest to lowest):
+
+1. **Voice Keywords** -- Spoken trigger words take the highest priority and lock the profile until you stop recording
+2. **URL Patterns** -- If you're in a browser, URL matching is checked next
+3. **App Matching** -- The frontmost application is checked last
+4. **Default Profile** -- If no triggers match, the default profile activates as a fallback
+
+## Tips
+
+- Start simple. Create one or two profiles for your most common workflows before building a full set.
+- The default profile is always on. Use it for your most common transcription settings, and create specialized profiles for the exceptions.
+- Profiles show an **ACTIVE** badge in the sidebar when they're currently applied, so you always know which profile Echo is using.
+
+## Related
+
+- [Creating and Managing Profiles](/docs/adaptive-awareness/profiles)
+- [Triggers: Voice, URL, and App Matching](/docs/adaptive-awareness/triggers)
+- [Advanced Profile Settings](/docs/adaptive-awareness/advanced)
+- [AI Enhancement](/docs/ai-enhancement)

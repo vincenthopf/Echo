@@ -1,0 +1,147 @@
+---
+title: Recording
+description: Configure your microphone, keyboard shortcuts, audio input mode, sensitivity, and media behavior during recording.
+---
+
+The **Recording** tab in Settings controls which microphone Echo uses, your recording keyboard shortcuts, microphone sensitivity, and media behavior. Open Echo, go to **Settings** in the sidebar, then click the **Recording** tab.
+
+## Echo Shortcuts
+
+These are your primary recording hotkeys.
+
+{/* Screenshot: Echo Shortcuts section showing Hotkey 1 dropdown */}
+
+### Setting Up a Hotkey
+
+1. Click the **Hotkey 1** dropdown menu.
+2. Choose from the available options:
+   - **Right Option** -- press the right Option key
+   - **Left Option** -- press the left Option key
+   - **Left Control** -- press the left Control key
+   - **Right Control** -- press the right Control key
+   - **Fn** -- press the Fn key
+   - **Right Command** -- press the right Command key
+   - **Right Shift** -- press the right Shift key
+   - **Custom** -- record any key combination you prefer
+3. If you chose **Custom**, click the shortcut recorder field and press your desired key combination.
+
+### Adding a Second Hotkey
+
+You can set up a second hotkey for the same recording action. This is useful if you want different keys for different situations (for example, one for your external keyboard and one for your laptop keyboard).
+
+1. Click **Add another hotkey** below Hotkey 1.
+2. Choose a key or combination from the **Hotkey 2** dropdown.
+3. To remove the second hotkey, click the red **-** button next to it.
+
+### How Hotkeys Work
+
+Echo hotkeys support two recording modes:
+
+- **Quick tap** -- Tap the hotkey briefly to start hands-free recording. Tap it again to stop recording and transcribe.
+- **Push-to-talk** -- Press and hold the hotkey to record. Release it to stop recording and transcribe.
+
+Echo automatically determines which mode to use based on how long you hold the key. A brief press (under about 1.7 seconds) activates hands-free mode; holding longer activates push-to-talk.
+
+## Other App Shortcuts
+
+Additional shortcuts are found in the **Other App Shortcuts** section.
+
+{/* Screenshot: Other App Shortcuts section showing Paste Original, Paste Transformed, Retry, Cancel, and Mouse settings */}
+
+### Paste Original
+
+Set a shortcut for **Paste Original** to quickly paste your most recent transcription (before any AI transformation). Click the shortcut recorder field and press your desired key combination.
+
+### Paste Transformed
+
+Set a shortcut for **Paste Transformed** to paste the AI-enhanced version of your last transcription. If no transformation was applied, it falls back to the original transcript.
+
+### Retry
+
+Set a shortcut for **Retry** to re-transcribe your last recorded audio using your current model and settings. The result is copied to your clipboard.
+
+### Cancel
+
+By default, you cancel a recording by double-tapping Escape. To use a different key combination:
+
+1. Toggle on **Custom Cancel Shortcut**.
+2. Click the **Cancel Shortcut** recorder field and press your preferred keys.
+
+### Mouse Activation
+
+You can toggle recording with your middle mouse button:
+
+1. Toggle on **Enable Mouse Activation**.
+2. Adjust the **Activation Delay** (in milliseconds) to control how long the button must be held before recording starts. The default is 200ms, which prevents accidental triggers from scrolling.
+
+## Choosing Your Audio Input
+
+Echo offers three input modes for selecting which microphone to use.
+
+{/* Screenshot: Audio Input section showing the three input mode cards */}
+
+### System Default
+
+Uses whatever microphone your Mac is currently set to in System Settings. This is the simplest option -- Echo always follows your system preference.
+
+### Custom Device
+
+Lets you pick a specific microphone from a list of all available audio devices. This overrides your Mac's system-wide default.
+
+1. Select the **Custom Device** card.
+2. Under **Available Devices**, click the microphone you want to use.
+3. The selected device shows a checkmark, and the active device displays an **Active** badge.
+4. Click **Refresh** if a recently connected device does not appear.
+
+### Prioritized
+
+Sets up a ranked list of preferred microphones. Echo automatically uses the highest-priority device that is currently connected. If none of your prioritized devices are available, it falls back to the system default.
+
+1. Select the **Prioritized** card.
+2. Under **Available Devices**, click the **+** button next to each microphone you want to prioritize.
+3. The device moves to the **Prioritized Devices** list.
+4. Use the **up** and **down** arrows to reorder your priority list.
+5. To remove a device from the priority list, click the **-** button.
+
+{/* Screenshot: Prioritized mode showing a ranked list of devices with up/down arrows */}
+
+This mode is ideal if you switch between setups -- for example, a USB microphone at your desk and your MacBook's built-in mic when mobile.
+
+## Microphone Sensitivity
+
+Adjust how sensitive Echo is to detecting your voice. Find this under **Audio Management** > **Sensitivity**.
+
+{/* Screenshot: Microphone Sensitivity slider */}
+
+- **Low** -- Requires louder speech to begin capturing. Useful in noisy environments.
+- **High** -- Picks up quieter sounds more easily. Better for quiet rooms.
+
+The default is a balanced middle setting. If Echo seems to miss the start of your sentences, try increasing sensitivity. If it picks up too much background noise, lower it.
+
+## Sound Feedback
+
+Toggle **Sound feedback** under **Audio Management** > **Sound** to enable or disable the audio cues that play when you start and stop recording.
+
+## Universal Paste Compatibility
+
+Enable this toggle under **Audio Management** > **Paste** if you notice pasting issues with your keyboard layout or in certain applications.
+
+Turn this on if:
+- You use a non-standard keyboard layout (AZERTY, Dvorak, Colemak, etc.)
+- Pasted text appears incorrectly in specific applications
+- You see literal "pasted text" instead of your transcription in some apps
+
+This uses an alternative pasting method that works across more keyboard layouts and apps, though it may be slightly slower.
+
+## Tips
+
+- Single modifier keys (like Right Option or Right Command) make the best recording hotkeys because they require only one keypress and do not conflict with most application shortcuts.
+- Echo automatically detects when you connect or disconnect audio devices. In **Prioritized** mode, it will seamlessly switch to the next available device in your list.
+- If you use a Bluetooth headset, put it in the priority list so Echo automatically uses it when it connects and falls back to your built-in mic when it disconnects.
+- The **Retry** shortcut is especially useful when you switch transcription models and want to re-process your last recording with the new model.
+
+## Related
+
+- [General](/docs/settings/general) -- Launch at login, updates, and appearance
+- [Transcription](/docs/settings/transcription) -- Model selection and output formatting
+- [Intelligence](/docs/settings/intelligence) -- AI Enhancement and transformation shortcuts

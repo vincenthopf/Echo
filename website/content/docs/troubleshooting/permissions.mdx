@@ -1,0 +1,113 @@
+---
+title: Permission Issues
+description: Fix problems with Microphone, Accessibility, and Screen Recording permissions on macOS.
+---
+
+Echo requires macOS permissions to record audio, paste text, and optionally capture screen context. If any of these aren't working correctly, this page walks through the most common fixes.
+
+## Microphone Permission
+
+### Symptom
+
+Echo shows an error like "Microphone access is required to start recording" when you try to record.
+
+### Fix
+
+1. Open **System Settings** > **Privacy & Security** > **Microphone**
+2. Find **Echo** in the list and make sure it is toggled **on**
+3. Quit Echo completely (right-click the menu bar icon > **Quit**) and reopen it
+
+If Echo doesn't appear in the Microphone list at all, try recording once -- macOS should prompt you to grant access. If the prompt never appears, drag the Echo app from your Applications folder into the Microphone list manually.
+
+{/* Screenshot: macOS System Settings > Privacy & Security > Microphone with Echo toggled on */}
+
+### Resetting Microphone Permission
+
+If microphone access seems stuck or Echo can't detect it after granting:
+
+1. Open **System Settings** > **Privacy & Security** > **Microphone**
+2. Toggle Echo **off**, then toggle it back **on**
+3. Quit and reopen Echo
+
+## Accessibility Permission
+
+### Symptom
+
+After transcription, text is copied to your clipboard instead of being pasted directly at your cursor. You see a notification saying "Transcript copied to clipboard. Enable Accessibility for auto-paste."
+
+### Fix
+
+1. Open **System Settings** > **Privacy & Security** > **Accessibility**
+2. Find **Echo** in the list and toggle it **on**
+3. Switch back to Echo -- it will detect the change automatically
+
+{/* Screenshot: macOS System Settings > Privacy & Security > Accessibility with Echo toggled on */}
+
+> **Note:** Accessibility access allows Echo to paste transcribed text directly into any app at your cursor position. Without it, Echo still works but only copies text to the clipboard.
+
+### Echo Not in the Accessibility List
+
+If Echo doesn't appear in the list:
+
+1. Click the **+** button at the bottom of the Accessibility list
+2. Navigate to your **Applications** folder
+3. Select **Echo** and click **Open**
+4. Toggle it on
+
+### Accessibility Toggle Has No Effect
+
+If you've toggled Accessibility on but Echo still copies to clipboard:
+
+1. Toggle Echo **off** in the Accessibility list
+2. Quit Echo completely
+3. Toggle Echo back **on** in the Accessibility list
+4. Reopen Echo
+
+In rare cases, macOS may require you to remove Echo from the list entirely, restart your Mac, then re-add it.
+
+## Screen Recording Permission
+
+### Symptom
+
+Screen context features in AI Enhancement don't work, or Echo reports that screen capture is unavailable.
+
+### Fix
+
+1. Open **System Settings** > **Privacy & Security** > **Screen Recording**
+2. Find **Echo** in the list and toggle it **on**
+3. Switch back to Echo -- it will detect the change
+
+{/* Screenshot: macOS System Settings > Privacy & Security > Screen Recording with Echo toggled on */}
+
+> **Note:** Screen Recording is optional. Echo works fully without it. This permission is only needed if you want Echo to capture on-screen context to improve AI Enhancement results.
+
+### Resetting Screen Recording Permission
+
+If Screen Recording access appears granted but isn't working:
+
+1. Remove Echo from the Screen Recording list by selecting it and clicking the **-** button
+2. Quit Echo completely
+3. Reopen Echo and re-request Screen Recording permission from the **Settings** screen
+
+## Checking All Permissions at Once
+
+You can verify the status of all permissions in one place:
+
+1. Open Echo and go to **Settings**
+2. Navigate to the **Permissions** section
+
+Each permission shows a green checkmark when active or an orange indicator when it needs attention. Use the refresh button next to each permission to recheck its status without leaving the app.
+
+{/* Screenshot: Echo Settings permissions section showing status indicators */}
+
+## Tips
+
+- After changing any permission in System Settings, quit Echo completely and reopen it. Some macOS permissions don't take effect until the app restarts.
+- If permission changes seem ignored, try restarting your Mac. macOS occasionally caches permission states.
+- On macOS Ventura and later, you may see a prompt asking to allow Echo to control your computer. This is the Accessibility permission -- click **OK** or grant it in System Settings.
+
+## Related
+
+- [Setting up permissions](/docs/getting-started/permissions) -- Initial permission setup during onboarding
+- [Audio issues](/docs/troubleshooting/audio-issues) -- Microphone not detected or poor audio quality
+- [Common issues](/docs/troubleshooting) -- Overview of all troubleshooting topics

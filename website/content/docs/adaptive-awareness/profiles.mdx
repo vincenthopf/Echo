@@ -1,0 +1,97 @@
+---
+title: Profiles
+description: How to create, edit, and manage Adaptive Awareness profiles in Echo.
+---
+
+Profiles are the building blocks of Adaptive Awareness. Each profile is a complete set of transcription settings -- model, language, AI enhancement, output behavior -- that Echo can switch to automatically based on context.
+
+## Creating a Profile
+
+1. Open Echo and click **Adaptive Awareness** in the sidebar
+2. Click the **+** button at the top of the profile list
+3. A new profile named "New Profile" appears and is selected for editing
+4. In the **General** section on the right, set the profile's **Name** and **Icon**
+5. Configure the rest of the profile's settings (triggers, transcription, AI enhancement, advanced options)
+
+Changes save automatically as you edit.
+
+{/* Screenshot: Creating a new profile -- the General section showing Icon, Name, and Default fields */}
+
+## The Default Profile
+
+One profile is always marked as the default. It acts as the fallback -- when no other profile's triggers match the current context, Echo uses the default profile.
+
+Key things to know about the default profile:
+
+- Echo creates a default profile automatically when you first use Adaptive Awareness
+- The default profile is always enabled and cannot be disabled
+- Exactly one profile can be the default at any time
+- The default profile shows **Default Fallback Profile** underneath its name in the profile list
+
+To change which profile is the default:
+
+1. Select the profile you want to make default
+2. In the **General** section, click **Set as default**
+
+Or right-click any profile in the list and choose **Set as Default**.
+
+## Editing a Profile
+
+Select any profile from the list on the left to open its settings on the right. The profile editor has five sections:
+
+- **General** -- Name, icon, and default status
+- **Activation Triggers** -- Apps, websites, and voice keywords that activate this profile (see [Triggers](/docs/adaptive-awareness/triggers))
+- **Transcription** -- Model and language selection for this profile
+- **Intelligent Transformation** -- AI enhancement settings per profile (see [Advanced](/docs/adaptive-awareness/advanced))
+- **Advanced** -- Type-out mode, auto-send, media controls, and clipboard behavior (see [Advanced](/docs/adaptive-awareness/advanced))
+
+### Transcription Settings
+
+Each profile can override the global transcription model and language:
+
+1. In the **Transcription** section, use the **Model** dropdown to select a specific model, or leave it on **Use Global Setting** to follow your main Echo settings
+2. Use the **Language** dropdown to choose a language for this profile
+
+This is useful when you work in multiple languages. For example, you could have one profile set to English for work emails and another set to Spanish for personal messages.
+
+{/* Screenshot: The Transcription section showing Model and Language dropdowns */}
+
+## Enabling and Disabling Profiles
+
+Each profile (except the default) has a toggle switch in the profile list. When disabled, the profile's triggers are ignored and it won't activate.
+
+- To disable a profile, turn off the toggle next to it in the profile list
+- To re-enable it, turn the toggle back on
+
+Disabled profiles remain in your list and keep their settings. They simply stop responding to triggers until you re-enable them.
+
+## Duplicating a Profile
+
+To create a new profile based on an existing one:
+
+1. Right-click the profile you want to copy in the profile list
+2. Click **Duplicate**
+3. A copy appears with " Copy" appended to the name, starting in a disabled state
+
+The duplicate inherits all settings and triggers from the original. Edit the copy to customize it.
+
+## Deleting a Profile
+
+1. Right-click the profile in the profile list
+2. Click **Delete**
+3. Confirm the deletion when prompted
+
+Deletion is permanent and cannot be undone.
+
+## Tips
+
+- Use the search bar at the top of the profile list to quickly find profiles by name.
+- The active profile shows a green **ACTIVE** badge, so you can verify at a glance which profile Echo is currently using.
+- When setting up a profile for a specific app, keep the **Model** and **Language** on **Use Global Setting** unless you have a reason to override them. This keeps things simple and means your profiles automatically benefit from any global changes you make later.
+
+## Related
+
+- [Triggers: Voice, URL, and App Matching](/docs/adaptive-awareness/triggers)
+- [Advanced Profile Settings](/docs/adaptive-awareness/advanced)
+- [Transcription Models](/docs/transcription/local-models)
+- [Language Selection](/docs/transcription/language-selection)

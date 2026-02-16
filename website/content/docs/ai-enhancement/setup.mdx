@@ -1,0 +1,121 @@
+---
+title: Setting Up AI Providers
+description: How to connect Echo to an AI provider for transcription enhancement.
+---
+
+Before you can use AI Enhancement, you need to connect Echo to an AI provider. This is done in the **Settings** > **Intelligence** tab. Once a provider is connected, you enable AI Enhancement per-profile in [Adaptive Awareness](/docs/adaptive-awareness). Echo supports a wide range of cloud providers as well as local models through Ollama.
+
+## Choosing a Provider
+
+Echo supports these AI providers for enhancement:
+
+| Provider | Free Tier | Notes |
+|----------|-----------|-------|
+| **Gemini** | Yes | Google's models. Free tier available. Default provider. |
+| **Groq** | Yes | Very fast inference. Free tier available. |
+| **Cerebras** | Yes | Fast inference. Free tier available. |
+| **OpenAI** | No | GPT models. Paid API key required. |
+| **Anthropic** | No | Claude models. Paid API key required. |
+| **Mistral** | No | Mistral models. Paid API key required. |
+| **OpenRouter** | Varies | Access to hundreds of models from many providers. Supports vision models. |
+| **Ollama** | Yes (local) | Run models on your own Mac. Fully offline, no API key needed. |
+| **Custom** | Varies | Any OpenAI-compatible API endpoint. |
+
+If you're just getting started, **Gemini**, **Groq**, or **Cerebras** are good choices because they offer free API keys.
+
+## Adding an API Key
+
+1. Open Echo and go to **Settings**
+2. Select the **Intelligence** tab
+3. Under **AI Provider Integration**, choose your provider from the **AI Provider** dropdown
+4. Paste your API key into the **API Key** field
+5. Click **Verify and Save**
+
+{/* Screenshot: The Intelligence tab showing the AI Provider dropdown and API Key field with Verify and Save button */}
+
+Echo verifies your key against the provider's API before saving it. If verification fails, double-check that your key is correct and that your account is active.
+
+Once connected, you'll see a green **Connected** badge next to the provider name.
+
+### Where to Get API Keys
+
+Each provider has a link directly in Echo. After selecting a provider, click **Get API Key** to open the provider's key management page:
+
+- **OpenAI** -- [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+- **Anthropic** -- [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
+- **Gemini** -- [makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+- **Groq** -- [console.groq.com/keys](https://console.groq.com/keys)
+- **Cerebras** -- [cloud.cerebras.ai](https://cloud.cerebras.ai/)
+- **Mistral** -- [console.mistral.ai/api-keys](https://console.mistral.ai/api-keys)
+- **OpenRouter** -- [openrouter.ai/keys](https://openrouter.ai/keys)
+
+### Key Security
+
+Your API keys are stored in the app's preferences.
+
+## Selecting a Model
+
+After connecting a provider, you can choose which model to use:
+
+1. In the **Intelligence** tab under **AI Provider Integration**, find the **Model** dropdown below the provider selector
+2. Select the model you want to use
+
+Each provider offers different models with varying speed, quality, and cost. Faster models (like smaller variants) work well for simple cleanup, while more capable models handle complex rewriting better.
+
+For **OpenRouter**, click the refresh button next to the model dropdown to load the full list of available models. OpenRouter also supports vision-capable models, which can process screen captures as images rather than text for improved context understanding.
+
+## Ollama (Local Models)
+
+Ollama lets you run AI models directly on your Mac with no internet connection and no API key. Everything stays on your device.
+
+### Prerequisites
+
+1. Install Ollama from [ollama.ai/download](https://ollama.ai/download)
+2. Open Terminal and pull a model: `ollama pull mistral` (or any model you prefer)
+3. Keep Ollama running in the background
+
+### Connecting Echo to Ollama
+
+1. Open Echo and go to **Settings** > **Intelligence**
+2. Select **Ollama** from the **AI Provider** dropdown
+3. The **Server URL** defaults to `http://localhost:11434` -- change it only if you're running Ollama on a different address
+4. Echo will attempt to connect automatically. You should see a green **Connected** status.
+5. Select your preferred model from the **Model** dropdown
+
+{/* Screenshot: The Ollama configuration section showing Status, Server URL, and Model fields */}
+
+If the status shows **Disconnected**, click **Refresh** to retry the connection. Make sure Ollama is running and that you have at least one model pulled.
+
+## Custom Provider
+
+If you use an OpenAI-compatible API that isn't listed (such as a self-hosted model or a third-party service), you can set it up as a custom provider:
+
+1. Select **Custom** from the **AI Provider** dropdown
+2. Enter the **Endpoint** URL (the full chat completions URL, e.g., `https://api.example.com/v1/chat/completions`)
+3. Enter the **Model** name
+4. Enter your **API Key**
+5. Click **Verify and Save**
+
+The custom provider uses the OpenAI-compatible API format, so any service that follows that standard should work.
+
+## Removing an API Key
+
+To disconnect a provider:
+
+1. Go to **Settings** > **Intelligence**
+2. Select the provider you want to disconnect
+3. Click **Remove** next to the masked API key
+
+This deletes the key from your Keychain. You can always add a new key later.
+
+## Tips
+
+- You can add keys for multiple providers and switch between them at any time. Echo remembers your key and model selection for each provider.
+- Free-tier providers (Gemini, Groq, Cerebras) have rate limits. If you see rate limit errors, wait a moment before trying again or switch to a paid provider.
+- For the fastest response times, try Groq or Cerebras. For the highest quality output, try OpenAI, Anthropic, or Gemini's larger models.
+
+## Related
+
+- [AI Enhancement Overview](/docs/ai-enhancement)
+- [Prompts](/docs/ai-enhancement/prompts)
+- [Screen Context](/docs/ai-enhancement/screen-context)

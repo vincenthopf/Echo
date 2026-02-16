@@ -1,0 +1,121 @@
+---
+title: Triggers
+description: How to set up voice keywords, URL patterns, and app matching to automatically activate profiles.
+---
+
+Triggers determine when a profile activates. You can set up three types of triggers -- applications, websites, and voice keywords -- and combine them to create precise activation rules.
+
+## The Activation Triggers Section
+
+Open any profile in Adaptive Awareness, and you'll see the **Activation Triggers** section. It displays three columns side by side:
+
+- **Applications** -- Activate based on the frontmost app
+- **Websites** -- Activate based on the current browser URL
+- **Voice Keywords** -- Activate based on a word you speak during recording
+
+{/* Screenshot: The three-column Activation Triggers section showing Applications, Websites, and Voice Keywords columns */}
+
+## Application Triggers
+
+Application triggers activate a profile when a specific app is in the foreground.
+
+### Adding an App Trigger
+
+1. In the **Applications** column, click **+ Add app**
+2. A picker sheet appears showing your installed applications
+3. Use the search bar to find the app you want
+4. Click an app to select it (selected apps are highlighted)
+5. Click **Done** to save your selections
+
+You can select multiple apps in a single session. Each selected app appears as a tag in the Applications column.
+
+### Removing an App Trigger
+
+Hover over an app in the Applications column and click the **x** button that appears.
+
+## Website Triggers (URL Patterns)
+
+URL triggers activate a profile when a matching URL is open in your browser. Echo works with Safari, Chrome, Arc, Edge, Brave, Opera, Vivaldi, Orion, and Yandex Browser.
+
+### Adding a URL Pattern
+
+1. In the **Websites** column, type a URL pattern into the text field (for example, `github.com`)
+2. Click **Add** or press Return
+3. The pattern appears as a tag in the Websites column
+
+You don't need to include `https://` or `www.` -- Echo strips these automatically when matching.
+
+### How URL Matching Works
+
+Echo uses simple substring matching. If the pattern you enter appears anywhere in the current URL, the profile activates. For example:
+
+| Pattern | Matches |
+|---------|---------|
+| `github.com` | Any page on GitHub |
+| `github.com/my-org` | Pages under a specific GitHub organization |
+| `docs.google.com` | Google Docs pages |
+| `notion.so` | Any Notion page |
+
+URL patterns also support wildcards. For example, `*.example.com` matches any subdomain of example.com.
+
+### Removing a URL Pattern
+
+Hover over a URL tag in the Websites column and click the **x** button that appears.
+
+## Voice Keywords
+
+Voice keywords let you activate a profile by saying a specific word at the beginning of your recording. This is the most flexible trigger type because it works regardless of which app or website is active.
+
+### Adding a Voice Keyword
+
+1. In the **Voice Keywords** column, type a keyword into the text field
+2. Click **Add** or press Return
+3. The keyword appears as a tag in the Voice Keywords column
+
+### How Voice Keywords Work
+
+When you start a recording, Echo listens for any configured trigger words at the beginning of your speech. If it detects a match:
+
+1. The matching profile activates immediately
+2. The trigger word is removed from the transcription output (it won't appear in your text)
+3. The profile stays locked for the duration of that recording
+
+Voice keywords are case-insensitive, so "email" and "Email" are treated as the same trigger.
+
+### Removing a Voice Keyword
+
+Hover over a keyword tag in the Voice Keywords column and click the **x** button that appears.
+
+## Trigger Logic: Any vs. All
+
+When a profile has triggers across multiple categories (for example, both an app trigger and a URL pattern), you can control how they're evaluated using the **Any** / **All** toggle in the upper right of the Activation Triggers section.
+
+- **Any** (default) -- The profile activates when *any single trigger* matches. This is OR logic: an app match *or* a URL match *or* a voice keyword is enough.
+- **All** -- The profile activates only when triggers from *at least two different categories* match simultaneously. This is AND logic: for example, a specific app *and* a matching URL must both be true.
+
+The **All** option only appears when you have triggers configured in at least two categories. It's useful for highly specific rules -- for example, activating a profile only when you're in Chrome *and* on a specific website.
+
+{/* Screenshot: The Any/All trigger logic toggle in the Activation Triggers header */}
+
+## Activation Precedence
+
+When Echo checks which profile to activate, it follows a strict priority order:
+
+1. **Voice Keywords** -- Highest priority. If you say a trigger word, that profile activates regardless of the current app or URL.
+2. **URL Patterns** -- If you're in a browser, URL patterns are checked next.
+3. **App Matching** -- The frontmost application is checked.
+4. **Default Profile** -- If no triggers match any enabled profile, the default profile activates.
+
+Within each priority level, Echo checks profiles in the order they appear in the profile list.
+
+## Tips
+
+- Keep voice keywords short and distinctive. Single words that you wouldn't normally say at the start of a sentence work best -- for example, "email", "code", or "translate".
+- For URL patterns, use the most specific pattern that covers your use case. `mail.google.com` is better than `google.com` if you only want the profile to activate in Gmail.
+- You can add multiple triggers of the same type to a single profile. For example, a "Work Chat" profile could have both Slack and Microsoft Teams as app triggers.
+
+## Related
+
+- [What is Adaptive Awareness](/docs/adaptive-awareness)
+- [Creating and Managing Profiles](/docs/adaptive-awareness/profiles)
+- [Advanced Profile Settings](/docs/adaptive-awareness/advanced)

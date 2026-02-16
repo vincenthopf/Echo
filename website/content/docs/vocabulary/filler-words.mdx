@@ -1,0 +1,34 @@
+---
+title: Filler Word Removal
+description: Echo automatically removes filler words like uh, um, and hmm from your transcriptions.
+---
+
+Filler word removal strips out hesitation sounds and verbal fillers from your transcriptions automatically. Words like "uh," "um," "hmm," and similar sounds are removed before the text reaches your clipboard, so you get clean, readable output without editing.
+
+This feature is enabled by default and works with every transcription, regardless of which model or service you use.
+
+## What Gets Removed
+
+Echo removes the following filler words automatically:
+
+`uh` `um` `uhm` `umm` `uhh` `uhhh` `ah` `eh` `hmm` `hm` `mmm` `mm` `mh` `ha` `ehh`
+
+## How It Works
+
+Filler word removal runs early in the transcription pipeline, before Smart Corrections are applied. The process:
+
+1. Each filler word is matched using word boundaries, so removing "um" won't affect words like "umbrella" or "aluminum"
+2. Any trailing commas or periods attached to the filler word are also cleaned up
+3. Extra spaces left behind after removal are collapsed automatically
+
+The matching is case-insensitive, so "Um," "UM," and "um" are all treated the same way.
+
+## Tips
+
+- Filler word removal works alongside Smart Corrections and Personal Vocabulary. They complement each other: filler words are stripped first, then Smart Corrections are applied.
+- If you use AI Enhancement, the AI prompt also handles filler word cleanup, giving you a double layer of cleaning.
+
+## Related
+
+- [Smart Corrections](/docs/vocabulary/smart-corrections) -- Auto-replace words after transcription
+- [Personal Vocabulary](/docs/vocabulary/personal-vocabulary) -- Teach Echo specialized terms

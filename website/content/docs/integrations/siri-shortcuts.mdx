@@ -1,0 +1,65 @@
+---
+title: Siri Shortcuts
+description: Control Echo recordings with Siri and the Shortcuts app on macOS.
+---
+
+Echo provides Siri Shortcuts actions so you can start, stop, and dismiss recordings using your voice, the Shortcuts app, or any automation that supports App Shortcuts on macOS.
+
+## Available Actions
+
+Echo exposes two actions to Siri and the Shortcuts app:
+
+### Toggle Recorder
+
+Starts a new recording if Echo is idle, or stops the current recording if one is in progress. This is the primary action for hands-free control.
+
+**Siri phrases you can use:**
+- "Toggle Echo recorder"
+- "Start Echo recording"
+- "Stop Echo recording"
+
+### Dismiss Recorder
+
+Cancels any active recording and closes the recorder window. Use this when you want to abandon a recording without transcribing it.
+
+**Siri phrases you can use:**
+- "Dismiss Echo recorder"
+- "Cancel Echo recording"
+- "Close Echo recorder"
+
+## Using Siri
+
+You can trigger either action by speaking to Siri. Make sure Siri is enabled in **System Settings > Siri & Spotlight** on your Mac.
+
+1. Activate Siri (hold the microphone key, the globe key, or say "Siri" if voice activation is on).
+2. Say one of the phrases listed above, for example: **"Start Echo recording"**.
+3. Echo will toggle or dismiss the recorder in the background -- you do not need to have the Echo window open.
+
+## Building Custom Shortcuts
+
+You can also use Echo's actions inside the Shortcuts app to build automations.
+
+1. Open the **Shortcuts** app on your Mac.
+2. Click **+** to create a new shortcut.
+3. Search for **"Echo"** in the actions panel on the right.
+4. Drag **Toggle Recorder** or **Dismiss Recorder** into your shortcut.
+5. Combine with other actions as needed -- for example, you could open a specific app first, then start an Echo recording.
+
+{/* Screenshot: Shortcuts app showing Echo actions in the actions panel */}
+
+## Example Shortcuts
+
+**Quick dictation shortcut:** Create a shortcut with a single "Toggle Recorder" action and assign it a keyboard shortcut in the Shortcuts app. This gives you an alternative way to start recordings beyond Echo's built-in global hotkey.
+
+**Meeting preparation:** Build a shortcut that opens your video call app, then toggles the Echo recorder, so you are ready to transcribe from the moment the call starts.
+
+## Tips
+
+- Echo does not need to be the active window for Siri Shortcuts to work. As long as Echo is running in the menu bar, the actions will fire.
+- If Siri does not recognize the phrases, try opening the **Shortcuts** app first. macOS registers Echo's actions when the Shortcuts app discovers them.
+- You can rename and customize shortcuts in the Shortcuts app without affecting Echo's functionality.
+
+## Related
+
+- [Recording Settings](/docs/settings/recording) -- set up global hotkeys within Echo
+- [Recording Settings](/docs/settings/recording) -- configure audio input and recording behavior

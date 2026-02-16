@@ -1,0 +1,99 @@
+---
+title: Prompts
+description: How to use built-in prompts, create custom ones, and control how AI Enhancement transforms your transcriptions.
+---
+
+Prompts are the instructions that tell the AI how to process your transcription. Different prompts produce different results from the same spoken input -- one might clean up grammar while another formats an email or rewrites for clarity.
+
+## Built-In Prompts
+
+Echo ships with two system prompts that cannot be deleted:
+
+- **Default** -- The general-purpose prompt. It cleans up grammar and spelling, removes filler words ("um", "uh", "like"), keeps only the final version when you correct yourself mid-sentence, formats lists, converts spoken numbers to digits, and preserves your personality and tone. It does not answer questions -- it only cleans up what you said.
+
+- **Assistant** -- Treats your transcription as a request and provides a direct answer. Use this when you want to ask a question or give a command by voice and get a response. It uses your screen, clipboard, and selected text as reference material.
+
+## Selecting a Prompt
+
+You can select which prompt to use in two ways:
+
+**Per Adaptive Awareness profile:**
+1. Open **Adaptive Awareness** in the sidebar
+2. Select a profile (including the **Default** profile for your general settings)
+3. In the **Intelligent Transformation** section, use the **Prompt** selector to choose a prompt
+
+Each profile can use a different prompt, so Echo automatically switches prompts based on what you're doing. See [Adaptive Awareness](/docs/adaptive-awareness) for details.
+
+**Via keyboard shortcuts** (while the recorder is visible):
+- Press **Command + E** to toggle enhancement on or off
+- Press **Command + 1** through **Command + 0** to switch between your saved prompts by number
+
+## Creating a Custom Prompt
+
+1. Open **Adaptive Awareness** in the sidebar and select any profile
+2. In the **Intelligent Transformation** section, click **Create New Prompt** next to the prompt selector
+3. The prompt editor opens with a blank form
+
+{/* Screenshot: The New Prompt editor window */}
+
+4. Fill in the fields:
+   - **Title** -- A short name for the prompt (shown in the grid and popover)
+   - **Icon** -- Choose from categories: Document & Text, Communication, Professional, Technical, Content, Media & Creative
+   - **Description** -- A brief note about what this prompt does (optional, for your reference)
+   - **Use enhanced template** -- When on (the default), your instructions are wrapped in a system template that provides context about transcription enhancement, your dictionary terms, and clipboard content. When off, only your exact instructions are sent. Turn this off if you want complete control over the prompt.
+   - **Prompt Instructions** -- The actual instructions for the AI. Write what you want it to do with the transcription.
+
+5. Click **Save**
+
+### Starting from a Template
+
+When creating a new prompt, you'll see a **Start with a Predefined Template** section at the bottom of the editor. These templates give you a tested starting point that you can customize:
+
+| Template | What It Does |
+|----------|-------------|
+| **System Default** | General cleanup: grammar, filler words, self-corrections, lists, numbers |
+| **Chat** | Casual, Gen-Z-friendly formatting for messaging |
+| **Email** | Formats transcriptions as professional emails with salutations and sign-offs |
+| **Vibe Coding** | Cleans up programming conversations, corrects technical terms using screen context |
+| **Rewrite** | Rewrites with enhanced clarity and improved sentence structure while preserving meaning |
+
+Click any template to load its title, icon, and prompt text into the editor. You can then modify it however you like before saving.
+
+## Editing a Prompt
+
+1. Open **Adaptive Awareness** in the sidebar and select any profile
+2. In the **Intelligent Transformation** section, below the prompt selector you'll see a preview of the current prompt. Click **Edit Prompt** to open it in the editor
+
+System prompts (Default and Assistant) cannot be modified. If you open one, the editor will show its content but the fields will be read-only. Create a custom prompt instead if you want different behavior.
+
+## The Enhanced Template
+
+When **Use enhanced template** is turned on (which is the default for custom prompts), your instructions are placed inside a wrapper that:
+
+- Tells the AI it is a transcription enhancer, not a chatbot
+- Instructs it to reference your clipboard, screen context, and personal vocabulary for accuracy
+- Corrects words that sound similar to terms in your dictionary or on-screen content
+- Warns the AI not to answer questions found in the transcription -- only clean them up
+
+This template works well for most use cases. Turn it off only if you need the AI to behave differently (for example, if you want it to respond to questions like the Assistant prompt does).
+
+## Prompts and Adaptive Awareness
+
+Prompts can be assigned to [Adaptive Awareness](/docs/adaptive-awareness) profiles. When a profile activates (based on your active app, a URL, or a voice trigger), it can automatically switch to a specific prompt. For example:
+
+- A "Coding" profile that activates when VS Code is open could use the Vibe Coding prompt
+- An "Email" profile that activates when Gmail is open could use the Email prompt
+
+The editor shows a usage indicator when a prompt is assigned to profiles, so you always know where it's being used. Changes to a prompt apply everywhere it's referenced.
+
+## Tips
+
+- Start with the Default prompt and create custom ones only when you have a specific need. The Default handles most situations well.
+- Keep prompt instructions clear and specific. The AI follows instructions more reliably when they're concrete rather than vague.
+- If the enhanced template is getting in the way, turn off **Use enhanced template** and write the full prompt yourself, including any context handling you need.
+
+## Related
+
+- [AI Enhancement Overview](/docs/ai-enhancement)
+- [Setup API Keys](/docs/ai-enhancement/setup)
+- [Adaptive Awareness Profiles](/docs/adaptive-awareness/profiles)
