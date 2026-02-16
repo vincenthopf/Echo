@@ -98,4 +98,8 @@ Icon
 .AppleDesktop
 Network Trash Folder
 Temporary Items
-.apdisk 
+.apdisk
+
+# Internal docs and assets
+docs/plans/
+webassets/
