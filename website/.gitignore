@@ -42,3 +42,7 @@ next-env.d.ts
 
 # fumadocs
 .source/
+
+# cloudflare
+.open-next/
+.dev.vars
