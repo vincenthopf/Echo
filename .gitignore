@@ -103,3 +103,4 @@ Temporary Items
 # Internal docs and assets
 docs/plans/
 webassets/
+.mcp.json
