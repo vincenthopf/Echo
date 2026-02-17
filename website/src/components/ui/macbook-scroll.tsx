@@ -55,22 +55,94 @@ export function MacbookScroll({
   const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
+  // Mobile: simple scale + fade instead of expensive 3D transforms
+  const mobileScale = useTransform(scrollYProgress, [0, 0.3], [0.92, 1]);
+  const mobileOpacity = useTransform(scrollYProgress, [0, 0.15], [0.7, 1]);
+
+  if (isMobile) {
+    return (
+      <div
+        ref={ref}
+        className="flex min-h-[120vh] flex-shrink-0 flex-col items-center justify-start px-4 pb-0 pt-24"
+      >
+        {title && (
+          <motion.div
+            style={{ translateY: textTransform, opacity: textOpacity }}
+            className="mb-10 text-center"
+          >
+            {title}
+          </motion.div>
+        )}
+
+        <motion.div
+          className="scale-[0.55] transform sm:scale-75"
+          style={{
+            scale: mobileScale,
+            opacity: mobileOpacity,
+            willChange: "transform, opacity",
+          }}
+        >
+          {/* Screen — static, no 3D transforms */}
+          <div className="relative">
+            <div className="h-96 w-[32rem] rounded-2xl bg-[#010101] p-2">
+              <div className="absolute inset-0 rounded-lg bg-[#272729]" />
+              {src && (
+                <img
+                  src={src}
+                  alt="Echo app screenshot"
+                  className="relative h-full w-full rounded-lg object-cover object-left-top"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* MacBook base */}
+          <div className="relative -z-10 h-[22rem] w-[32rem] overflow-hidden rounded-2xl bg-gray-200 dark:bg-[#272729]">
+            <div className="relative h-10 w-full">
+              <div className="absolute inset-x-0 mx-auto h-4 w-[80%] bg-[#050505]" />
+            </div>
+            <div className="relative flex">
+              <div className="mx-auto h-full w-[10%] overflow-hidden">
+                <SpeakerGrid />
+              </div>
+              <div className="mx-auto h-full w-[80%]">
+                <Keypad />
+              </div>
+              <div className="mx-auto h-full w-[10%] overflow-hidden">
+                <SpeakerGrid />
+              </div>
+            </div>
+            <div
+              className="mx-auto my-1 h-32 w-[40%] rounded-xl"
+              style={{ boxShadow: "0px 0px 1px 1px #00000020 inset" }}
+            />
+            <div className="absolute inset-x-0 bottom-0 mx-auto h-2 w-20 rounded-tl-3xl rounded-tr-3xl bg-gradient-to-t from-[#272729] to-[#050505]" />
+            {showGradient && (
+              <div className="absolute inset-x-0 bottom-0 z-50 h-40 w-full bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black" />
+            )}
+            {badge && <div className="absolute bottom-4 left-4">{badge}</div>}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={ref}
-      className="flex min-h-[120vh] flex-shrink-0 flex-col items-center justify-start px-4 pb-0 pt-24 md:min-h-[200vh] md:px-0 md:pb-80 md:pt-40 [perspective:800px]"
+      className="flex min-h-[200vh] flex-shrink-0 flex-col items-center justify-start px-0 pb-80 pt-40 [perspective:800px]"
     >
       {title && (
         <motion.div
           style={{ translateY: textTransform, opacity: textOpacity }}
-          className="mb-10 text-center md:mb-20"
+          className="mb-20 text-center"
         >
           {title}
         </motion.div>
       )}
 
-      {/* MacBook visual — scales down on small screens */}
-      <div className="scale-[0.55] transform sm:scale-75 md:scale-100">
+      {/* MacBook visual */}
+      <div className="scale-100 transform">
         <Lid
           src={src}
           scaleX={scaleX}
@@ -163,6 +235,7 @@ function Lid({
           translateY: translate,
           transformStyle: "preserve-3d",
           transformOrigin: "top",
+          willChange: "transform",
         }}
         className="absolute inset-0 h-96 w-[32rem] rounded-2xl bg-[#010101] p-2"
       >
