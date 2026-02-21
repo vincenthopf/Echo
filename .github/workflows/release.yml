@@ -40,17 +40,14 @@ jobs:
           agvtool new-marketing-version ${{ inputs.version }}
           agvtool new-version -all ${{ inputs.build_number }}
 
-      # Ensure whisper.xcframework is discoverable by the Xcode project
+      # Xcode project references whisper.xcframework via ../ relative paths,
+      # so symlinks must be created at the parent of the repo checkout
       - name: Setup whisper.xcframework paths
         run: |
-          mkdir -p whisper.cpp/build-apple
-          if [ ! -L whisper.cpp/build-apple/whisper.xcframework ]; then
-            ln -s ../../whisper.xcframework whisper.cpp/build-apple/whisper.xcframework
-          fi
-          mkdir -p build-apple
-          if [ ! -L build-apple/whisper.xcframework ]; then
-            ln -s ../whisper.xcframework build-apple/whisper.xcframework
-          fi
+          mkdir -p ../whisper.cpp/build-apple
+          ln -sf "$GITHUB_WORKSPACE/whisper.xcframework" ../whisper.cpp/build-apple/whisper.xcframework
+          mkdir -p ../build-apple
+          ln -sf "$GITHUB_WORKSPACE/whisper.xcframework" ../build-apple/whisper.xcframework
 
       - name: Import code signing certificate
         env:
@@ -93,7 +90,8 @@ jobs:
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
-            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }}
+            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            PROVISIONING_PROFILE_SPECIFIER=""
 
       - name: Export archive
         run: |
