@@ -41,13 +41,27 @@ jobs:
           agvtool new-version -all ${{ inputs.build_number }}
 
       # Xcode project references whisper.xcframework via ../ relative paths from the repo root.
-      # Copy instead of symlink to avoid dSYMs path resolution issues.
+      # Copy framework and create empty dSYMs dirs (not tracked in git but referenced in Info.plist).
       - name: Setup whisper.xcframework paths
         run: |
           mkdir -p ../whisper.cpp/build-apple
           cp -R whisper.xcframework ../whisper.cpp/build-apple/
           mkdir -p ../build-apple
           cp -R whisper.xcframework ../build-apple/
+
+          # Create missing dSYMs directories referenced by xcframework Info.plist
+          for dir in ../whisper.cpp/build-apple/whisper.xcframework/*/; do
+            mkdir -p "$dir/dSYMs"
+          done
+          for dir in ../build-apple/whisper.xcframework/*/; do
+            mkdir -p "$dir/dSYMs"
+          done
+
+      # Flip signing to Manual in the pbxproj so Xcode doesn't require provisioning profiles
+      - name: Configure code signing for CI
+        run: |
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' $XCODE_PROJECT/project.pbxproj
+          sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "Apple Development"/"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application"/g' $XCODE_PROJECT/project.pbxproj
 
       - name: Import code signing certificate
         env:
