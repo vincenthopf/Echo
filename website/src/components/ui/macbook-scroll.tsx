@@ -91,6 +91,7 @@ export function MacbookScroll({
                   src={src}
                   alt="Echo app screenshot"
                   className="relative h-full w-full rounded-lg object-cover object-left-top"
+                  loading="lazy"
                 />
               )}
             </div>
@@ -245,6 +246,7 @@ function Lid({
             src={src}
             alt="Echo app screenshot"
             className="absolute inset-0 h-full w-full rounded-lg object-cover object-left-top"
+            loading="lazy"
           />
         )}
       </motion.div>

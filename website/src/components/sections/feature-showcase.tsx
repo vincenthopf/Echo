@@ -3,6 +3,7 @@
 import { BlurFade } from "@/components/ui/blur-fade";
 import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { useTheme } from "next-themes";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export function FeatureShowcase() {
@@ -35,13 +36,15 @@ export function FeatureShowcase() {
           <BlurFade delay={0.15} inView>
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lg shadow-black/5 dark:shadow-black/20">
               <div className="overflow-hidden rounded-xl">
-                <img
+                <Image
                   src={
                     isDark
                       ? "/screenshots/Darkmode-dashboard.png"
                       : "/screenshots/Lightmode-dashboard.png"
                   }
                   alt="Echo dashboard with transcription metrics"
+                  width={1200}
+                  height={750}
                   className="w-full scale-[1.1]"
                 />
               </div>
@@ -89,13 +92,15 @@ export function FeatureShowcase() {
           <BlurFade delay={0.15} inView>
             <div className="mx-auto max-w-2xl">
               <div className="overflow-hidden rounded-3xl">
-                <img
+                <Image
                   src={
                     isDark
                       ? "/screenshots/TranscribingDarkmode.png"
                       : "/screenshots/TranscribingLightmode.png"
                   }
                   alt="Echo floating overlay showing live audio waveform"
+                  width={1200}
+                  height={750}
                   className="w-full"
                 />
               </div>
@@ -167,13 +172,15 @@ export function FeatureShowcase() {
             <BlurFade delay={0.3} inView direction="right" className="order-1 md:order-2">
               <div className="overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lg shadow-black/5 dark:shadow-black/20">
                 <div className="overflow-hidden rounded-xl">
-                  <img
+                  <Image
                     src={
                       isDark
                         ? "/screenshots/Darkmode-Adaptive-awareness.png"
                         : "/screenshots/lightmode-Adaptive-awareness.png"
                     }
                     alt="Adaptive Awareness profile settings with app triggers"
+                    width={1200}
+                    height={750}
                     className="w-full scale-[1.1]"
                   />
                 </div>
@@ -188,13 +195,15 @@ export function FeatureShowcase() {
             <BlurFade delay={0.15} inView direction="left">
               <div className="overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lg shadow-black/5 dark:shadow-black/20">
                 <div className="overflow-hidden rounded-xl">
-                  <img
+                  <Image
                     src={
                       isDark
                         ? "/screenshots/Darkmode-vocab.png"
                         : "/screenshots/lightmode-vocab.png"
                     }
                     alt="Smart vocabulary and word replacement settings"
+                    width={1200}
+                    height={750}
                     className="w-full scale-[1.1]"
                   />
                 </div>
@@ -250,13 +259,15 @@ export function FeatureShowcase() {
             <div className="mx-auto max-w-4xl">
               <div className="overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lg shadow-black/5 dark:shadow-black/20">
                 <div className="overflow-hidden rounded-xl">
-                  <img
+                  <Image
                     src={
                       isDark
                         ? "/screenshots/Advanced Settings.png"
                         : "/screenshots/Advanced Settings lightmode.png"
                     }
                     alt="Advanced settings with Type-Out Mode and Auto-Send controls"
+                    width={1200}
+                    height={750}
                     className="w-full scale-[1.1]"
                   />
                 </div>

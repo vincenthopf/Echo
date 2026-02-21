@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { OrbitingCircles } from "@/components/ui/orbiting-circles";
 import OpenAI from "@/components/icons/open-ai";
@@ -40,9 +41,11 @@ export function ProvidersStrip() {
           <BlurFade delay={0.3} inView direction="right">
             <div className="relative mx-auto flex h-[400px] w-full max-w-[400px] items-center justify-center">
               {/* Echo app icon at center */}
-              <img
+              <Image
                 src="/app-icon.png"
                 alt="Echo"
+                width={56}
+                height={56}
                 className="h-14 w-14 rounded-2xl shadow-lg"
               />
 
