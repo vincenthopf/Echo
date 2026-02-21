@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, Download } from "lucide-react";
 import { AnimatePresence, motion, useScroll } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -91,10 +92,13 @@ export function Navbar() {
           <div className="flex h-[56px] items-center justify-between p-4">
             {/* Logo */}
             <Link href="/" className="flex shrink-0 items-center gap-2.5">
-              <img
+              <Image
                 src="/app-icon.png"
                 alt="Echo"
+                width={28}
+                height={28}
                 className="size-7 rounded-md"
+                priority
               />
               <span className="text-lg font-semibold text-foreground">
                 Echo
@@ -157,10 +161,13 @@ export function Navbar() {
                     className="flex items-center gap-2.5"
                     onClick={() => setIsDrawerOpen(false)}
                   >
-                    <img
+                    <Image
                       src="/app-icon.png"
                       alt="Echo"
+                      width={28}
+                      height={28}
                       className="size-7 rounded-md"
+                      priority
                     />
                     <span className="text-lg font-semibold text-foreground">
                       Echo
