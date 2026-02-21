@@ -1,5 +1,3 @@
-"use client";
-
 import { Hero } from "@/components/sections/hero";
 import { Pain } from "@/components/sections/pain";
 import { HowItWorks } from "@/components/sections/how-it-works";
