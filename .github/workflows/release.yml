@@ -36,7 +36,6 @@ jobs:
 
       - name: Set version numbers
         run: |
-          cd $XCODE_PROJECT/..
           agvtool new-marketing-version ${{ inputs.version }}
           agvtool new-version -all ${{ inputs.build_number }}
 
@@ -44,24 +43,13 @@ jobs:
       # Copy framework and create empty dSYMs dirs (not tracked in git but referenced in Info.plist).
       - name: Setup whisper.xcframework paths
         run: |
-          mkdir -p ../whisper.cpp/build-apple
-          cp -R whisper.xcframework ../whisper.cpp/build-apple/
-          mkdir -p ../build-apple
-          cp -R whisper.xcframework ../build-apple/
-
-          # Create missing dSYMs directories referenced by xcframework Info.plist
-          for dir in ../whisper.cpp/build-apple/whisper.xcframework/*/; do
-            mkdir -p "$dir/dSYMs"
+          for target_dir in ../whisper.cpp/build-apple ../build-apple; do
+            mkdir -p "$target_dir"
+            cp -R whisper.xcframework "$target_dir/"
+            for slice in "$target_dir"/whisper.xcframework/*/; do
+              mkdir -p "$slice/dSYMs"
+            done
           done
-          for dir in ../build-apple/whisper.xcframework/*/; do
-            mkdir -p "$dir/dSYMs"
-          done
-
-      # Flip signing to Manual in the pbxproj so Xcode doesn't require provisioning profiles
-      - name: Configure code signing for CI
-        run: |
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic/CODE_SIGN_STYLE = Manual/g' $XCODE_PROJECT/project.pbxproj
-          sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=macosx\*\]" = "Apple Development"/"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application"/g' $XCODE_PROJECT/project.pbxproj
 
       - name: Import code signing certificate
         env:
@@ -72,20 +60,20 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           KEYCHAIN_PASSWORD=$(openssl rand -hex 20)
 
-          # Decode certificate
           echo "$CERTIFICATE_P12_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
 
-          # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Import certificate
           security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" \
             -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple: \
             -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Store keychain password for cleanup
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> $GITHUB_ENV
 
       - name: Resolve SPM dependencies
         run: |
@@ -94,49 +82,51 @@ jobs:
             -scheme $SCHEME \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm
 
-      - name: Build archive
+      - name: Build app
         run: |
-          xcodebuild archive \
+          xcodebuild build \
             -project $XCODE_PROJECT \
             -scheme $SCHEME \
             -configuration Release \
-            -archivePath $RUNNER_TEMP/Echo.xcarchive \
+            -derivedDataPath $RUNNER_TEMP/build \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_IDENTITY="" \
             PROVISIONING_PROFILE=""
 
-      - name: Export archive
+      - name: Sign app with Developer ID
         run: |
-          cat > $RUNNER_TEMP/ExportOptions.plist << PLIST
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>developer-id</string>
-            <key>teamID</key>
-            <string>${{ secrets.APPLE_TEAM_ID }}</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>signingCertificate</key>
-            <string>Developer ID Application</string>
-          </dict>
-          </plist>
-          PLIST
+          APP_PATH="$RUNNER_TEMP/build/Build/Products/Release/Echo.app"
+          ENTITLEMENTS="VoiceInk/VoiceInk.entitlements"
+          IDENTITY="Developer ID Application"
 
-          xcodebuild -exportArchive \
-            -archivePath $RUNNER_TEMP/Echo.xcarchive \
-            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
-            -exportPath $RUNNER_TEMP/export
+          # Sign all nested frameworks and binaries first
+          find "$APP_PATH/Contents/Frameworks" -type f -name "*.dylib" -o -name "*.framework" | while read -r item; do
+            codesign --force --options runtime --sign "$IDENTITY" "$item" || true
+          done
+
+          find "$APP_PATH/Contents/Frameworks" -type d -name "*.framework" | while read -r fw; do
+            codesign --force --options runtime --sign "$IDENTITY" "$fw"
+          done
+
+          # Sign XPC services
+          find "$APP_PATH" -type d -name "*.xpc" | while read -r xpc; do
+            codesign --force --options runtime --sign "$IDENTITY" "$xpc"
+          done
+
+          # Sign the main app bundle with entitlements
+          codesign --force --options runtime --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP_PATH"
+
+          # Verify
+          codesign --verify --deep --strict "$APP_PATH"
+          echo "Code signing verified successfully"
 
       - name: Create DMG
         run: |
-          APP_PATH="$RUNNER_TEMP/export/Echo.app"
+          APP_PATH="$RUNNER_TEMP/build/Build/Products/Release/Echo.app"
           DMG_PATH="$RUNNER_TEMP/Echo.dmg"
 
-          # Create a temporary directory for the DMG contents
           DMG_DIR=$RUNNER_TEMP/dmg-contents
           mkdir -p "$DMG_DIR"
           cp -R "$APP_PATH" "$DMG_DIR/"
@@ -159,14 +149,12 @@ jobs:
             --team-id "$APPLE_TEAM_ID" \
             --wait --timeout 600
 
-          # Staple the notarization ticket
           xcrun stapler staple "$RUNNER_TEMP/Echo.dmg"
 
       - name: Sign with Sparkle EdDSA key
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          # Find Sparkle's sign_update tool from SPM checkout
           SIGN_UPDATE=$(find $RUNNER_TEMP/spm -name "sign_update" -type f | head -1)
 
           if [ -z "$SIGN_UPDATE" ]; then
@@ -175,11 +163,9 @@ jobs:
           fi
           chmod +x "$SIGN_UPDATE"
 
-          # Sign the DMG and capture the output
           SIGNATURE=$("$SIGN_UPDATE" "$RUNNER_TEMP/Echo.dmg" --ed-key-file <(echo "$SPARKLE_PRIVATE_KEY") 2>&1)
           echo "Sparkle signature output: $SIGNATURE"
 
-          # Parse sparkle:edSignature and length from the output
           ED_SIGNATURE=$(echo "$SIGNATURE" | grep -o 'sparkle:edSignature="[^"]*"' | sed 's/sparkle:edSignature="//;s/"//')
           LENGTH=$(echo "$SIGNATURE" | grep -o 'length="[^"]*"' | sed 's/length="//;s/"//')
 
@@ -235,4 +221,4 @@ jobs:
 
       - name: Cleanup keychain
         if: always()
-        run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true
+        run: security delete-keychain $KEYCHAIN_PATH 2>/dev/null || true
