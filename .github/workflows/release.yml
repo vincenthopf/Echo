@@ -187,7 +187,7 @@ jobs:
                       <pubDate>${PUB_DATE}</pubDate>
                       <sparkle:version>${{ inputs.build_number }}</sparkle:version>
                       <sparkle:shortVersionString>${{ inputs.version }}</sparkle:shortVersionString>
-                      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+                      <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
                       <description><![CDATA[
                           <h3>What's New in Version ${{ inputs.version }}</h3>
                           <ul>
