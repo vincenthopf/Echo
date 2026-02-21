@@ -6,7 +6,7 @@ import {
   type MotionValue,
   useScroll,
   useTransform,
-} from "framer-motion";
+} from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface MacbookScrollProps {
