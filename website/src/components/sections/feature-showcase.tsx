@@ -14,7 +14,7 @@ export function FeatureShowcase() {
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <section className="relative px-6 py-20 md:py-28">
+    <section id="features" className="relative px-6 py-20 md:py-28">
       <div className="mx-auto max-w-6xl">
         {/* Section heading — left-aligned */}
         <BlurFade delay={0.1} inView>
