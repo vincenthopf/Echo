@@ -96,7 +96,7 @@ export function DownloadHero() {
         <BlurFade delay={0.1}>
           <h1 className="mt-8 text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             {phase === "done"
-              ? "Your download has started."
+              ? "Echo is on its way."
               : "Thanks for choosing Echo."}
           </h1>
         </BlurFade>
@@ -104,8 +104,8 @@ export function DownloadHero() {
         <BlurFade delay={0.2}>
           <p className="mt-4 text-lg text-muted-foreground">
             {phase === "done"
-              ? "Open the DMG and drag Echo to Applications."
-              : "Your download will begin in a moment."}
+              ? "Open the file and drag Echo to your Applications folder."
+              : "Your download starts in just a moment."}
           </p>
         </BlurFade>
 
@@ -161,7 +161,7 @@ export function DownloadHero() {
               href={directUrl}
               className="text-sm text-primary underline underline-offset-4 hover:text-primary/80"
             >
-              Download didn&apos;t start? Click here.
+              Download didn&apos;t start? Download manually.
             </a>
           </div>
         </BlurFade>
@@ -175,7 +175,7 @@ export function DownloadHero() {
             className="mt-16"
           >
             <p className="text-sm text-muted-foreground">
-              Scroll down for previous versions
+              Looking for an earlier version?
             </p>
             <svg
               className="mx-auto mt-2 h-5 w-5 animate-bounce text-muted-foreground"
