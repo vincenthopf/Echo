@@ -96,10 +96,10 @@ export function ReleaseHistory() {
     <section className="mx-auto max-w-3xl px-6 py-24">
       <BlurFade delay={0} inView>
         <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Previous Versions
+          All Versions
         </h2>
         <p className="mt-2 text-muted-foreground">
-          Every release, ready to download. Roll back any time.
+          Every release, ready when you need it.
         </p>
       </BlurFade>
 
