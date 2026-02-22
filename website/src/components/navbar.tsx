@@ -93,7 +93,7 @@ export function Navbar() {
             {/* Logo */}
             <Link href="/" className="flex shrink-0 items-center gap-2.5">
               <Image
-                src="/app-icon.png"
+                src="/app-icon.webp"
                 alt="Echo"
                 width={28}
                 height={28}
@@ -162,7 +162,7 @@ export function Navbar() {
                     onClick={() => setIsDrawerOpen(false)}
                   >
                     <Image
-                      src="/app-icon.png"
+                      src="/app-icon.webp"
                       alt="Echo"
                       width={28}
                       height={28}

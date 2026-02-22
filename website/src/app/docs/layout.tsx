@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         title: (
           <div className="flex items-center gap-2">
             <Image
-              src="/app-icon.png"
+              src="/app-icon.webp"
               alt="Echo"
               width={24}
               height={24}

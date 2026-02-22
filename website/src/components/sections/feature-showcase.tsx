@@ -39,8 +39,8 @@ export function FeatureShowcase() {
                 <Image
                   src={
                     isDark
-                      ? "/screenshots/Darkmode-dashboard.png"
-                      : "/screenshots/Lightmode-dashboard.png"
+                      ? "/screenshots/Darkmode-dashboard.webp"
+                      : "/screenshots/Lightmode-dashboard.webp"
                   }
                   alt="Echo dashboard with transcription metrics"
                   width={1200}
@@ -95,8 +95,8 @@ export function FeatureShowcase() {
                 <Image
                   src={
                     isDark
-                      ? "/screenshots/TranscribingDarkmode.png"
-                      : "/screenshots/TranscribingLightmode.png"
+                      ? "/screenshots/TranscribingDarkmode.webp"
+                      : "/screenshots/TranscribingLightmode.webp"
                   }
                   alt="Echo floating overlay showing live audio waveform"
                   width={1200}
@@ -175,8 +175,8 @@ export function FeatureShowcase() {
                   <Image
                     src={
                       isDark
-                        ? "/screenshots/Darkmode-Adaptive-awareness.png"
-                        : "/screenshots/lightmode-Adaptive-awareness.png"
+                        ? "/screenshots/Darkmode-Adaptive-awareness.webp"
+                        : "/screenshots/lightmode-Adaptive-awareness.webp"
                     }
                     alt="Adaptive Awareness profile settings with app triggers"
                     width={1200}
@@ -198,8 +198,8 @@ export function FeatureShowcase() {
                   <Image
                     src={
                       isDark
-                        ? "/screenshots/Darkmode-vocab.png"
-                        : "/screenshots/lightmode-vocab.png"
+                        ? "/screenshots/Darkmode-vocab.webp"
+                        : "/screenshots/lightmode-vocab.webp"
                     }
                     alt="Smart vocabulary and word replacement settings"
                     width={1200}
@@ -262,8 +262,8 @@ export function FeatureShowcase() {
                   <Image
                     src={
                       isDark
-                        ? "/screenshots/Advanced Settings.png"
-                        : "/screenshots/Advanced Settings lightmode.png"
+                        ? "/screenshots/Advanced Settings.webp"
+                        : "/screenshots/Advanced Settings lightmode.webp"
                     }
                     alt="Advanced settings with Type-Out Mode and Auto-Send controls"
                     width={1200}

@@ -13,8 +13,8 @@ export function Hero() {
 
   const isDark = mounted && resolvedTheme === "dark";
   const screenshotSrc = isDark
-    ? "/screenshots/Darkmode-dashboard.png"
-    : "/screenshots/Lightmode-dashboard.png";
+    ? "/screenshots/Darkmode-dashboard.webp"
+    : "/screenshots/Lightmode-dashboard.webp";
 
   return (
     <section className="relative w-full overflow-hidden bg-background">

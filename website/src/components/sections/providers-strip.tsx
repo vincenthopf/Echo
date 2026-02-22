@@ -42,7 +42,7 @@ export function ProvidersStrip() {
             <div className="relative mx-auto flex h-[400px] w-full max-w-[400px] items-center justify-center">
               {/* Echo app icon at center */}
               <Image
-                src="/app-icon.png"
+                src="/app-icon.webp"
                 alt="Echo"
                 width={56}
                 height={56}

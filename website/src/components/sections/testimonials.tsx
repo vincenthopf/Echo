@@ -10,42 +10,42 @@ const testimonials = [
     role: "Freelance Writer",
     quote:
       "Honestly I just wanted something that worked without sending my stuff to the cloud. Turns out it's also way more accurate than Apple dictation? Like, noticeably better.",
-    avatar: "/avatars/sarah-k.png",
+    avatar: "/avatars/sarah-k.webp",
   },
   {
     name: "Marcus T.",
     role: "Software Engineer",
     quote:
       "The thing where it switches context based on what app you're in is wild. I'm in VS Code and it keeps my variable names intact, then I switch to Slack and it's casual again. Didn't even set it up.",
-    avatar: "/avatars/marcus-t.png",
+    avatar: "/avatars/marcus-t.webp",
   },
   {
     name: "Priya R.",
     role: "Product Manager",
     quote:
       "I ramble through meeting notes and it just... formats them? With bullet points and action items? I used to spend 20 min cleaning up transcripts after every call.",
-    avatar: "/avatars/priya-r.png",
+    avatar: "/avatars/priya-r.webp",
   },
   {
     name: "James L.",
     role: "Journalist",
     quote:
       "Wait, this is free? I was paying for Otter. The local transcription is fast enough for interviews and I don't have to worry about source confidentiality.",
-    avatar: "/avatars/james-l.png",
+    avatar: "/avatars/james-l.webp",
   },
   {
     name: "Elena V.",
     role: "Academic Researcher",
     quote:
       "I keep sensitive interview data on-device with local models, but switch to cloud for quick lecture notes. Having both options in one app is exactly what I needed.",
-    avatar: "/avatars/elena-v.png",
+    avatar: "/avatars/elena-v.webp",
   },
   {
     name: "David W.",
     role: "Content Creator",
     quote:
       "The type-out mode is so good. I dictate directly into Notion, Google Docs, whatever — it just types it out character by character like I'm actually typing. Works everywhere.",
-    avatar: "/avatars/david-w.png",
+    avatar: "/avatars/david-w.webp",
   },
 ];
 
