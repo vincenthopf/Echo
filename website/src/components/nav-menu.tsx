@@ -34,36 +34,44 @@ export function NavMenu({ links }: NavMenuProps) {
   }, []);
 
   React.useEffect(() => {
+    let rafId = 0;
     const handleScroll = () => {
-      if (isManualScroll) return;
-      let closestSection = "";
-      let minDistance = Infinity;
-      for (const link of hashLinks) {
-        const sectionId = link.href.substring(1);
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          const distance = Math.abs(rect.top - 100);
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestSection = link.href;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        if (isManualScroll) return;
+        let closestSection = "";
+        let minDistance = Infinity;
+        for (const link of hashLinks) {
+          const sectionId = link.href.substring(1);
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            const distance = Math.abs(rect.top - 100);
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestSection = link.href;
+            }
           }
         }
-      }
-      if (closestSection && closestSection !== activeSection) {
-        setActiveSection(closestSection);
-        const navItem = ref.current?.querySelector(
-          `[data-href="${closestSection}"]`
-        );
-        if (navItem) {
-          setLeft((navItem as HTMLElement).offsetLeft);
-          setWidth(navItem.getBoundingClientRect().width);
+        if (closestSection && closestSection !== activeSection) {
+          setActiveSection(closestSection);
+          const navItem = ref.current?.querySelector(
+            `[data-href="${closestSection}"]`
+          );
+          if (navItem) {
+            setLeft((navItem as HTMLElement).offsetLeft);
+            setWidth(navItem.getBoundingClientRect().width);
+          }
         }
-      }
+      });
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isManualScroll, activeSection, hashLinks]);
 
   const handleClick = (
