@@ -102,30 +102,21 @@ jobs:
           IDENTITY="Developer ID Application"
           CODESIGN="codesign --force --options runtime --timestamp --sign"
 
-          # Sign everything inside-out using codesign --deep won't work reliably,
-          # so we sign each Mach-O and bundle explicitly.
-
-          # 1. All Mach-O binaries and dylibs (deepest first via -depth)
-          find "$APP_PATH" -depth \( -name "*.dylib" -o -name "*.o" \) -type f | while read -r item; do
-            $CODESIGN "$IDENTITY" "$item"
+          # Find and sign every Mach-O binary in the bundle (inside-out via -depth).
+          # This catches all executables regardless of extension (dylibs, standalone
+          # binaries like Sparkle's Autoupdate, helper tools, etc.)
+          find "$APP_PATH" -depth -type f | while read -r file; do
+            if file "$file" | grep -q "Mach-O"; then
+              $CODESIGN "$IDENTITY" "$file" || true
+            fi
           done
 
-          # 2. Nested .app bundles (e.g. Sparkle's Updater.app)
-          find "$APP_PATH" -depth -name "*.app" -type d ! -path "$APP_PATH" | while read -r app; do
-            $CODESIGN "$IDENTITY" "$app"
+          # Sign all nested bundles inside-out: .xpc, .app, .framework
+          find "$APP_PATH" -depth \( -name "*.xpc" -o -name "*.app" -o -name "*.framework" \) -type d ! -path "$APP_PATH" | while read -r bundle; do
+            $CODESIGN "$IDENTITY" "$bundle"
           done
 
-          # 3. XPC services
-          find "$APP_PATH" -depth -name "*.xpc" -type d | while read -r xpc; do
-            $CODESIGN "$IDENTITY" "$xpc"
-          done
-
-          # 4. Frameworks
-          find "$APP_PATH/Contents/Frameworks" -depth -name "*.framework" -type d | while read -r fw; do
-            $CODESIGN "$IDENTITY" "$fw"
-          done
-
-          # 5. Main app bundle with entitlements
+          # Sign the main app bundle with entitlements
           codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP_PATH"
 
           # Verify
