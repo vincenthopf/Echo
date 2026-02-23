@@ -112,7 +112,7 @@ struct AboutView: View {
 
                     FeatureComparison(
                         title: "Pay only for what you use",
-                        description: "Download local models for free or connect your own API keys for cloud services. No extra subscriptions, monthly fees or nastry surprises.",
+                        description: "Download local models for free or connect your own API keys for cloud services. No extra subscriptions, monthly fees or nasty surprises.",
                         icon: "dollarsign.circle.fill",
                         accentColor: .blue
                     )
@@ -138,7 +138,7 @@ struct AboutView: View {
                     .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
 
-                Text("2025 Echo")
+                Text("2026 Echo")
                     .font(Tokens.Typography.caption)
                     .foregroundColor(Tokens.Colors.textTertiary(for: colorScheme))
             }
