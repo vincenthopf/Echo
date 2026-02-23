@@ -91,8 +91,7 @@ jobs:
             -destination 'generic/platform=macOS' \
             -archivePath $RUNNER_TEMP/Echo.xcarchive \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm \
-            CODE_SIGNING_REQUIRED=YES \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGN_IDENTITY="-"
 
       - name: Export and sign with Developer ID
         env:
