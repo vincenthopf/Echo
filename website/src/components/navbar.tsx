@@ -91,7 +91,11 @@ export function Navbar() {
         >
           <div className="flex h-[56px] items-center justify-between p-4">
             {/* Logo */}
-            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <Link
+              href="/"
+              className="flex shrink-0 items-center gap-2.5"
+              onClick={() => window.scrollTo({ top: 0 })}
+            >
               <Image
                 src="/app-icon.webp"
                 alt="Echo"

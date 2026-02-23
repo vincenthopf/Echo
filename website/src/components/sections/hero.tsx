@@ -24,7 +24,7 @@ export function Hero() {
         title={
           <div className="mx-auto max-w-3xl px-6">
             <TextAnimate
-              animation="blurInUp"
+              animation="fadeIn"
               by="word"
               as="h1"
               className="text-4xl font-bold tracking-tight text-black dark:text-white sm:text-5xl md:text-6xl lg:text-7xl"
