@@ -82,7 +82,7 @@ jobs:
             -scheme $SCHEME \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm
 
-      - name: Build app
+      - name: Build and sign app
         run: |
           xcodebuild build \
             -project $XCODE_PROJECT \
@@ -90,36 +90,12 @@ jobs:
             -configuration Release \
             -derivedDataPath $RUNNER_TEMP/build \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_IDENTITY="" \
-            PROVISIONING_PROFILE=""
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Developer ID Application" \
+            OTHER_CODE_SIGN_FLAGS="--timestamp --options runtime"
 
-      - name: Sign app with Developer ID
-        run: |
+          # Verify signing
           APP_PATH="$RUNNER_TEMP/build/Build/Products/Release/Echo.app"
-          ENTITLEMENTS="VoiceInk/VoiceInk.entitlements"
-          IDENTITY="Developer ID Application"
-          CODESIGN="codesign --force --options runtime --timestamp --sign"
-
-          # Find and sign every Mach-O binary in the bundle (inside-out via -depth).
-          # This catches all executables regardless of extension (dylibs, standalone
-          # binaries like Sparkle's Autoupdate, helper tools, etc.)
-          find "$APP_PATH" -depth -type f | while read -r file; do
-            if file "$file" | grep -q "Mach-O"; then
-              $CODESIGN "$IDENTITY" "$file" || true
-            fi
-          done
-
-          # Sign all nested bundles inside-out: .xpc, .app, .framework
-          find "$APP_PATH" -depth \( -name "*.xpc" -o -name "*.app" -o -name "*.framework" \) -type d ! -path "$APP_PATH" | while read -r bundle; do
-            $CODESIGN "$IDENTITY" "$bundle"
-          done
-
-          # Sign the main app bundle with entitlements
-          codesign --force --options runtime --timestamp --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP_PATH"
-
-          # Verify
           codesign --verify --deep --strict "$APP_PATH"
           echo "Code signing verified successfully"
 
