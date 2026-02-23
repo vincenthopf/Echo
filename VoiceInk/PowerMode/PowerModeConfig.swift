@@ -275,6 +275,12 @@ class PowerModeManager: ObservableObject {
             var updatedConfigs = configurations
             updatedConfigs.append(config)
             applyConfigurations(updatedConfigs)
+
+            AnalyticsService.shared.track("profile_created", properties: [
+                "has_voice_triggers": !config.triggerWords.isEmpty,
+                "has_url_patterns": !(config.urlConfigs ?? []).isEmpty,
+                "has_app_bundles": !(config.appConfigs ?? []).isEmpty
+            ])
         }
     }
 
@@ -421,8 +427,16 @@ class PowerModeManager: ObservableObject {
             return
         }
 
+        let isNewActivation = activeConfiguration?.id != currentConfig.id
+
         activeConfiguration = currentConfig
         userDefaults.set(currentConfig.id.uuidString, forKey: activeConfigIdKey)
+
+        if isNewActivation {
+            AnalyticsService.shared.track("profile_activated", properties: [
+                "profile_name": currentConfig.name
+            ])
+        }
     }
 
     var currentActiveConfiguration: PowerModeConfig? {
