@@ -20,11 +20,18 @@ export const metadata: Metadata = {
   title: "Echo — Voice to text for Mac",
   description:
     "The all-in-one voice tool for Mac. Local AI, cloud engines, smart formatting, and context-aware profiles. Free.",
+  metadataBase: new URL("https://echo.vjh.io"),
   openGraph: {
     title: "Echo — Voice to text for Mac",
     description:
       "The all-in-one voice tool for Mac. Local AI, cloud engines, smart formatting, and context-aware profiles. Free.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Echo — Voice to text for Mac",
+    description:
+      "The all-in-one voice tool for Mac. Local AI, cloud engines, smart formatting, and context-aware profiles. Free.",
   },
 };
 
@@ -36,11 +43,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Polyfill esbuild's __name helper — prevents ReferenceError in OpenNext/Cloudflare bundles */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(typeof __name==="undefined"){var __name=function(t,v){Object.defineProperty(t,"name",{value:v,configurable:true});return t}}`,
+          }}
+        />
         <link
           rel="preload"
           href="/screenshots/Lightmode-dashboard.webp"
           as="image"
           type="image/webp"
+          fetchPriority="high"
         />
         {process.env.NODE_ENV === "development" && (
           <Script
