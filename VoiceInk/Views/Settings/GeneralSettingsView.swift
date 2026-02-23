@@ -14,6 +14,7 @@ struct GeneralSettingsView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
     @AppStorage("autoUpdateCheck") private var autoUpdateCheck = true
     @AppStorage("enableAnnouncements") private var enableAnnouncements = true
+    @AppStorage("analyticsEnabled") private var analyticsEnabled = true
     @State private var showResetOnboardingAlert = false
 
     @Environment(\.colorScheme) private var colorScheme
@@ -178,6 +179,35 @@ struct GeneralSettingsView: View {
             )
 
             VStack(spacing: 0) {
+                FormRow(label: "Analytics") {
+                    HStack(spacing: Tokens.Spacing.sm) {
+                        Toggle("", isOn: $analyticsEnabled)
+                            .toggleStyle(.switch)
+                            .tint(Tokens.Colors.orange)
+                            .labelsHidden()
+                            .onChange(of: analyticsEnabled) { _, newValue in
+                                if newValue {
+                                    AnalyticsService.shared.optIn()
+                                } else {
+                                    AnalyticsService.shared.optOut()
+                                }
+                            }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Share Anonymous Usage Data")
+                                .font(Tokens.Typography.body)
+                                .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
+                            Text("Help improve Echo by sharing anonymous usage statistics. No personal data or transcription content is ever collected.")
+                                .font(Tokens.Typography.bodySmall)
+                                .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
+                        }
+
+                        Spacer()
+                    }
+                }
+
+                FormDivider()
+
                 AudioCleanupSettingsView()
                     .padding(Tokens.Spacing.lg)
             }
