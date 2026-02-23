@@ -70,6 +70,7 @@ struct OnboardingTutorialView: View {
                         
                         // Continue button
                         Button(action: {
+                            AnalyticsService.shared.track("onboarding_completed")
                             hasCompletedOnboarding = true
                         }) {
                             Text("Complete Setup")
@@ -84,6 +85,7 @@ struct OnboardingTutorialView: View {
                         .disabled(transcribedText.isEmpty)
                         
                         SkipButton(text: "Skip for now", colorScheme: colorScheme) {
+                            AnalyticsService.shared.track("onboarding_skipped", properties: ["step": "tutorial"])
                             hasCompletedOnboarding = true
                         }
                     }

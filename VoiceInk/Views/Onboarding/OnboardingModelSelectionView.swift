@@ -93,6 +93,10 @@ struct OnboardingModelSelectionView: View {
                                     modelSelectionError = "Please select a model to continue."
                                     return
                                 }
+                                AnalyticsService.shared.track("onboarding_model_selected", properties: [
+                                    "model_name": selectedModel?.name ?? "unknown",
+                                    "model_provider": selectedModel?.provider.rawValue ?? "unknown"
+                                ])
                                 withAnimation {
                                     showModelDownload = true
                                 }

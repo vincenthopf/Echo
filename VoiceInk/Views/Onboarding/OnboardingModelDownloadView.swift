@@ -234,6 +234,9 @@ struct OnboardingModelDownloadView: View {
             }
 
             whisperState.setDefaultTranscriptionModel(modelToSet)
+            AnalyticsService.shared.track("onboarding_model_downloaded", properties: [
+                "model_name": resolvedModel.name
+            ])
             withAnimation {
                 isModelSet = true
             }
