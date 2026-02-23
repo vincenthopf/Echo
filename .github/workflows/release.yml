@@ -82,26 +82,54 @@ jobs:
             -scheme $SCHEME \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm
 
-      - name: Build and sign app
+      - name: Archive app
         run: |
-          xcodebuild build \
+          xcodebuild archive \
             -project $XCODE_PROJECT \
             -scheme $SCHEME \
             -configuration Release \
-            -derivedDataPath $RUNNER_TEMP/build \
+            -destination 'generic/platform=macOS' \
+            -archivePath $RUNNER_TEMP/Echo.xcarchive \
             -clonedSourcePackagesDirPath $RUNNER_TEMP/spm \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Developer ID Application" \
-            OTHER_CODE_SIGN_FLAGS="--timestamp --options runtime"
+            CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export and sign with Developer ID
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          # Create ExportOptions plist for Developer ID signing
+          cat > $RUNNER_TEMP/ExportOptions.plist << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>developer-id</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>teamID</key>
+              <string>${APPLE_TEAM_ID}</string>
+              <key>signingCertificate</key>
+              <string>Developer ID Application</string>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/Echo.xcarchive \
+            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/export
 
           # Verify signing
-          APP_PATH="$RUNNER_TEMP/build/Build/Products/Release/Echo.app"
+          APP_PATH="$RUNNER_TEMP/export/Echo.app"
           codesign --verify --deep --strict "$APP_PATH"
+          codesign -d --entitlements - "$APP_PATH" 2>&1 | head -20
           echo "Code signing verified successfully"
 
       - name: Create DMG
         run: |
-          APP_PATH="$RUNNER_TEMP/build/Build/Products/Release/Echo.app"
+          APP_PATH="$RUNNER_TEMP/export/Echo.app"
           DMG_PATH="$RUNNER_TEMP/Echo.dmg"
 
           DMG_DIR=$RUNNER_TEMP/dmg-contents
