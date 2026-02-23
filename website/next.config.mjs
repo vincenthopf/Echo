@@ -8,6 +8,9 @@ const config = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    optimizePackageImports: ['motion', 'lucide-react', '@radix-ui/react-icons'],
+  },
 };
 
 const withMDX = createMDX();
