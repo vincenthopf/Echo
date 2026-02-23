@@ -110,31 +110,35 @@ export function DownloadHero() {
         </BlurFade>
 
         {/* Countdown / completion */}
-        <div className="mt-12 flex h-32 items-center justify-center">
+        <div className="mt-12 flex h-40 items-center justify-center">
           <AnimatePresence mode="wait">
             {phase === "countdown" && count > 0 ? (
-              <motion.span
+              <motion.div
                 key={count}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.5 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="text-8xl font-bold tabular-nums text-primary sm:text-9xl"
+                initial={{ opacity: 0, y: 20, rotateX: -80 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                exit={{ opacity: 0, y: -20, rotateX: 80 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                className="flex h-32 w-24 items-center justify-center rounded-2xl border border-border bg-card shadow-lg sm:h-36 sm:w-28"
+                style={{ perspective: 800 }}
               >
-                {count}
-              </motion.span>
+                <span className="text-7xl font-bold tabular-nums text-primary sm:text-8xl">
+                  {count}
+                </span>
+              </motion.div>
             ) : phase === "done" ? (
               <motion.div
                 key="done"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, type: "spring" }}
+                className="flex h-32 w-24 items-center justify-center rounded-2xl border border-border bg-card shadow-lg sm:h-36 sm:w-28"
               >
                 <svg
-                  className="mx-auto h-20 w-20 text-primary"
+                  className="h-16 w-16 text-primary"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   viewBox="0 0 24 24"
                 >
                   <path
