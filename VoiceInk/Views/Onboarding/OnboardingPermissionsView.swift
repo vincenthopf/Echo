@@ -65,6 +65,7 @@ struct OnboardingPermissionsView: View {
                     .accessibilityIdentifier("onboarding.quickSetup.continue")
 
                     SkipButton(text: "Skip onboarding", colorScheme: colorScheme) {
+                        AnalyticsService.shared.track("onboarding_skipped", properties: ["step": "permissions"])
                         hasCompletedOnboarding = true
                     }
                 }
@@ -329,6 +330,11 @@ struct OnboardingPermissionsView: View {
 
     private func continueToModelSelection() {
         guard requiredComplete else { return }
+        AnalyticsService.shared.track("onboarding_permissions_completed", properties: [
+            "microphone": microphoneGranted,
+            "accessibility": accessibilityGranted,
+            "screen_recording": screenRecordingGranted
+        ])
         withAnimation {
             if launchArguments.contains("-uiTestForceModelSelection") {
                 showModelSelection = true

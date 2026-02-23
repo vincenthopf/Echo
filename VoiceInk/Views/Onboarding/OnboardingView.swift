@@ -60,6 +60,7 @@ struct OnboardingView: View {
                             if showSecondaryElements {
                                 VStack(spacing: 20) {
                                     Button(action: {
+                                        AnalyticsService.shared.track("onboarding_started")
                                         withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
                                             showPermissions = true
                                         }
@@ -77,6 +78,7 @@ struct OnboardingView: View {
                                     .accessibilityIdentifier("onboarding.startQuickSetup")
 
                                     SkipButton(text: "Skip Tour", colorScheme: colorScheme) {
+                                        AnalyticsService.shared.track("onboarding_skipped")
                                         hasCompletedOnboarding = true
                                     }
                                 }

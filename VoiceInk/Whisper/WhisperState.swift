@@ -185,6 +185,7 @@ class WhisperState: NSObject, ObservableObject {
 
                             await MainActor.run {
                                 self.recordingState = .recording
+                                AnalyticsService.shared.track("recording_started")
                             }
          
                             // Only load model if it's a local model and not already loaded
@@ -400,6 +401,12 @@ class WhisperState: NSObject, ObservableObject {
                     transcription.aiRequestSystemMessage = enhancementService.lastSystemMessageSent
                     transcription.aiRequestUserMessage = enhancementService.lastUserMessageSent
                     finalPastedText = processedEnhancedText
+
+                    AnalyticsService.shared.track("enhancement_used", properties: [
+                        "provider": enhancementService.getAIService()?.currentModel ?? "unknown",
+                        "prompt_name": promptName ?? "default",
+                        "enhancement_seconds": round(enhancementDuration * 10) / 10
+                    ])
                 } catch {
                     transcription.enhancedText = "Enhancement failed: \(error)"
                   
@@ -409,6 +416,15 @@ class WhisperState: NSObject, ObservableObject {
 
             transcription.transcriptionStatus = TranscriptionStatus.completed.rawValue
 
+            AnalyticsService.shared.track("transcription_completed", properties: [
+                "engine": model.provider.rawValue,
+                "model_name": model.displayName,
+                "duration_seconds": round(actualDuration * 10) / 10,
+                "character_count": (transcription.text ?? "").count,
+                "transcription_seconds": round(transcriptionDuration * 10) / 10,
+                "used_enhancement": enhancementService?.isEnhancementEnabled == true && enhancementService?.isConfigured == true
+            ])
+
         } catch {
             let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             let recoverySuggestion = (error as? LocalizedError)?.recoverySuggestion ?? ""
@@ -416,6 +432,12 @@ class WhisperState: NSObject, ObservableObject {
 
             transcription.text = "Transcription Failed: \(fullErrorText)"
             transcription.transcriptionStatus = TranscriptionStatus.failed.rawValue
+
+            AnalyticsService.shared.track("transcription_failed", properties: [
+                "engine": currentTranscriptionModel?.provider.rawValue ?? "unknown",
+                "model_name": currentTranscriptionModel?.displayName ?? "unknown",
+                "error": errorDescription
+            ])
         }
 
         // --- Finalize and save ---
