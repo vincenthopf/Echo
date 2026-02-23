@@ -16,7 +16,7 @@ export function DownloadCTA() {
       origin: { y: 0.6 },
       colors: ["#F5A574", "#F09882", "#E87C9B", "#C4866C", "#D4976C"],
     });
-    window.open("https://github.com/vincenthopf/Echo/releases/latest/download/Echo.dmg", "_blank");
+    window.location.href = "/download";
   };
 
   return (

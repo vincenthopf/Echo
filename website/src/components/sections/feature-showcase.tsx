@@ -300,7 +300,7 @@ export function FeatureShowcase() {
                 <div className="mt-6">
                   <InteractiveHoverButton
                     className="text-sm px-5 py-2"
-                    onClick={() => window.open("https://github.com/vincenthopf/Echo/releases/latest/download/Echo.dmg", "_blank")}
+                    onClick={() => window.location.href = "/download"}
                   >
                     Download for Mac
                   </InteractiveHoverButton>

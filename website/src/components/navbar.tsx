@@ -110,13 +110,13 @@ export function Navbar() {
 
             {/* Right side: CTA + theme toggle + mobile menu */}
             <div className="flex shrink-0 items-center gap-1 md:gap-3">
-              <a
-                href="https://github.com/vincenthopf/Echo/releases/latest/download/Echo.dmg"
+              <Link
+                href="/download"
                 className="hidden h-8 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95 md:inline-flex"
               >
                 <Download className="size-3.5" />
                 Download
-              </a>
+              </Link>
               <ThemeToggle />
               <button
                 className="flex size-8 cursor-pointer items-center justify-center rounded-md border border-border md:hidden"
@@ -211,14 +211,14 @@ export function Navbar() {
                     ))}
                   </AnimatePresence>
                 </motion.ul>
-                <a
-                  href="https://github.com/vincenthopf/Echo/releases/latest/download/Echo.dmg"
+                <Link
+                  href="/download"
                   onClick={() => setIsDrawerOpen(false)}
                   className="flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-95"
                 >
                   <Download className="size-3.5" />
                   Download for Mac
-                </a>
+                </Link>
               </div>
             </motion.div>
           </>
