@@ -3,18 +3,26 @@
     <channel>
         <title>Echo Releases</title>
         <item>
-            <title>1.0.2</title>
-            <pubDate>Sun, 22 Feb 2026 03:10:13 +0000</pubDate>
-            <sparkle:version>161</sparkle:version>
-            <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+            <title>0.1.0</title>
+            <pubDate>Mon, 23 Feb 2026 03:23:59 +0000</pubDate>
+            <sparkle:version>100</sparkle:version>
+            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
-                <h3>What's New in Version 1.0.2</h3>
+                <h3>What's New in Version 0.1.0</h3>
                 <ul>
-                    <li>Initial Echo release</li>
+                    <li>First public release of Echo</li>
+<li>Local AI transcription with whisper.cpp and Parakeet</li>
+<li>Cloud transcription via Deepgram, Groq, ElevenLabs, Gemini, Mistral</li>
+<li>Adaptive Awareness profiles for context-aware transcription</li>
+<li>AI-powered text enhancement and formatting</li>
+<li>Custom dictionary and word replacements</li>
+<li>Screen capture context for smarter transcription</li>
+<li>Global hotkey recording</li>
+<li>Full light and dark mode support</li>
                 </ul>
             ]]></description>
-            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v1.0.2/Echo.dmg" length="16206630" type="application/octet-stream" sparkle:edSignature="LxA62yUjvtPavum80xGuEiR/NnGW49kXRmDey76JauJDoejgCAMWRf9nnkTxo49isr97C0KSP6JidL3Yl7FsBQ=="/>
+            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.0/Echo.dmg" length="16206332" type="application/octet-stream" sparkle:edSignature="HzeM10um4+++MBgBj7oqO56AjZWvZa2F8cD1IQxQSrVa037XBkbyK8rZUCmRe4edr+mU7CHSQ8LZ7O2RvcEwDw=="/>
         </item>
     </channel>
 </rss>
