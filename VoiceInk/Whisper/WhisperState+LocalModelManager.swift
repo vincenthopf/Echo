@@ -174,6 +174,11 @@ extension WhisperState {
             availableModels.append(whisperModel)
             self.downloadProgress.removeValue(forKey: model.name + "_main")
 
+            AnalyticsService.shared.track("model_downloaded", properties: [
+                "model_name": model.name,
+                "model_type": model.provider.rawValue
+            ])
+
             if shouldWarmup(model) {
                 WhisperModelWarmupCoordinator.shared.scheduleWarmup(for: model, whisperState: self)
             }
@@ -274,6 +279,10 @@ extension WhisperState {
                 recordingState = .idle
                 UserDefaults.standard.removeObject(forKey: "CurrentModel")
             }
+
+            AnalyticsService.shared.track("model_deleted", properties: [
+                "model_name": model.name
+            ])
         } catch {
             logError("Error deleting model: \(model.name)", error)
         }
