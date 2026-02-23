@@ -117,6 +117,9 @@ struct VoiceInkApp: App {
 
         AppShortcuts.updateAppShortcutParameters()
 
+        // Configure analytics (must be after all services init)
+        AnalyticsService.shared.configure()
+
         #if DEBUG
         // Prompt for Accessibility permission on launch so dev builds can paste.
         // The system remembers the grant across rebuilds as long as the bundle ID stays the same.
