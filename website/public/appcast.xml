@@ -3,18 +3,19 @@
     <channel>
         <title>Echo Releases</title>
         <item>
-            <title>0.1.0</title>
-            <pubDate>Mon, 23 Feb 2026 13:18:22 +0000</pubDate>
-            <sparkle:version>101</sparkle:version>
-            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+            <title>0.1.1</title>
+            <pubDate>Mon, 23 Feb 2026 16:17:34 +0000</pubDate>
+            <sparkle:version>102</sparkle:version>
+            <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
-                <h3>What's New in Version 0.1.0</h3>
+                <h3>What's New in Version 0.1.1</h3>
                 <ul>
-                    Initial public release of Echo — voice to text for Mac. Local AI transcription with whisper.cpp and Parakeet, cloud engines including Deepgram and Groq, Adaptive Awareness profiles, and smart text enhancement.
+                    <li>Added privacy-first anonymous usage analytics (opt-out in Settings > Privacy Controls)</li>
+<li>Universal binary: now runs natively on Intel Macs</li>
                 </ul>
             ]]></description>
-            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.0/Echo.dmg" length="16210145" type="application/octet-stream" sparkle:edSignature="i2lTw6o3NOLU80zr4RTuWx0VrE6wOCmjMMH7J4aatghNCHp0TGfA6jmqoI2+6mBb2Hzy9d1ufJDiUO7osroXBA=="/>
+            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.1/Echo.dmg" length="16878711" type="application/octet-stream" sparkle:edSignature="44uRD3kGLUS39eNsqF+5W5dOT9pHIYJYCuIKowi+/WEFaD3d8ksRjlKOhwxvwb8xjqlvbR7GD4DUJOTfLyhLAQ=="/>
         </item>
     </channel>
 </rss>
