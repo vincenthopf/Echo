@@ -54,7 +54,13 @@ export function DownloadCTA() {
               className="px-8 py-3 text-base"
               onClick={handleDownloadClick}
             >
-              Download for Mac
+              <span className="inline-flex items-center gap-2">
+                Download for Mac
+                <span className="relative inline-flex overflow-hidden rounded-full bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white">
+                  Beta
+                  <span className="pointer-events-none absolute inset-0 animate-badge-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                </span>
+              </span>
             </InteractiveHoverButton>
             <p className="text-sm text-muted-foreground">
               macOS 13+ · Apple Silicon & Intel · Open source

@@ -103,6 +103,10 @@ export function Navbar() {
               <span className="text-lg font-semibold text-foreground">
                 Echo
               </span>
+              <span className="relative inline-flex overflow-hidden rounded-full bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white">
+                Beta
+                <span className="pointer-events-none absolute inset-0 animate-badge-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              </span>
             </Link>
 
             {/* Desktop nav */}
@@ -171,6 +175,10 @@ export function Navbar() {
                     />
                     <span className="text-lg font-semibold text-foreground">
                       Echo
+                    </span>
+                    <span className="relative overflow-hidden rounded-full bg-gradient-to-r from-[var(--gradient-start)] via-[var(--gradient-mid)] to-[var(--gradient-end)] px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white">
+                      Beta
+                      <span className="absolute inset-0 animate-badge-shimmer bg-gradient-to-r from-transparent via-white/25 to-transparent" />
                     </span>
                   </Link>
                   <button
