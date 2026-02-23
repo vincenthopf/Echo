@@ -108,6 +108,11 @@ jobs:
               -e "s/\$(AppIdentifierPrefix)/${APPLE_TEAM_ID}./g" \
               VoiceInk/VoiceInk.entitlements > $RUNNER_TEMP/entitlements.plist
 
+          # Remove restricted entitlements that require a provisioning profile.
+          # These are sandbox-only and unnecessary for non-sandboxed Developer ID apps.
+          /usr/libexec/PlistBuddy -c "Delete :keychain-access-groups" $RUNNER_TEMP/entitlements.plist 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Delete :com.apple.security.temporary-exception.mach-lookup.global-name" $RUNNER_TEMP/entitlements.plist 2>/dev/null || true
+
           echo "=== Resolved entitlements ==="
           cat $RUNNER_TEMP/entitlements.plist
 
