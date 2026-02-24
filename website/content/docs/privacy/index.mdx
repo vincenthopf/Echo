@@ -18,7 +18,7 @@ When you use local transcription models (Whisper or Parakeet), everything happen
 
 ## What Is Sent Externally
 
-Echo sends data to external services **only** when you explicitly choose to use them. Nothing is sent by default.
+Echo sends data to external services **only** when you explicitly choose to use them, with the exception of [anonymous usage analytics](#anonymous-usage-analytics) (which you can disable).
 
 ### Cloud Transcription
 
@@ -36,9 +36,45 @@ If you use Ollama for AI Enhancement, the processing happens locally on your Mac
 
 Echo uses Sparkle for automatic update checks. When enabled, it contacts the update server to check for new versions. This sends only basic information needed to check for updates (app version and macOS version). You can disable automatic update checks in **Settings**.
 
-## No Telemetry or Analytics
+## Anonymous Usage Analytics
 
-Echo does not collect telemetry, usage analytics, or any form of tracking data. There are no analytics SDKs, no crash reporting services, and no usage metrics sent anywhere. Echo does not phone home.
+Echo never collects personal data, transcription content, audio recordings, or anything you type or say. No individual user can be identified from the data collected.
+
+### What Is Collected
+
+To help improve Echo, the app collects anonymous usage statistics via [PostHog](https://posthog.com). Analytics are **enabled by default** and can be **disabled at any time** in **Settings > Privacy Controls > Share Anonymous Usage Data**. When you opt out, PostHog stops collecting data and all locally stored analytics data is cleared.
+
+Every event includes three baseline properties: `platform` (always "macOS"), `app_version`, and `build` number. Beyond these, the specific events and their additional properties are:
+
+**Onboarding:**
+- `onboarding_started`, `onboarding_completed`, `onboarding_skipped` (with the step skipped)
+- `onboarding_permissions_completed` (which permissions were granted: microphone, accessibility, screen recording)
+- `onboarding_model_selected` and `onboarding_model_downloaded` (model name and provider type)
+
+**Transcription:**
+- `recording_started` (no additional properties)
+- `transcription_completed` (engine type, model name, recording duration in seconds, character count, transcription duration in seconds)
+- `transcription_failed` (engine type, model name, error description)
+- `enhancement_used` (AI provider name, prompt name, enhancement duration in seconds)
+
+**Model management:**
+- `model_downloaded` (model name, model type)
+- `model_deleted` (model name)
+
+**Adaptive Awareness:**
+- `profile_created` (whether the profile has voice triggers, URL patterns, or app rules — not the actual trigger words, URLs, or app names)
+- `profile_activated` (profile name)
+
+**Application lifecycle:**
+- App launched and app terminated events (captured automatically by PostHog)
+
+That is the complete list. No other data is collected. Notably, Echo does **not** collect: the content of your transcriptions, your audio, screen captures, API keys, dictionary entries, replacement rules, URLs you visit, app names, or any text you type.
+
+PostHog data is sent to `us.i.posthog.com` (hosted in the United States). PostHog's privacy policy is available at [posthog.com/privacy](https://posthog.com/privacy).
+
+### Echo Website
+
+The Echo website uses [Microsoft Clarity](https://clarity.microsoft.com) to understand how visitors interact with the site. Clarity collects anonymous session data including page views, scroll depth, clicks, and heatmaps. It does not collect personal information or use cookies for advertising. Clarity is subject to [Microsoft's Privacy Statement](https://privacy.microsoft.com/privacystatement).
 
 ## No Account Required
 
@@ -70,7 +106,7 @@ Each permission is used only for its stated purpose. Echo does not access any da
 
 ## Tips
 
-- For maximum privacy, use local transcription models and Ollama for AI Enhancement. This keeps all data entirely on your Mac.
+- For maximum privacy, use local transcription models, Ollama for AI Enhancement, and disable anonymous usage analytics in **Settings > Privacy Controls**. This keeps all data entirely on your Mac.
 - Review each cloud service's privacy policy before entering your API key. Echo sends data to the service you choose, and that service's terms govern how it's handled.
 - Use the auto-cleanup feature to automatically delete old recordings and transcriptions if you prefer not to keep a history.
 
