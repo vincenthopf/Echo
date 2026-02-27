@@ -276,49 +276,43 @@ struct CloudModelCardView: View {
     
     private func verifyAPIKey() {
         guard !apiKey.isEmpty else { return }
-        
+
         isVerifying = true
         verificationStatus = .verifying
-        
+
         switch model.provider {
-        case .groq:
-            aiService.selectedProvider = .groq
-        case .elevenLabs:
-            aiService.selectedProvider = .elevenLabs
-        case .deepgram:
-            aiService.selectedProvider = .deepgram
-        case .mistral:
-            aiService.selectedProvider = .mistral
         case .gemini:
+            // Gemini exists as both AI Enhancement and transcription provider — verify via AIService
             aiService.selectedProvider = .gemini
+            aiService.saveAPIKey(apiKey) { isValid in
+                DispatchQueue.main.async {
+                    self.isVerifying = false
+                    if isValid {
+                        self.verificationStatus = .success
+                        UserDefaults.standard.set(self.apiKey, forKey: "\(self.providerKey)APIKey")
+                        self.isConfiguredState = true
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.isExpanded = false
+                        }
+                    } else {
+                        self.verificationStatus = .failure
+                    }
+                }
+            }
+        case .groq, .elevenLabs, .deepgram, .mistral, .soniox:
+            // Transcription-only providers — save key directly, validated at transcription time
+            UserDefaults.standard.set(apiKey, forKey: "\(providerKey)APIKey")
+            isVerifying = false
+            verificationStatus = .success
+            isConfiguredState = true
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isExpanded = false
+            }
         default:
-            // This case should ideally not be hit for cloud models in this view
             print("Warning: verifyAPIKey called for unsupported provider \(model.provider.rawValue)")
             isVerifying = false
             verificationStatus = .failure
             return
-        }
-        
-        aiService.saveAPIKey(apiKey) { isValid in
-            DispatchQueue.main.async {
-                self.isVerifying = false
-                if isValid {
-                    self.verificationStatus = .success
-                    // Save the API key
-                    UserDefaults.standard.set(self.apiKey, forKey: "\(self.providerKey)APIKey")
-                    self.isConfiguredState = true
-                    
-                    // Collapse the configuration section after successful verification
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        self.isExpanded = false
-                    }
-                } else {
-                    self.verificationStatus = .failure
-                }
-                
-                // Restore original provider
-                // aiService.selectedProvider = originalProvider // This line was removed as per the new_code
-            }
         }
     }
     
