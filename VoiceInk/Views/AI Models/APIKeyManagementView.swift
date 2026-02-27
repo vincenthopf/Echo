@@ -20,7 +20,7 @@ struct APIKeyManagementView: View {
             FormRow(label: "AI Provider") {
                 HStack {
                     Picker("", selection: $aiService.selectedProvider) {
-                        ForEach(AIProvider.allCases.filter { $0 != .elevenLabs && $0 != .deepgram }, id: \.self) { provider in
+                        ForEach(AIProvider.allCases, id: \.self) { provider in
                             Text(provider.rawValue).tag(provider)
                         }
                     }
@@ -471,7 +471,7 @@ struct APIKeyManagementView: View {
     // MARK: - Helpers
 
     private var isFreeProvider: Bool {
-        [.groq, .gemini, .cerebras].contains(aiService.selectedProvider)
+        aiService.selectedProvider == .gemini
     }
 
     private var canVerifyCustom: Bool {
@@ -480,14 +480,11 @@ struct APIKeyManagementView: View {
 
     private var apiKeyURL: URL? {
         switch aiService.selectedProvider {
-        case .groq: return URL(string: "https://console.groq.com/keys")
         case .openAI: return URL(string: "https://platform.openai.com/api-keys")
         case .gemini: return URL(string: "https://makersuite.google.com/app/apikey")
         case .anthropic: return URL(string: "https://console.anthropic.com/settings/keys")
-        case .mistral: return URL(string: "https://console.mistral.ai/api-keys")
         case .openRouter: return URL(string: "https://openrouter.ai/keys")
-        case .cerebras: return URL(string: "https://cloud.cerebras.ai/")
-        case .ollama, .custom, .elevenLabs, .deepgram: return nil
+        case .ollama, .custom: return nil
         }
     }
 
