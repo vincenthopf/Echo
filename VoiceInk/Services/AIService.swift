@@ -32,15 +32,15 @@ enum AIProvider: String, CaseIterable {
         case .gemini:
             return "gemini-2.5-flash-lite"
         case .anthropic:
-            return "claude-haiku-4-5"
+            return "claude-sonnet-4-6"
         case .openAI:
-            return "gpt-5-mini"
+            return "gpt-4.1-mini"
         case .ollama:
             return UserDefaults.standard.string(forKey: "ollamaSelectedModel") ?? "mistral"
         case .custom:
             return UserDefaults.standard.string(forKey: "customProviderModel") ?? ""
         case .openRouter:
-            return "openai/gpt-oss-120b"
+            return "anthropic/claude-sonnet-4-6"
         }
     }
     
@@ -51,22 +51,29 @@ enum AIProvider: String, CaseIterable {
                 "gemini-2.5-pro",
                 "gemini-2.5-flash",
                 "gemini-2.5-flash-lite",
-                "gemini-2.0-flash-001"
+                "gemini-3.1-pro-preview",
+                "gemini-3-flash-preview"
             ]
         case .anthropic:
             return [
-                "claude-opus-4-0",
-                "claude-sonnet-4-0",
+                "claude-opus-4-6",
+                "claude-sonnet-4-6",
+                "claude-haiku-4-5",
                 "claude-sonnet-4-5",
-                "claude-haiku-4-5"
+                "claude-opus-4-5"
             ]
         case .openAI:
             return [
+                "gpt-5.2",
+                "gpt-5.2-pro",
                 "gpt-5",
                 "gpt-5-mini",
-                "gpt-5-nano",
                 "gpt-4.1",
-                "gpt-4.1-mini"
+                "gpt-4.1-mini",
+                "gpt-4.1-nano",
+                "o3",
+                "o3-mini",
+                "o4-mini"
             ]
         case .ollama:
             return []
