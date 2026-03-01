@@ -204,15 +204,15 @@ import Foundation
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .groq)
         ),
         CloudModel(
-           name: "scribe_v1",
-           displayName: "Scribe v1 (ElevenLabs)",
-           description: "ElevenLabs' Scribe model for fast and accurate transcription.",
-           provider: .elevenLabs,
-           speed: 0.7,
-           accuracy: 0.98,
-           isMultilingual: true,
-           supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .elevenLabs)
-       ),
+            name: "scribe_v2",
+            displayName: "Scribe v2 (ElevenLabs)",
+            description: "ElevenLabs' latest SOTA model. #1 ranked STT with 2.3% WER. Supports keyterm prompting for improved accuracy.",
+            provider: .elevenLabs,
+            speed: 0.85,
+            accuracy: 0.99,
+            isMultilingual: true,
+            supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .elevenLabs)
+        ),
        CloudModel(
            name: "nova-2",
            displayName: "Nova (Deepgram)",
