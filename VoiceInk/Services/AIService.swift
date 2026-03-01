@@ -30,7 +30,7 @@ enum AIProvider: String, CaseIterable {
     var defaultModel: String {
         switch self {
         case .gemini:
-            return "gemini-2.5-flash-lite"
+            return "gemini-3-flash-preview"
         case .anthropic:
             return "claude-sonnet-4-6"
         case .openAI:
@@ -65,7 +65,6 @@ enum AIProvider: String, CaseIterable {
         case .openAI:
             return [
                 "gpt-5.2",
-                "gpt-5.2-pro",
                 "gpt-5",
                 "gpt-5-mini",
                 "gpt-4.1",

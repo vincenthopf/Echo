@@ -18,6 +18,16 @@ extension WhisperState {
             if isNativeModelSupported(savedModel) {
                 currentTranscriptionModel = savedModel
             }
+        } else if let savedModelName = UserDefaults.standard.string(forKey: "CurrentTranscriptionModel") {
+            // Migrate users from removed local models to the recommended model
+            let removedLocalModels = ["ggml-tiny", "ggml-tiny.en", "ggml-base", "ggml-base.en",
+                                       "ggml-small", "ggml-small.en", "ggml-medium", "ggml-medium.en",
+                                       "ggml-large-v2"]
+            if removedLocalModels.contains(savedModelName),
+               let replacement = allAvailableModels.first(where: { $0.name == "ggml-large-v3-turbo-q5_0" }) {
+                currentTranscriptionModel = replacement
+                UserDefaults.standard.set(replacement.name, forKey: "CurrentTranscriptionModel")
+            }
         }
     }
 

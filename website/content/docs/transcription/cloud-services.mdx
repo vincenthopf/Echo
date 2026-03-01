@@ -12,9 +12,9 @@ Cloud transcription services process your audio on external servers. They are fa
 | **Deepgram** | Nova | Very good | Yes | Fast and cost-effective. Uses Nova-3 for English, Nova-2 for other languages. |
 | **Deepgram** | Nova-3 Medical | Excellent | English only | Specialized for clinical and medical terminology. |
 | **Groq** | Whisper Large v3 Turbo | Excellent | Yes | Runs Whisper on Groq's fast inference hardware. |
-| **ElevenLabs** | Scribe v2 | Excellent | Yes | #1 ranked STT model (2.3% WER). Supports keyterm prompting with your [Dictionary](/docs/vocabulary/personal-vocabulary) terms. |
-| **Gemini** | Gemini 3.1 Pro | Excellent | Yes | Google's latest model with advanced reasoning capabilities. |
-| **Gemini** | Gemini 3 Flash | Very good | Yes | High performance at lower cost. |
+| **ElevenLabs** | Scribe v2 | Excellent | Yes | #1 ranked STT model (2.3% WER). |
+| **Gemini** | Gemini 3.1 Pro (Preview) | Excellent | Yes | Google's latest model with advanced reasoning capabilities. |
+| **Gemini** | Gemini 3 Flash (Preview) | Very good | Yes | High performance at lower cost. |
 | **Mistral** | Voxtral Mini | Excellent | Yes | Mistral's state-of-the-art transcription model. |
 
 ## Setting Up a Cloud Provider
@@ -70,8 +70,6 @@ The audio is sent directly to the provider you have selected. Echo does not stor
 ## ElevenLabs Scribe V2
 
 Scribe V2 is ElevenLabs' latest speech-to-text model and the #1 ranked STT model on the [Artificial Analysis benchmark](https://artificialanalysis.ai/leaderboards/speech-to-text) with a 2.3% word error rate. It supports 90+ languages.
-
-**Keyterm prompting.** Scribe V2 automatically uses the terms from your [Personal Vocabulary](/docs/vocabulary/personal-vocabulary) (Dictionary) as keyterms, improving accuracy for names, technical terms, and other specialized words. There is nothing extra to configure — just add your terms to the Dictionary and Scribe V2 will use them.
 
 ## Tips
 

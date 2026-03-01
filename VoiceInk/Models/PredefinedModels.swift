@@ -146,7 +146,7 @@ import Foundation
         CloudModel(
             name: "scribe_v2",
             displayName: "Scribe v2 (ElevenLabs)",
-            description: "ElevenLabs' latest SOTA model. #1 ranked STT with 2.3% WER. Supports keyterm prompting for improved accuracy.",
+            description: "ElevenLabs' latest SOTA model. #1 ranked STT with 2.3% WER.",
             provider: .elevenLabs,
             speed: 0.85,
             accuracy: 0.99,
