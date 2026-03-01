@@ -3,19 +3,23 @@
     <channel>
         <title>Echo Releases</title>
         <item>
-            <title>0.1.1</title>
-            <pubDate>Mon, 23 Feb 2026 16:17:34 +0000</pubDate>
-            <sparkle:version>102</sparkle:version>
-            <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
+            <title>0.1.2</title>
+            <pubDate>Sun, 01 Mar 2026 05:15:15 +0000</pubDate>
+            <sparkle:version>103</sparkle:version>
+            <sparkle:shortVersionString>0.1.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
-                <h3>What's New in Version 0.1.1</h3>
+                <h3>What's New in Version 0.1.2</h3>
                 <ul>
-                    <li>Added privacy-first anonymous usage analytics (opt-out in Settings > Privacy Controls)</li>
-<li>Universal binary: now runs natively on Intel Macs</li>
+                    <li>Updated AI Enhancement models to latest versions (Feb 2026)</li>
+<li>Replaced Scribe v1 with Scribe v2 — #1 ranked STT model (2.3% WER)</li>
+<li>Updated Gemini transcription models to 3.1 Pro and 3 Flash</li>
+<li>Removed deprecated AI Enhancement providers to simplify setup</li>
+<li>Removed low-accuracy local models; existing users auto-migrated to Large v3 Turbo</li>
+<li>Updated default recommended model to Large v3 Turbo (Quantized)</li>
                 </ul>
             ]]></description>
-            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.1/Echo.dmg" length="16878711" type="application/octet-stream" sparkle:edSignature="44uRD3kGLUS39eNsqF+5W5dOT9pHIYJYCuIKowi+/WEFaD3d8ksRjlKOhwxvwb8xjqlvbR7GD4DUJOTfLyhLAQ=="/>
+            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.2/Echo.dmg" length="16872784" type="application/octet-stream" sparkle:edSignature="IxWqj5I4NaakzWsL8AgbevvTTQuE98tFzD2/igG0Q5yxSwyKxyLGLrqfC5SAljFW9u6OEgGn8+TkODOihwuaAA=="/>
         </item>
     </channel>
 </rss>
