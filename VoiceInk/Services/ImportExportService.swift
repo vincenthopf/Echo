@@ -224,11 +224,15 @@ class ImportExportService {
                             hotkeyManager.hotkey1 = hotkey
                         } else if let hotkeyRaw = general.selectedHotkey1RawValue {
                             hotkeyManager.hotkey1 = SingleKeyShortcut.fromLegacyRawValue(hotkeyRaw)
+                        } else {
+                            hotkeyManager.hotkey1 = nil
                         }
                         if let hotkey2 = general.echoHotkey2 {
                             hotkeyManager.hotkey2 = hotkey2
                         } else if let hotkeyRaw2 = general.selectedHotkey2RawValue {
                             hotkeyManager.hotkey2 = SingleKeyShortcut.fromLegacyRawValue(hotkeyRaw2)
+                        } else {
+                            hotkeyManager.hotkey2 = nil
                         }
                         if let launch = general.launchAtLoginEnabled {
                             LaunchAtLogin.isEnabled = launch

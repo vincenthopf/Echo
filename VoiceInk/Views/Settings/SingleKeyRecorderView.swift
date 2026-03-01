@@ -135,14 +135,15 @@ struct SingleKeyRecorderView: View {
 
     private func captureModifierShortcut() {
         guard !peakModifiers.isEmpty else { return }
+        let sorted = peakModifiers.sorted()
 
-        if peakModifiers.count == 1 {
-            shortcut = SingleKeyShortcut(keyCode: peakModifiers[0], isModifier: true)
+        if sorted.count == 1 {
+            shortcut = SingleKeyShortcut(keyCode: sorted[0], isModifier: true)
         } else {
             shortcut = SingleKeyShortcut(
-                keyCode: peakModifiers[0],
+                keyCode: sorted[0],
                 isModifier: true,
-                comboKeyCodes: peakModifiers
+                comboKeyCodes: sorted
             )
         }
         onChanged?()
