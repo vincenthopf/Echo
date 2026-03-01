@@ -13,12 +13,21 @@ extension KeyboardShortcuts.Name {
 class HotkeyManager: ObservableObject {
     @Published var hotkey1: SingleKeyShortcut? {
         didSet {
+            // Clear hotkey2 if it conflicts
+            if let h1 = hotkey1, let h2 = hotkey2, h1.keyCode == h2.keyCode {
+                hotkey2 = nil
+            }
             persistHotkey(hotkey1, forKey: "echoHotkey1")
             setupHotkeyMonitoring()
         }
     }
     @Published var hotkey2: SingleKeyShortcut? {
         didSet {
+            // Reject if same key as hotkey1
+            if let h1 = hotkey1, let h2 = hotkey2, h1.keyCode == h2.keyCode {
+                hotkey2 = nil
+                return
+            }
             persistHotkey(hotkey2, forKey: "echoHotkey2")
             setupHotkeyMonitoring()
         }
@@ -63,10 +72,6 @@ class HotkeyManager: ObservableObject {
     // Debounce for Fn key
     private var fnDebounceTask: Task<Void, Never>?
     private var pendingFnKeyState: Bool? = nil
-
-    var isHotkeyConfigured: Bool {
-        hotkey1 != nil
-    }
 
     init(whisperState: WhisperState) {
         self.whisperState = whisperState
