@@ -5,6 +5,7 @@ import "./globals.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { SmoothCursor } from "@/components/ui/smooth-cursor";
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
+import { BackToTop } from "@/components/ui/back-to-top";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,6 +92,7 @@ export default function RootLayout({
           <SmoothScrollProvider>
             {process.env.NODE_ENV !== "development" && <SmoothCursor />}
             {children}
+            <BackToTop />
           </SmoothScrollProvider>
         </RootProvider>
       </body>
