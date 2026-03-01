@@ -8,6 +8,8 @@ struct GeneralSettings: Codable {
     let toggleMiniRecorderShortcut: KeyboardShortcuts.Shortcut?
     let toggleMiniRecorderShortcut2: KeyboardShortcuts.Shortcut?
     let retryLastTranscriptionShortcut: KeyboardShortcuts.Shortcut?
+    let echoHotkey1: SingleKeyShortcut?
+    let echoHotkey2: SingleKeyShortcut?
     let selectedHotkey1RawValue: String?
     let selectedHotkey2RawValue: String?
     let launchAtLoginEnabled: Bool?
@@ -87,8 +89,10 @@ class ImportExportService {
             toggleMiniRecorderShortcut: KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder),
             toggleMiniRecorderShortcut2: KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder2),
             retryLastTranscriptionShortcut: KeyboardShortcuts.getShortcut(for: .retryLastTranscription),
-            selectedHotkey1RawValue: hotkeyManager.selectedHotkey1.rawValue,
-            selectedHotkey2RawValue: hotkeyManager.selectedHotkey2.rawValue,
+            echoHotkey1: hotkeyManager.hotkey1,
+            echoHotkey2: hotkeyManager.hotkey2,
+            selectedHotkey1RawValue: nil,
+            selectedHotkey2RawValue: nil,
             launchAtLoginEnabled: LaunchAtLogin.isEnabled,
             isMenuBarOnly: menuBarManager.isMenuBarOnly,
             useAppleScriptPaste: UserDefaults.standard.bool(forKey: keyUseAppleScriptPaste),
@@ -221,13 +225,15 @@ class ImportExportService {
                         if let retryShortcut = general.retryLastTranscriptionShortcut {
                             KeyboardShortcuts.setShortcut(retryShortcut, for: .retryLastTranscription)
                         }
-                        if let hotkeyRaw = general.selectedHotkey1RawValue,
-                           let hotkey = HotkeyManager.HotkeyOption(rawValue: hotkeyRaw) {
-                            hotkeyManager.selectedHotkey1 = hotkey
+                        if let hotkey = general.echoHotkey1 {
+                            hotkeyManager.hotkey1 = hotkey
+                        } else if let hotkeyRaw = general.selectedHotkey1RawValue {
+                            hotkeyManager.hotkey1 = SingleKeyShortcut.fromLegacyRawValue(hotkeyRaw)
                         }
-                        if let hotkeyRaw2 = general.selectedHotkey2RawValue,
-                           let hotkey2 = HotkeyManager.HotkeyOption(rawValue: hotkeyRaw2) {
-                            hotkeyManager.selectedHotkey2 = hotkey2
+                        if let hotkey2 = general.echoHotkey2 {
+                            hotkeyManager.hotkey2 = hotkey2
+                        } else if let hotkeyRaw2 = general.selectedHotkey2RawValue {
+                            hotkeyManager.hotkey2 = SingleKeyShortcut.fromLegacyRawValue(hotkeyRaw2)
                         }
                         if let launch = general.launchAtLoginEnabled {
                             LaunchAtLogin.isEnabled = launch
