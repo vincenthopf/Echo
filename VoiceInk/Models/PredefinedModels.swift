@@ -194,16 +194,6 @@ import Foundation
          
                  // Cloud Models
         CloudModel(
-            name: "whisper-large-v3-turbo",
-            displayName: "Whisper Large v3 Turbo (Groq)",
-            description: "Whisper Large v3 Turbo model with Groq's lightning-speed inference",
-            provider: .groq,
-            speed: 0.65,
-            accuracy: 0.96,
-            isMultilingual: true,
-            supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .groq)
-        ),
-        CloudModel(
             name: "scribe_v2",
             displayName: "Scribe v2 (ElevenLabs)",
             description: "ElevenLabs' latest SOTA model. #1 ranked STT with 2.3% WER. Supports keyterm prompting for improved accuracy.",
@@ -212,6 +202,16 @@ import Foundation
             accuracy: 0.99,
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .elevenLabs)
+        ),
+        CloudModel(
+            name: "whisper-large-v3-turbo",
+            displayName: "Whisper Large v3 Turbo (Groq)",
+            description: "Whisper Large v3 Turbo model with Groq's lightning-speed inference",
+            provider: .groq,
+            speed: 0.65,
+            accuracy: 0.96,
+            isMultilingual: true,
+            supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .groq)
         ),
        CloudModel(
            name: "nova-2",
