@@ -86,8 +86,8 @@ class ImportExportService {
         let exportedWordReplacements = UserDefaults.standard.dictionary(forKey: wordReplacementsKey) as? [String: String]
 
         let generalSettingsToExport = GeneralSettings(
-            toggleMiniRecorderShortcut: KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder),
-            toggleMiniRecorderShortcut2: KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder2),
+            toggleMiniRecorderShortcut: nil,
+            toggleMiniRecorderShortcut2: nil,
             retryLastTranscriptionShortcut: KeyboardShortcuts.getShortcut(for: .retryLastTranscription),
             echoHotkey1: hotkeyManager.hotkey1,
             echoHotkey2: hotkeyManager.hotkey2,
@@ -216,12 +216,7 @@ class ImportExportService {
                     }
 
                     if let general = importedSettings.generalSettings {
-                        if let shortcut = general.toggleMiniRecorderShortcut {
-                            KeyboardShortcuts.setShortcut(shortcut, for: .toggleMiniRecorder)
-                        }
-                        if let shortcut2 = general.toggleMiniRecorderShortcut2 {
-                            KeyboardShortcuts.setShortcut(shortcut2, for: .toggleMiniRecorder2)
-                        }
+                        // toggleMiniRecorderShortcut/2 are legacy fields — no longer used
                         if let retryShortcut = general.retryLastTranscriptionShortcut {
                             KeyboardShortcuts.setShortcut(retryShortcut, for: .retryLastTranscription)
                         }
