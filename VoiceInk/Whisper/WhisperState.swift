@@ -62,9 +62,9 @@ class WhisperState: NSObject, ObservableObject {
     
     private var modelUrl: URL? {
         let possibleURLs = [
-            Bundle.main.url(forResource: "ggml-base.en", withExtension: "bin", subdirectory: "Models"),
-            Bundle.main.url(forResource: "ggml-base.en", withExtension: "bin"),
-            Bundle.main.bundleURL.appendingPathComponent("Models/ggml-base.en.bin")
+            Bundle.main.url(forResource: "ggml-large-v3-turbo-q5_0", withExtension: "bin", subdirectory: "Models"),
+            Bundle.main.url(forResource: "ggml-large-v3-turbo-q5_0", withExtension: "bin"),
+            Bundle.main.bundleURL.appendingPathComponent("Models/ggml-large-v3-turbo-q5_0.bin")
         ]
         
         for url in possibleURLs {

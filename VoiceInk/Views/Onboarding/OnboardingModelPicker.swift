@@ -19,7 +19,7 @@ enum OnboardingModelPicker {
         }
 
         if isIntel {
-            return model(named: "ggml-base.en")
+            return model(named: "ggml-large-v3-turbo-q5_0")
         }
 
         return firstLocalModel() ?? PredefinedModels.models.first
@@ -31,7 +31,7 @@ enum OnboardingModelPicker {
             options.append(primary)
         }
 
-        if let localFallback = model(named: "ggml-base.en"), !containsModel(named: localFallback.name, in: options) {
+        if let localFallback = model(named: "ggml-large-v3-turbo-q5_0"), !containsModel(named: localFallback.name, in: options) {
             options.append(localFallback)
         }
         if let parakeet = model(named: "parakeet-tdt-0.6b-v3"), !containsModel(named: parakeet.name, in: options) {

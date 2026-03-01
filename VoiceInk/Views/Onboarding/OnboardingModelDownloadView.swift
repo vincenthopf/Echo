@@ -173,8 +173,8 @@ struct OnboardingModelDownloadView: View {
         }
 
         if launchArguments.contains("-uiTestMockLocalProgress") {
-            whisperState.downloadProgress["ggml-base.en_main"] = 0.30
-            whisperState.downloadProgress["ggml-base.en_coreml"] = 0.50
+            whisperState.downloadProgress["ggml-large-v3-turbo-q5_0_main"] = 0.30
+            whisperState.downloadProgress["ggml-large-v3-turbo-q5_0_coreml"] = 0.50
         }
     }
 
