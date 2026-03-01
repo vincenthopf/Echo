@@ -3,23 +3,21 @@
     <channel>
         <title>Echo Releases</title>
         <item>
-            <title>0.1.2</title>
-            <pubDate>Sun, 01 Mar 2026 05:15:15 +0000</pubDate>
+            <title>0.1.3</title>
+            <pubDate>Sun, 01 Mar 2026 06:43:04 +0000</pubDate>
             <sparkle:version>103</sparkle:version>
-            <sparkle:shortVersionString>0.1.2</sparkle:shortVersionString>
+            <sparkle:shortVersionString>0.1.3</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
-                <h3>What's New in Version 0.1.2</h3>
+                <h3>What's New in Version 0.1.3</h3>
                 <ul>
-                    <li>Updated AI Enhancement models to latest versions (Feb 2026)</li>
-<li>Replaced Scribe v1 with Scribe v2 — #1 ranked STT model (2.3% WER)</li>
-<li>Updated Gemini transcription models to 3.1 Pro and 3 Flash</li>
-<li>Removed deprecated AI Enhancement providers to simplify setup</li>
-<li>Removed low-accuracy local models; existing users auto-migrated to Large v3 Turbo</li>
-<li>Updated default recommended model to Large v3 Turbo (Quantized)</li>
+                    <li>Fixed ElevenLabs API key validation to support restricted keys with Speech to Text permission</li>
+<li>Added specific error messages for invalid keys and missing permissions</li>
+<li>Added ElevenLabs Scribe v2 to recommended models</li>
+<li>Updated documentation</li>
                 </ul>
             ]]></description>
-            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.2/Echo.dmg" length="16872784" type="application/octet-stream" sparkle:edSignature="IxWqj5I4NaakzWsL8AgbevvTTQuE98tFzD2/igG0Q5yxSwyKxyLGLrqfC5SAljFW9u6OEgGn8+TkODOihwuaAA=="/>
+            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.3/Echo.dmg" length="16882749" type="application/octet-stream" sparkle:edSignature="r4B7DYR2A2K39upnnLR2Lw2wnxNnJPRgn/3bhxVpRuf+aRHL2I/x6muqjW+w7AA+p69Uk/WJsCVgjwAcQxVhCA=="/>
         </item>
     </channel>
 </rss>
