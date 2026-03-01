@@ -246,22 +246,22 @@ import Foundation
         
         // Gemini Models
         CloudModel(
-            name: "gemini-2.5-pro",
-            displayName: "Gemini 2.5 Pro",
-            description: "Google's advanced multimodal model with high-quality transcription capabilities.",
+            name: "gemini-3.1-pro-preview",
+            displayName: "Gemini 3.1 Pro (Preview)",
+            description: "Google's latest model with advanced reasoning and agentic capabilities.",
             provider: .gemini,
             speed: 0.7,
-            accuracy: 0.96,
+            accuracy: 0.97,
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .gemini)
         ),
         CloudModel(
-            name: "gemini-2.5-flash",
-            displayName: "Gemini 2.5 Flash",
-            description: "Google's optimized model for low-latency transcription with multimodal support.",
+            name: "gemini-3-flash-preview",
+            displayName: "Gemini 3 Flash (Preview)",
+            description: "Google's latest flash model. High performance at lower cost.",
             provider: .gemini,
             speed: 0.9,
-            accuracy: 0.94,
+            accuracy: 0.95,
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .gemini)
         ),
