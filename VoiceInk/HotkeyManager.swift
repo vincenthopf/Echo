@@ -14,7 +14,7 @@ class HotkeyManager: ObservableObject {
     @Published var hotkey1: SingleKeyShortcut? {
         didSet {
             // Clear hotkey2 if it conflicts
-            if let h1 = hotkey1, let h2 = hotkey2, h1.keyCode == h2.keyCode {
+            if let h1 = hotkey1, let h2 = hotkey2, h1 == h2 {
                 hotkey2 = nil
             }
             persistHotkey(hotkey1, forKey: "echoHotkey1")
@@ -23,8 +23,8 @@ class HotkeyManager: ObservableObject {
     }
     @Published var hotkey2: SingleKeyShortcut? {
         didSet {
-            // Reject if same key as hotkey1
-            if let h1 = hotkey1, let h2 = hotkey2, h1.keyCode == h2.keyCode {
+            // Reject if same as hotkey1
+            if let h1 = hotkey1, let h2 = hotkey2, h1 == h2 {
                 hotkey2 = nil
                 return
             }
@@ -239,13 +239,14 @@ class HotkeyManager: ObservableObject {
         let keyCode = event.keyCode
         let flags = event.modifierFlags
 
-        // Find matching hotkey
+        // Find matching hotkey (checks all keyCodes including combo members)
         guard let hotkey = matchingModifierHotkey(for: keyCode) else { return }
-        guard let flag = hotkey.modifierFlag else { return }
 
-        let isKeyPressed = flags.contains(flag)
+        // For combos, check if ALL required flags are present
+        let requiredFlags = hotkey.requiredModifierFlags
+        let isKeyPressed = flags.contains(requiredFlags)
 
-        // Fn key gets debounced
+        // Fn key gets debounced (only for single Fn, not combos)
         if hotkey.isFnKey {
             pendingFnKeyState = isKeyPressed
             fnDebounceTask?.cancel()
@@ -275,8 +276,8 @@ class HotkeyManager: ObservableObject {
     }
 
     private func matchingModifierHotkey(for keyCode: UInt16) -> SingleKeyShortcut? {
-        if let h1 = hotkey1, h1.isModifier, h1.keyCode == keyCode { return h1 }
-        if let h2 = hotkey2, h2.isModifier, h2.keyCode == keyCode { return h2 }
+        if let h1 = hotkey1, h1.isModifier, h1.allKeyCodes.contains(keyCode) { return h1 }
+        if let h2 = hotkey2, h2.isModifier, h2.allKeyCodes.contains(keyCode) { return h2 }
         return nil
     }
 

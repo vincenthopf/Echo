@@ -8,7 +8,11 @@ struct SingleKeyRecorderView: View {
     @State private var isRecording = false
     @State private var showCharacterWarning = false
     @State private var localMonitor: Any?
+    @State private var peakModifiers: [UInt16] = []
+    @State private var livePreview: String = ""
     @Environment(\.colorScheme) private var colorScheme
+
+    private static let modifierKeyCodes: Set<UInt16> = [0x3A, 0x3D, 0x3B, 0x3E, 0x3F, 0x36, 0x37, 0x38, 0x3C]
 
     var body: some View {
         HStack(spacing: Tokens.Spacing.sm) {
@@ -18,7 +22,7 @@ struct SingleKeyRecorderView: View {
                         Circle()
                             .fill(Tokens.Colors.orange)
                             .frame(width: 6, height: 6)
-                        Text("Press any key…")
+                        Text(livePreview.isEmpty ? "Press any key…" : livePreview)
                             .foregroundColor(Tokens.Colors.orange)
                     } else if let shortcut = shortcut {
                         Text(shortcut.displayName)
@@ -77,6 +81,8 @@ struct SingleKeyRecorderView: View {
 
     private func startRecording() {
         isRecording = true
+        peakModifiers = []
+        livePreview = ""
 
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [self] event in
             if event.type == .keyDown && event.keyCode == 0x35 {
@@ -92,15 +98,25 @@ struct SingleKeyRecorderView: View {
     private func handleRecordEvent(_ event: NSEvent) {
         if event.type == .flagsChanged {
             let keyCode = event.keyCode
-            let modifierKeyCodes: Set<UInt16> = [0x3A, 0x3D, 0x3B, 0x3E, 0x3F, 0x36, 0x37, 0x38, 0x3C]
-            guard modifierKeyCodes.contains(keyCode) else { return }
+            guard Self.modifierKeyCodes.contains(keyCode) else { return }
 
-            // Only capture on key down (flag becomes set)
-            guard isModifierKeyDown(keyCode: keyCode, flags: event.modifierFlags) else { return }
+            if isModifierKeyDown(keyCode: keyCode, flags: event.modifierFlags) {
+                // Key pressed — add to peak set
+                if !peakModifiers.contains(keyCode) {
+                    peakModifiers.append(keyCode)
+                }
+                // Update live preview
+                livePreview = peakModifiers.compactMap { SingleKeyShortcut.displayName(for: $0) }.joined(separator: " + ")
+            } else {
+                // Key released — check if ALL modifiers are now released
+                let relevantFlags: NSEvent.ModifierFlags = [.option, .control, .function, .command, .shift]
+                let noModifiersDown = event.modifierFlags.intersection(relevantFlags).isEmpty
 
-            shortcut = SingleKeyShortcut(keyCode: keyCode, isModifier: true)
-            onChanged?()
-            stopRecording()
+                if noModifiersDown && !peakModifiers.isEmpty {
+                    // All released — capture
+                    captureModifierShortcut()
+                }
+            }
 
         } else if event.type == .keyDown {
             let keyCode = event.keyCode
@@ -117,6 +133,22 @@ struct SingleKeyRecorderView: View {
         }
     }
 
+    private func captureModifierShortcut() {
+        guard !peakModifiers.isEmpty else { return }
+
+        if peakModifiers.count == 1 {
+            shortcut = SingleKeyShortcut(keyCode: peakModifiers[0], isModifier: true)
+        } else {
+            shortcut = SingleKeyShortcut(
+                keyCode: peakModifiers[0],
+                isModifier: true,
+                comboKeyCodes: peakModifiers
+            )
+        }
+        onChanged?()
+        stopRecording()
+    }
+
     private func isModifierKeyDown(keyCode: UInt16, flags: NSEvent.ModifierFlags) -> Bool {
         switch keyCode {
         case 0x3A, 0x3D: return flags.contains(.option)
@@ -130,6 +162,8 @@ struct SingleKeyRecorderView: View {
 
     private func stopRecording() {
         isRecording = false
+        peakModifiers = []
+        livePreview = ""
         if let monitor = localMonitor {
             NSEvent.removeMonitor(monitor)
             localMonitor = nil

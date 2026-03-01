@@ -4,12 +4,54 @@ import AppKit
 struct SingleKeyShortcut: Equatable, Codable {
     let keyCode: UInt16
     let isModifier: Bool
+    let comboKeyCodes: [UInt16]?
+
+    init(keyCode: UInt16, isModifier: Bool, comboKeyCodes: [UInt16]? = nil) {
+        self.keyCode = keyCode
+        self.isModifier = isModifier
+        self.comboKeyCodes = comboKeyCodes
+    }
+
+    var isCombo: Bool {
+        guard let combo = comboKeyCodes else { return false }
+        return combo.count > 1
+    }
+
+    var allKeyCodes: Set<UInt16> {
+        if let combo = comboKeyCodes {
+            return Set(combo)
+        }
+        return [keyCode]
+    }
 
     var displayName: String {
-        Self.displayName(for: keyCode) ?? "Key \(keyCode)"
+        if isCombo, let combo = comboKeyCodes {
+            return combo.compactMap { Self.displayName(for: $0) }.joined(separator: " + ")
+        }
+        return Self.displayName(for: keyCode) ?? "Key \(keyCode)"
+    }
+
+    /// Returns the combined modifier flags required for this shortcut.
+    /// For single keys, returns the single flag. For combos, returns all flags OR'd together.
+    var requiredModifierFlags: NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        for code in allKeyCodes {
+            if let flag = Self.modifierFlagForKeyCode(code) {
+                flags.insert(flag)
+            }
+        }
+        return flags
     }
 
     var modifierFlag: NSEvent.ModifierFlags? {
+        Self.modifierFlagForKeyCode(keyCode)
+    }
+
+    var isFnKey: Bool {
+        keyCode == 0x3F && !isCombo
+    }
+
+    static func modifierFlagForKeyCode(_ keyCode: UInt16) -> NSEvent.ModifierFlags? {
         switch keyCode {
         case 0x3A, 0x3D: return .option
         case 0x3B, 0x3E: return .control
@@ -18,10 +60,6 @@ struct SingleKeyShortcut: Equatable, Codable {
         case 0x38, 0x3C: return .shift
         default: return nil
         }
-    }
-
-    var isFnKey: Bool {
-        keyCode == 0x3F
     }
 
     /// Returns true for character keys (letters, numbers, punctuation) that would
