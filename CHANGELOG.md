@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.1.2
+
+### Updated AI & Transcription Models
+
+- Updated AI Enhancement models to the latest versions (Feb 2026) across all providers
+- Replaced Scribe v1 with Scribe v2 — ElevenLabs' #1 ranked STT model with 2.3% WER
+- Updated Gemini transcription models to 3.1 Pro and 3 Flash
+- Removed deprecated AI Enhancement providers (Cerebras, Groq, Mistral, ElevenLabs, Deepgram) to simplify the provider list
+
+### Improved Local Model Selection
+
+- Removed low-accuracy local models (tiny, base, small, medium) to reduce clutter
+- Existing users on removed models are automatically migrated to Large v3 Turbo (Quantized)
+- Updated default recommended model to Large v3 Turbo (Quantized) for the best balance of speed and accuracy
+
 ## v0.1.1
 
 ### Privacy-First Usage Analytics

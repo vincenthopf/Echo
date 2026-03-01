@@ -7,7 +7,7 @@ class DictionaryContextService {
 
     private init() {}
 
-    private let predefinedWords = "VoiceInk, chatGPT, GPT-4o, GPT-5-mini, Kimi-K2, GLM V4.5, Claude, Claude 4 sonnet, Claude opus, ultrathink, Vibe-coding, groq, cerebras, gpt-oss-120B, deepseek, gemini-2.5, Veo 3, elevenlabs, Kyutai"
+    private let predefinedWords = "Echo, chatGPT, GPT-5, GPT-4.1, Claude, Claude Sonnet, Claude Opus, Gemini, OpenRouter, Ollama, deepseek, elevenlabs, Kyutai, Parakeet, whisper"
 
     /// Get dictionary context using SwiftData
     func getDictionaryContext(from context: ModelContext) -> String {

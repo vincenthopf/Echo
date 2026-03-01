@@ -111,56 +111,6 @@ import Foundation
         
          // Local Models
          LocalModel(
-             name: "ggml-tiny",
-             displayName: "Tiny",
-             size: "75 MB",
-             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .local),
-             description: "Tiny model, fastest, least accurate",
-             speed: 0.95,
-             accuracy: 0.6,
-             ramUsage: 0.3
-         ),
-         LocalModel(
-             name: "ggml-tiny.en",
-             displayName: "Tiny (English)",
-             size: "75 MB",
-             supportedLanguages: getLanguageDictionary(isMultilingual: false, provider: .local),
-             description: "Tiny model optimized for English, fastest, least accurate",
-             speed: 0.95,
-             accuracy: 0.65,
-             ramUsage: 0.3
-         ),
-         LocalModel(
-             name: "ggml-base",
-             displayName: "Base",
-             size: "142 MB",
-             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .local),
-             description: "Base model, good balance between speed and accuracy, supports multiple languages",
-             speed: 0.85,
-             accuracy: 0.72,
-             ramUsage: 0.5
-         ),
-         LocalModel(
-             name: "ggml-base.en",
-             displayName: "Base (English)",
-             size: "142 MB",
-             supportedLanguages: getLanguageDictionary(isMultilingual: false, provider: .local),
-             description: "Base model optimized for English, good balance between speed and accuracy",
-             speed: 0.85,
-             accuracy: 0.75,
-             ramUsage: 0.5
-         ),
-         LocalModel(
-             name: "ggml-large-v2",
-             displayName: "Large v2",
-             size: "2.9 GB",
-             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .local),
-             description: "Large model v2, slower than Medium but more accurate",
-             speed: 0.3,
-             accuracy: 0.96,
-             ramUsage: 3.8
-         ),
-         LocalModel(
              name: "ggml-large-v3",
              displayName: "Large v3",
              size: "2.9 GB",
@@ -194,6 +144,16 @@ import Foundation
          
                  // Cloud Models
         CloudModel(
+            name: "scribe_v2",
+            displayName: "Scribe v2 (ElevenLabs)",
+            description: "ElevenLabs' latest SOTA model. #1 ranked STT with 2.3% WER.",
+            provider: .elevenLabs,
+            speed: 0.85,
+            accuracy: 0.99,
+            isMultilingual: true,
+            supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .elevenLabs)
+        ),
+        CloudModel(
             name: "whisper-large-v3-turbo",
             displayName: "Whisper Large v3 Turbo (Groq)",
             description: "Whisper Large v3 Turbo model with Groq's lightning-speed inference",
@@ -203,16 +163,6 @@ import Foundation
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .groq)
         ),
-        CloudModel(
-           name: "scribe_v1",
-           displayName: "Scribe v1 (ElevenLabs)",
-           description: "ElevenLabs' Scribe model for fast and accurate transcription.",
-           provider: .elevenLabs,
-           speed: 0.7,
-           accuracy: 0.98,
-           isMultilingual: true,
-           supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .elevenLabs)
-       ),
        CloudModel(
            name: "nova-2",
            displayName: "Nova (Deepgram)",
@@ -246,22 +196,22 @@ import Foundation
         
         // Gemini Models
         CloudModel(
-            name: "gemini-2.5-pro",
-            displayName: "Gemini 2.5 Pro",
-            description: "Google's advanced multimodal model with high-quality transcription capabilities.",
+            name: "gemini-3.1-pro-preview",
+            displayName: "Gemini 3.1 Pro (Preview)",
+            description: "Google's latest model with advanced reasoning and agentic capabilities.",
             provider: .gemini,
             speed: 0.7,
-            accuracy: 0.96,
+            accuracy: 0.97,
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .gemini)
         ),
         CloudModel(
-            name: "gemini-2.5-flash",
-            displayName: "Gemini 2.5 Flash",
-            description: "Google's optimized model for low-latency transcription with multimodal support.",
+            name: "gemini-3-flash-preview",
+            displayName: "Gemini 3 Flash (Preview)",
+            description: "Google's latest flash model. High performance at lower cost.",
             provider: .gemini,
             speed: 0.9,
-            accuracy: 0.94,
+            accuracy: 0.95,
             isMultilingual: true,
             supportedLanguages: getLanguageDictionary(isMultilingual: true, provider: .gemini)
         ),

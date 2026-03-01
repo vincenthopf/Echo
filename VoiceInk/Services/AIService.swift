@@ -2,25 +2,16 @@ import Foundation
 import os
 
 enum AIProvider: String, CaseIterable {
-    case cerebras = "Cerebras"
-    case groq = "GROQ"
     case gemini = "Gemini"
     case anthropic = "Anthropic"
     case openAI = "OpenAI"
     case openRouter = "OpenRouter"
-    case mistral = "Mistral"
-    case elevenLabs = "ElevenLabs"
-    case deepgram = "Deepgram"
     case ollama = "Ollama"
     case custom = "Custom"
     
     
     var baseURL: String {
         switch self {
-        case .cerebras:
-            return "https://api.cerebras.ai/v1/chat/completions"
-        case .groq:
-            return "https://api.groq.com/openai/v1/chat/completions"
         case .gemini:
             return "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
         case .anthropic:
@@ -29,12 +20,6 @@ enum AIProvider: String, CaseIterable {
             return "https://api.openai.com/v1/chat/completions"
         case .openRouter:
             return "https://openrouter.ai/api/v1/chat/completions"
-        case .mistral:
-            return "https://api.mistral.ai/v1/chat/completions"
-        case .elevenLabs:
-            return "https://api.elevenlabs.io/v1/speech-to-text"
-        case .deepgram:
-            return "https://api.deepgram.com/v1/listen"
         case .ollama:
             return UserDefaults.standard.string(forKey: "ollamaBaseURL") ?? "http://localhost:11434"
         case .custom:
@@ -44,84 +29,51 @@ enum AIProvider: String, CaseIterable {
     
     var defaultModel: String {
         switch self {
-        case .cerebras:
-            return "gpt-oss-120b"
-        case .groq:
-            return "qwen/qwen3-32b"
         case .gemini:
-            return "gemini-2.5-flash-lite"
+            return "gemini-3-flash-preview"
         case .anthropic:
-            return "claude-haiku-4-5"
+            return "claude-sonnet-4-6"
         case .openAI:
-            return "gpt-5-mini"
-        case .mistral:
-            return "mistral-large-latest"
-        case .elevenLabs:
-            return "scribe_v1"
-        case .deepgram:
-            return "whisper-1"
+            return "gpt-4.1-mini"
         case .ollama:
             return UserDefaults.standard.string(forKey: "ollamaSelectedModel") ?? "mistral"
         case .custom:
             return UserDefaults.standard.string(forKey: "customProviderModel") ?? ""
         case .openRouter:
-            return "openai/gpt-oss-120b"
+            return "anthropic/claude-sonnet-4-6"
         }
     }
     
     var availableModels: [String] {
         switch self {
-        case .cerebras:
-            return [
-                "llama-4-scout-17b-16e-instruct",
-                "llama-3.3-70b",
-                "gpt-oss-120b",
-                "qwen-3-32b",
-                "qwen-3-235b-a22b-instruct-2507"
-            ]
-        case .groq:
-            return [
-                "llama-3.1-8b-instant",
-                "llama-3.3-70b-versatile",
-                "moonshotai/kimi-k2-instruct-0905",
-                "qwen/qwen3-32b",
-                "meta-llama/llama-4-maverick-17b-128e-instruct",
-                "openai/gpt-oss-120b",
-                "openai/gpt-oss-20b"
-            ]
         case .gemini:
             return [
                 "gemini-2.5-pro",
                 "gemini-2.5-flash",
                 "gemini-2.5-flash-lite",
-                "gemini-2.0-flash-001"
+                "gemini-3.1-pro-preview",
+                "gemini-3-flash-preview"
             ]
         case .anthropic:
             return [
-                "claude-opus-4-0",
-                "claude-sonnet-4-0",
+                "claude-opus-4-6",
+                "claude-sonnet-4-6",
+                "claude-haiku-4-5",
                 "claude-sonnet-4-5",
-                "claude-haiku-4-5"
+                "claude-opus-4-5"
             ]
         case .openAI:
             return [
+                "gpt-5.2",
                 "gpt-5",
                 "gpt-5-mini",
-                "gpt-5-nano",
                 "gpt-4.1",
-                "gpt-4.1-mini"
+                "gpt-4.1-mini",
+                "gpt-4.1-nano",
+                "o3",
+                "o3-mini",
+                "o4-mini"
             ]
-        case .mistral:
-            return [
-                "mistral-large-latest",
-                "mistral-medium-latest",
-                "mistral-small-latest",
-                "mistral-saba-latest"
-            ]
-        case .elevenLabs:
-            return ["scribe_v1", "scribe_v1_experimental"]
-        case .deepgram:
-            return ["whisper-1"]
         case .ollama:
             return []
         case .custom:
@@ -365,12 +317,6 @@ class AIService: ObservableObject {
         switch selectedProvider {
         case .anthropic:
             verifyAnthropicAPIKey(key, completion: completion)
-        case .elevenLabs:
-            verifyElevenLabsAPIKey(key, completion: completion)
-        case .deepgram:
-            verifyDeepgramAPIKey(key, completion: completion)
-        case .mistral:
-            verifyMistralAPIKey(key, completion: completion)
         default:
             verifyOpenAICompatibleAPIKey(key, completion: completion)
         }
@@ -442,77 +388,6 @@ class AIService: ObservableObject {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                completion(false)
-                return
-            }
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                completion(httpResponse.statusCode == 200)
-            } else {
-                completion(false)
-            }
-        }.resume()
-    }
-    
-    private func verifyElevenLabsAPIKey(_ key: String, completion: @escaping (Bool) -> Void) {
-        let url = URL(string: "https://api.elevenlabs.io/v1/user")!
-
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(key, forHTTPHeaderField: "xi-api-key")
-
-        URLSession.shared.dataTask(with: request) { data, response, _ in
-            let isValid = (response as? HTTPURLResponse)?.statusCode == 200
-
-            if let data = data, let body = String(data: data, encoding: .utf8) {
-                self.logger.info("ElevenLabs verification response: \(body)")
-            }
-
-            completion(isValid)
-        }.resume()
-    }
-    
-    private func verifyMistralAPIKey(_ key: String, completion: @escaping (Bool) -> Void) {
-        let url = URL(string: "https://api.mistral.ai/v1/models")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                self.logger.error("Mistral API key verification failed: \(error.localizedDescription)")
-                completion(false)
-                return
-            }
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 {
-                    completion(true)
-                } else {
-                    if let data = data, let body = String(data: data, encoding: .utf8) {
-                        self.logger.error("Mistral API key verification failed with status code \(httpResponse.statusCode): \(body)")
-                    } else {
-                        self.logger.error("Mistral API key verification failed with status code \(httpResponse.statusCode) and no response body.")
-                    }
-                    completion(false)
-                }
-            } else {
-                self.logger.error("Mistral API key verification failed: Invalid response from server.")
-                completion(false)
-            }
-        }.resume()
-    }
-
-    private func verifyDeepgramAPIKey(_ key: String, completion: @escaping (Bool) -> Void) {
-        let url = URL(string: "https://api.deepgram.com/v1/auth/token")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.addValue("Token \(key)", forHTTPHeaderField: "Authorization")
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                self.logger.error("Deepgram API key verification failed: \(error.localizedDescription)")
                 completion(false)
                 return
             }
