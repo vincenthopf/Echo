@@ -1,5 +1,4 @@
 import SwiftUI
-import KeyboardShortcuts
 
 struct OnboardingTutorialView: View {
     @Binding var hasCompletedOnboarding: Bool
@@ -44,12 +43,8 @@ struct OnboardingTutorialView: View {
 
                             }
                             
-                            if hotkeyManager.selectedHotkey1 == .custom,
-                               let shortcut = KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder) {
-                                KeyboardShortcutView(shortcut: shortcut)
-                                    .scaleEffect(1.2)
-                            } else if hotkeyManager.selectedHotkey1 != .none && hotkeyManager.selectedHotkey1 != .custom {
-                                Text(hotkeyManager.selectedHotkey1.displayName)
+                            if let hotkey = hotkeyManager.hotkey1 {
+                                Text(hotkey.displayName)
                                     .font(.system(size: 24, weight: .bold, design: .rounded))
                                     .foregroundColor(.accentColor)
                                     .padding(.horizontal, 16)
