@@ -16,6 +16,7 @@ struct CloudModelCardView: View {
     @State private var isVerifying = false
     @State private var verificationStatus: VerificationStatus = .none
     @State private var isConfiguredState: Bool = false
+    @State private var verificationFailureMessage: String?
 
     enum VerificationStatus {
         case none, verifying, success, failure
@@ -256,7 +257,7 @@ struct CloudModelCardView: View {
             }
 
             if verificationStatus == .failure {
-                Text("Invalid API key. Please check your key and try again.")
+                Text(verificationFailureMessage ?? "Invalid API key. Please check your key and try again.")
                     .font(Tokens.Typography.caption)
                     .foregroundColor(Tokens.Colors.error)
             } else if verificationStatus == .success {
@@ -299,11 +300,33 @@ struct CloudModelCardView: View {
                     }
                 }
             }
-        case .groq, .elevenLabs, .deepgram, .mistral, .soniox:
+        case .elevenLabs:
+            // Validate ElevenLabs key by testing against the STT endpoint
+            let keyToVerify = apiKey
+            Task {
+                let result = await verifyElevenLabsAPIKey(keyToVerify)
+                await MainActor.run {
+                    self.isVerifying = false
+                    if result.isValid {
+                        self.verificationStatus = .success
+                        self.verificationFailureMessage = nil
+                        UserDefaults.standard.set(keyToVerify, forKey: "\(self.providerKey)APIKey")
+                        self.isConfiguredState = true
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.isExpanded = false
+                        }
+                    } else {
+                        self.verificationFailureMessage = result.errorMessage
+                        self.verificationStatus = .failure
+                    }
+                }
+            }
+        case .groq, .deepgram, .mistral, .soniox:
             // Transcription-only providers — save key directly, validated at transcription time
             UserDefaults.standard.set(apiKey, forKey: "\(providerKey)APIKey")
             isVerifying = false
             verificationStatus = .success
+            verificationFailureMessage = nil
             isConfiguredState = true
             withAnimation(.easeInOut(duration: 0.3)) {
                 isExpanded = false
@@ -334,6 +357,59 @@ struct CloudModelCardView: View {
         
         withAnimation(.easeInOut(duration: 0.3)) {
             isExpanded = false
+        }
+    }
+
+    /// Validates an ElevenLabs API key by making a minimal request to the STT endpoint.
+    /// A key with `speech_to_text` permission will get a 400 (missing audio), while
+    /// an invalid or under-permissioned key gets 401/403.
+    private func verifyElevenLabsAPIKey(_ apiKey: String) async -> (isValid: Bool, errorMessage: String?) {
+        let url = URL(string: "https://api.elevenlabs.io/v1/speech-to-text")!
+        let boundary = "Boundary-\(UUID().uuidString)"
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue(apiKey, forHTTPHeaderField: "xi-api-key")
+        request.timeoutInterval = 15
+
+        // Send only model_id — no audio file. A valid key returns 400/422 (missing file),
+        // while an invalid/restricted key returns 401/403.
+        var body = Data()
+        let crlf = "\r\n"
+        body.append("--\(boundary)\(crlf)".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"model_id\"\(crlf)\(crlf)".data(using: .utf8)!)
+        body.append("scribe_v2".data(using: .utf8)!)
+        body.append(crlf.data(using: .utf8)!)
+        body.append("--\(boundary)--\(crlf)".data(using: .utf8)!)
+
+        do {
+            let (data, response) = try await URLSession.shared.upload(for: request, from: body)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return (false, "Could not connect to ElevenLabs. Please try again.")
+            }
+
+            switch httpResponse.statusCode {
+            case 401:
+                return (false, "Invalid API key. Please check your key and try again.")
+            case 403:
+                let errorBody = String(data: data, encoding: .utf8) ?? ""
+                if errorBody.lowercased().contains("permission") {
+                    return (false, "This API key is missing the Speech to Text permission. Please update your key permissions in the ElevenLabs dashboard.")
+                }
+                return (false, "Access denied. Ensure your API key has the Speech to Text permission enabled.")
+            case 400, 422:
+                // Expected — the key authenticated successfully but the request
+                // was rejected because we didn't send an audio file. Key is valid.
+                return (true, nil)
+            case 200...299:
+                // Unexpected but means the key works
+                return (true, nil)
+            default:
+                return (false, "Verification failed (HTTP \(httpResponse.statusCode)). Please try again.")
+            }
+        } catch {
+            return (false, "Network error: \(error.localizedDescription)")
         }
     }
 }

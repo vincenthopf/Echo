@@ -57,7 +57,7 @@ Handles model loading/unloading, transcription service orchestration, and UI pre
 **TranscriptionService Protocol** - Abstraction for all providers:
 - `LocalTranscriptionService` - whisper.cpp XCFramework
 - `ParakeetTranscriptionService` - FluidAudio engine
-- `CloudTranscriptionService` - Routes to Deepgram, Groq, ElevenLabs, Gemini, Mistral
+- `CloudTranscriptionService` - Routes to Groq, ElevenLabs, Deepgram, Mistral, Gemini, Soniox, and OpenAI-compatible custom providers
 - `NativeAppleTranscriptionService` - Apple's on-device Speech framework
 
 ### Adaptive Awareness System
@@ -79,7 +79,7 @@ Key classes (internally prefixed "PowerMode", displayed as "Adaptive Awareness")
 
 Key services in `VoiceInk/Services/`:
 - **AIEnhancementService** - Post-transcription AI processing with custom prompts
-- **AIService** - OpenAI/Anthropic API integration
+- **AIService** - AI Enhancement provider integration (Gemini, Anthropic, OpenAI, OpenRouter, Ollama, Custom)
 - **AudioDeviceManager** - CoreAudio device enumeration
 - **CursorPaster** - Simulated keyboard input for inline text insertion
 - **DictionaryContextService** - Custom word/terminology management
@@ -135,7 +135,7 @@ Audio (16kHz PCM) → Model Selection → Transcription Service → AI Enhanceme
 - OSLog with subsystem `com.VincentHopf.embrvoice`
 
 ### License System
-Polar.sh for license management. `LicenseViewModel` handles validation. Obfuscated keys in `Obfuscator.swift`.
+Polar.sh for license management. `LicenseManager` handles validation. Obfuscated keys in `Obfuscator.swift`.
 
 ## Notable Files
 
