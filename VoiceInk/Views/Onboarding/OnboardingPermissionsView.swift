@@ -1,7 +1,6 @@
 import SwiftUI
 import AVFoundation
 import AppKit
-import KeyboardShortcuts
 
 struct OnboardingPermissionsView: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -94,8 +93,8 @@ struct OnboardingPermissionsView: View {
             // Re-check permissions when user switches back from System Settings
             refreshPermissionStates()
         }
-        .onChange(of: hotkeyManager.selectedHotkey1) { _, newValue in
-            shortcutConfigured = newValue != .none
+        .onChange(of: hotkeyManager.hotkey1) { _, newValue in
+            shortcutConfigured = newValue != nil
         }
     }
 
@@ -146,8 +145,11 @@ struct OnboardingPermissionsView: View {
             description: "Required to trigger recording quickly.",
             isComplete: shortcutConfigured,
             content: {
-                KeyboardShortcuts.Recorder(for: .toggleMiniRecorder)
-                    .frame(width: 220)
+                SingleKeyRecorderView(shortcut: Binding(
+                    get: { hotkeyManager.hotkey1 },
+                    set: { hotkeyManager.hotkey1 = $0 }
+                ))
+                .frame(width: 220)
             }
         )
         .accessibilityIdentifier("onboarding.checklist.keyboardShortcut")
@@ -247,7 +249,7 @@ struct OnboardingPermissionsView: View {
     private func refreshPermissionStates() {
         microphoneGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
         audioDeviceConfigured = audioDeviceManager.inputMode == .systemDefault || audioDeviceManager.selectedDeviceID != nil
-        shortcutConfigured = hotkeyManager.selectedHotkey1 != .none
+        shortcutConfigured = hotkeyManager.hotkey1 != nil
         accessibilityGranted = AXIsProcessTrusted()
         screenRecordingGranted = CGPreflightScreenCaptureAccess()
     }

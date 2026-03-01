@@ -48,24 +48,22 @@ struct RecordingSettingsView: View {
             VStack(spacing: 0) {
                 // Hotkey 1
                 FormRow(label: "Hotkey 1") {
-                    hotkeyContent(
-                        binding: $hotkeyManager.selectedHotkey1,
-                        shortcutName: .toggleMiniRecorder
+                    SingleKeyRecorderView(
+                        shortcut: $hotkeyManager.hotkey1
                     )
                 }
 
-                if hotkeyManager.selectedHotkey2 != .none {
+                if hotkeyManager.hotkey2 != nil {
                     FormDivider()
 
                     FormRow(label: "Hotkey 2") {
                         HStack(spacing: Tokens.Spacing.md) {
-                            hotkeyContent(
-                                binding: $hotkeyManager.selectedHotkey2,
-                                shortcutName: .toggleMiniRecorder2
+                            SingleKeyRecorderView(
+                                shortcut: $hotkeyManager.hotkey2
                             )
 
                             Button(action: {
-                                withAnimation { hotkeyManager.selectedHotkey2 = .none }
+                                withAnimation { hotkeyManager.hotkey2 = nil }
                             }) {
                                 Image(systemName: "minus.circle.fill")
                                     .foregroundColor(Tokens.Colors.error)
@@ -75,12 +73,12 @@ struct RecordingSettingsView: View {
                     }
                 }
 
-                if hotkeyManager.selectedHotkey1 != .none && hotkeyManager.selectedHotkey2 == .none {
+                if hotkeyManager.hotkey1 != nil && hotkeyManager.hotkey2 == nil {
                     FormDivider()
 
                     FormRow(label: "") {
                         Button(action: {
-                            withAnimation { hotkeyManager.selectedHotkey2 = .rightOption }
+                            withAnimation { hotkeyManager.hotkey2 = SingleKeyShortcut(keyCode: 0x3D, isModifier: true) }
                         }) {
                             Label("Add another hotkey", systemImage: "plus.circle.fill")
                         }
@@ -628,51 +626,4 @@ struct RecordingSettingsView: View {
         }
     }
 
-    @ViewBuilder
-    private func hotkeyContent(
-        binding: Binding<HotkeyManager.HotkeyOption>,
-        shortcutName: KeyboardShortcuts.Name
-    ) -> some View {
-        HStack(spacing: Tokens.Spacing.md) {
-            Menu {
-                ForEach(HotkeyManager.HotkeyOption.allCases, id: \.self) { option in
-                    Button(action: {
-                        binding.wrappedValue = option
-                    }) {
-                        HStack {
-                            Text(option.displayName)
-                            if binding.wrappedValue == option {
-                                Spacer()
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-            } label: {
-                HStack(spacing: Tokens.Spacing.sm) {
-                    Text(binding.wrappedValue.displayName)
-                        .foregroundColor(Tokens.Colors.textPrimary(for: colorScheme))
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 10))
-                        .foregroundColor(Tokens.Colors.textSecondary(for: colorScheme))
-                }
-                .padding(.horizontal, Tokens.Spacing.md)
-                .padding(.vertical, Tokens.Spacing.sm)
-                .background(Tokens.Colors.background(for: colorScheme))
-                .cornerRadius(Tokens.Radius.sm)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Tokens.Radius.sm)
-                        .stroke(Tokens.Colors.border(for: colorScheme), lineWidth: 1)
-                )
-            }
-            .menuStyle(.borderlessButton)
-
-            if binding.wrappedValue == .custom {
-                KeyboardShortcuts.Recorder(for: shortcutName)
-                    .controlSize(.small)
-            }
-
-            Spacer()
-        }
-    }
 }

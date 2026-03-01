@@ -30,7 +30,7 @@ enum SetupReadinessEvaluator {
     ) -> SetupReadiness {
         evaluate(
             microphoneAuthorized: AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
-            hotkeyConfigured: hotkeyManager.selectedHotkey1 != .none,
+            hotkeyConfigured: hotkeyManager.hotkey1 != nil,
             hasUsableDefaultModel: hasUsableDefaultModel(whisperState: whisperState),
             accessibilityEnabled: AXIsProcessTrusted(),
             screenRecordingEnabled: CGPreflightScreenCaptureAccess()

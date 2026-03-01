@@ -78,7 +78,8 @@ class PermissionManager: ObservableObject {
     
     func checkKeyboardShortcut() {
         DispatchQueue.main.async {
-            self.isKeyboardShortcutSet = KeyboardShortcuts.getShortcut(for: .toggleMiniRecorder) != nil
+            // Check if echo hotkey is configured via UserDefaults
+            self.isKeyboardShortcutSet = UserDefaults.standard.data(forKey: "echoHotkey1") != nil
         }
     }
 }
@@ -209,7 +210,7 @@ struct PermissionsView: View {
                         icon: "keyboard",
                         title: "Keyboard Shortcut",
                         description: "Set up a keyboard shortcut to use Echo anywhere",
-                        isGranted: hotkeyManager.selectedHotkey1 != .none,
+                        isGranted: hotkeyManager.hotkey1 != nil,
                         buttonTitle: "Configure Shortcut",
                         buttonAction: {
                             NotificationCenter.default.post(
