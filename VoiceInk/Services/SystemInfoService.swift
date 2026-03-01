@@ -143,16 +143,16 @@ class SystemInfoService {
     }
 
     private func getPrimaryHotkey() -> String {
-        if let hotkeyRaw = UserDefaults.standard.string(forKey: "selectedHotkey1"),
-           let hotkey = HotkeyManager.HotkeyOption(rawValue: hotkeyRaw) {
+        if let data = UserDefaults.standard.data(forKey: "echoHotkey1"),
+           let hotkey = try? JSONDecoder().decode(SingleKeyShortcut.self, from: data) {
             return hotkey.displayName
         }
         return "Right Command"
     }
 
     private func getSecondaryHotkey() -> String {
-        if let hotkeyRaw = UserDefaults.standard.string(forKey: "selectedHotkey2"),
-           let hotkey = HotkeyManager.HotkeyOption(rawValue: hotkeyRaw) {
+        if let data = UserDefaults.standard.data(forKey: "echoHotkey2"),
+           let hotkey = try? JSONDecoder().decode(SingleKeyShortcut.self, from: data) {
             return hotkey.displayName
         }
         return "None"
