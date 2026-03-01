@@ -24,7 +24,7 @@ When you record with Echo, the audio is captured at high quality and then sent t
 
 Local models run entirely on your Mac. Your audio never leaves your device, which makes this the most private option. Echo supports two families of local models:
 
-- **Whisper** -- OpenAI's speech recognition models, available in sizes from Tiny (75 MB) to Large v3 (2.9 GB). Larger models are more accurate but slower.
+- **Whisper** -- OpenAI's speech recognition models, available from Large v3 Turbo Quantized (547 MB) to Large v3 (2.9 GB). Larger models are more accurate but slower.
 - **Parakeet** -- NVIDIA's speech recognition models, optimized for speed. Available in English-only (V2) and multilingual (V3) versions.
 
 Local models need to be downloaded before first use. Once downloaded, they work without an internet connection.
@@ -35,7 +35,7 @@ Local models need to be downloaded before first use. Once downloaded, they work 
 
 Cloud services send your audio to external APIs for transcription. They typically offer faster processing and high accuracy without using your Mac's resources, but they require an internet connection and an API key from the provider.
 
-Echo supports five cloud transcription providers: **Deepgram**, **Groq**, **ElevenLabs**, **Gemini**, and **Mistral**.
+Echo supports cloud transcription providers including **Deepgram**, **Groq**, **ElevenLabs**, **Gemini**, **Mistral**, and **Soniox**.
 
 [Learn more about cloud services](/docs/transcription/cloud-services)
 
@@ -60,13 +60,13 @@ To set a model as your default, find it in the list and click **Set as Default**
 
 ## Tips
 
-- If you are just getting started, try one of the **Recommended** models. Parakeet V3 offers the fastest local transcription, while Base (English) is a solid lightweight option for English-only use.
+- If you are just getting started, try one of the **Recommended** models. Parakeet V3 offers the fastest local transcription, while Large v3 Turbo (Quantized) is a great balance of speed and accuracy.
 - You can change your default model at any time. The switch takes effect on your next recording.
 - Local models are loaded into memory when you start recording and stay loaded between recordings for faster performance.
 
 ## Related
 
 - [Local Models](/docs/transcription/local-models) -- Downloading and configuring Whisper and Parakeet models
-- [Cloud Services](/docs/transcription/cloud-services) -- Setting up Deepgram, Groq, and other cloud providers
+- [Cloud Services](/docs/transcription/cloud-services) -- Setting up Deepgram, ElevenLabs, Groq, and other cloud providers
 - [Language Selection](/docs/transcription/language-selection) -- Choosing your transcription language
 - [Audio File Transcription](/docs/transcription/audio-file) -- Transcribing existing audio and video files

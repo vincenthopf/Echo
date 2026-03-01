@@ -24,16 +24,9 @@ Whisper models come in multiple sizes. Larger models are more accurate but take 
 
 | Model | Size | Languages | Speed | Accuracy |
 |-------|------|-----------|-------|----------|
-| **Tiny** | 75 MB | Multilingual | Very fast | Basic |
-| **Tiny (English)** | 75 MB | English only | Very fast | Slightly better for English |
-| **Base** | 142 MB | Multilingual | Fast | Good |
-| **Base (English)** | 142 MB | English only | Fast | Good for English |
 | **Large v3 Turbo (Quantized)** | 547 MB | Multilingual | Fast | Very good |
 | **Large v3 Turbo** | 1.5 GB | Multilingual | Moderate | Excellent |
-| **Large v2** | 2.9 GB | Multilingual | Slow | Excellent |
 | **Large v3** | 2.9 GB | Multilingual | Slow | Best |
-
-English-only models (marked with "English") are fine-tuned for English and tend to be slightly more accurate for English speech than their multilingual counterparts.
 
 ## Downloading a Model
 
@@ -78,7 +71,6 @@ Click the gear icon in the top-right corner of the model list to access addition
 ## Tips
 
 - **Parakeet V3** is the recommended starting point for most users. It offers the best combination of speed and multilingual support among local models.
-- **Base (English)** is a great lightweight option if you only need English transcription and want minimal resource usage.
 - **Large v3 Turbo (Quantized)** gives you near-Large accuracy at a fraction of the size (547 MB vs. 2.9 GB), making it the best high-accuracy option for most Macs.
 - Models stay loaded in memory between recordings, so your second recording will start faster than the first.
 
