@@ -13,6 +13,11 @@ on:
         description: 'Release notes (markdown bullet points, e.g. "- Fixed X\n- Added Y")'
         required: true
         type: string
+      skip_notarization:
+        description: 'Skip Apple notarization (use when dev membership is expired)'
+        required: false
+        type: boolean
+        default: false
 
 env:
   SCHEME: Echo
@@ -156,6 +161,7 @@ jobs:
             "$DMG_PATH"
 
       - name: Notarize DMG
+        if: ${{ inputs.skip_notarization != true }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
@@ -181,6 +187,10 @@ jobs:
           fi
 
           xcrun stapler staple "$RUNNER_TEMP/Echo.dmg"
+
+      - name: Skip notarization notice
+        if: ${{ inputs.skip_notarization == true }}
+        run: echo "⚠️ Notarization skipped — users will need to right-click > Open on first launch"
 
       - name: Sign with Sparkle EdDSA key
         env:
