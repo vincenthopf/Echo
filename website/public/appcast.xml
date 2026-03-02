@@ -3,21 +3,18 @@
     <channel>
         <title>Echo Releases</title>
         <item>
-            <title>0.1.3</title>
-            <pubDate>Sun, 01 Mar 2026 06:43:04 +0000</pubDate>
+            <title>0.1.4</title>
+            <pubDate>Mon, 02 Mar 2026 08:15:45 +0000</pubDate>
             <sparkle:version>103</sparkle:version>
-            <sparkle:shortVersionString>0.1.3</sparkle:shortVersionString>
+            <sparkle:shortVersionString>0.1.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <description><![CDATA[
-                <h3>What's New in Version 0.1.3</h3>
+                <h3>What's New in Version 0.1.4</h3>
                 <ul>
-                    <li>Fixed ElevenLabs API key validation to support restricted keys with Speech to Text permission</li>
-<li>Added specific error messages for invalid keys and missing permissions</li>
-<li>Added ElevenLabs Scribe v2 to recommended models</li>
-<li>Updated documentation</li>
+                    <li>Replaced shortcut system with unified press-any-key capture supporting single modifier keys, function keys, and modifier combos (e.g. Fn + Option)\n- Fixed bug where modifier-only combos were rejected as Echo shortcuts\n- Added live preview and character key blocking to shortcut recorder\n- Normalized combo key order for consistent duplicate detection</li>
                 </ul>
             ]]></description>
-            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.3/Echo.dmg" length="16882749" type="application/octet-stream" sparkle:edSignature="r4B7DYR2A2K39upnnLR2Lw2wnxNnJPRgn/3bhxVpRuf+aRHL2I/x6muqjW+w7AA+p69Uk/WJsCVgjwAcQxVhCA=="/>
+            <enclosure url="https://github.com/vincenthopf/Echo/releases/download/v0.1.4/Echo.dmg" length="16871621" type="application/octet-stream" sparkle:edSignature="McU7AHQdtHOROSncVk1+QMH2wvsbkT3YFZOGOW8zODZRRkcxhra06GebPVkmsezr+mhbCvoYNQFUWD5NJSW1Dw=="/>
         </item>
     </channel>
 </rss>
