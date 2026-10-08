@@ -5,6 +5,7 @@ initOpenNextCloudflareForDev();
 
 /** @type {import('next').NextConfig} */
 const config = {
+  output: process.env.STATIC_EXPORT === '1' ? 'export' : undefined,
   images: {
     unoptimized: true,
   },

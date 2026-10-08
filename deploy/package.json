@@ -1,0 +1,9 @@
+{
+  "name": "echo-site-deploy",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "cf": "1.0.0-beta.12",
+    "wrangler": "^4.136.0"
+  }
+}
