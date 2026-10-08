@@ -12,3 +12,9 @@
 
 /app-icon-dark.webp
   Cache-Control: public,max-age=2592000,immutable
+
+/api/search
+  Content-Type: application/json; charset=utf-8
+
+/download/opengraph-image
+  Content-Type: image/png

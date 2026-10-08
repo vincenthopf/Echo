@@ -88,7 +88,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <RootProvider>
+        <RootProvider search={{ options: { type: "static" } }}>
           <SmoothScrollProvider>
             {process.env.NODE_ENV !== "development" && <SmoothCursor />}
             {children}
